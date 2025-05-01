@@ -1,0 +1,7 @@
+ui:
+  image: "registry/myrepo/fabric-ui"
+  tag: "latest"
+  port: 80
+  replicas: 1
+service:
+  type: ClusterIP

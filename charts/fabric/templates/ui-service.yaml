@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-ui
+  labels:
+    app: {{ .Release.Name }}
+    component: ui
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.ui.port }}
+    targetPort: {{ .Values.ui.port }}
+    name: http
+  selector:
+    app: {{ .Release.Name }}
+    component: ui

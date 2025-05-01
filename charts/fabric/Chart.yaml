@@ -1,0 +1,7 @@
+apiVersion: v2
+name: fabric-chart
+description: Helm chart for Hyperledger Fabric network with UI
+type: application
+version: 0.1.0
+appVersion: "1.0"
+

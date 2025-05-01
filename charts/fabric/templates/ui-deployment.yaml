@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ui
+  labels:
+    app: {{ .Release.Name }}
+    component: ui
+spec:
+  replicas: {{ .Values.ui.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: ui
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: ui
+    spec:
+      containers:
+      - name: fabric-ui
+        image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
+        ports:
+        - containerPort: {{ .Values.ui.port }}
+        volumeMounts:
+        - name: ui-assets
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: ui-assets
+        emptyDir: {}
+
