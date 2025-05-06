@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels:
+    app: {{ .Release.Name }}
+    component: backend
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        component: backend
+    spec:
+      containers:
+      - name: {{ .Release.Name }}-backend
+        image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
+        ports:
+        - containerPort: {{ .Values.backend.port }}
+        # Mount the fabric secret env file
+        volumeMounts:
+        - name: fabric-env
+          mountPath: /root/.config/fabric/env
+          subPath: env
+        - name: sync
+          mountPath: /root/.config/fabric/patterns
+      # Define the volumes for fabric and sync
+      volumes:
+      - name: fabric-env
+        secret:
+          secretName: fabric
+      - name: sync
+        persistentVolumeClaim:
+          claimName: sync

@@ -19,6 +19,9 @@ spec:
     spec:
       containers:
       - name: fabric-ui
+        env:
+          - name: API_DOMAIN
+            value: {{ .Values.ui.backendUrl }}
         image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
         ports:
         - containerPort: {{ .Values.ui.port }}
@@ -28,4 +31,3 @@ spec:
       volumes:
       - name: ui-assets
         emptyDir: {}
-

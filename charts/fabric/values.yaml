@@ -1,7 +1,13 @@
-ui:
-  image: "registry/myrepo/fabric-ui"
-  tag: "latest"
+backend:
+  image: "ghcr.io/fritzduchardt/fabric"
+  tag: "main"
   port: 80
   replicas: 1
+ui:
+  image: "ghcr.io/fritzduchardt/fabric-ui"
+  tag: "master"
+  port: 80
+  replicas: 1
+  backendUrl: http://fabric
 service:
   type: ClusterIP

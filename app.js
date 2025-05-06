@@ -1,7 +1,10 @@
-const apiUrl = 'http://localhost:8080/chat';
-const patternsUrl = 'http://localhost:8080/patterns/names';
-const modelsUrl = 'http://localhost:8080/models/names';
-const obsidianUrl = 'http://localhost:8080/obsidian/files';
+// API domain configuration
+const apiDomain = process.env.API_DOMAIN || 'http://localhost:8080';
+// Environment-configurable API endpoints based on apiDomain
+const apiUrl = `${apiDomain}/chat`;
+const patternsUrl = `${apiDomain}/patterns/names`;
+const modelsUrl = `${apiDomain}/models/names`;
+const obsidianUrl = `${apiDomain}/obsidian/files`;
 
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
@@ -18,7 +21,8 @@ async function loadPatterns() {
     patternInput.innerHTML = '';
     patterns.forEach(p => {
       const o = document.createElement('option');
-      o.value = p; o.textContent = p;
+      o.value = p;
+      o.textContent = p;
       if (p === 'general') o.selected = true;
       patternInput.appendChild(o);
     });
@@ -33,7 +37,8 @@ async function loadModels() {
   modelSelect.innerHTML = '';
   defaults.forEach(m => {
     const o = document.createElement('option');
-    o.value = m; o.textContent = m;
+    o.value = m;
+    o.textContent = m;
     modelSelect.appendChild(o);
   });
   modelSelect.value = 'o4-mini';
@@ -51,7 +56,8 @@ async function loadObsidianFiles() {
     obsidianSelect.appendChild(noneOpt);
     files.forEach(f => {
       const o = document.createElement('option');
-      o.value = f; o.textContent = f;
+      o.value = f;
+      o.textContent = f;
       obsidianSelect.appendChild(o);
     });
   } catch (e) {
@@ -96,12 +102,11 @@ form.addEventListener('submit', async e => {
   input.value = '';
   showLoading();
 
-  // determine temperature based on selected model
   let temperature;
   if (model === 'o4-mini') {
-    temperature = 1.0;    // for o4-mini use higher temperature
+    temperature = 1.0;
   } else {
-    temperature = 0.7;    // default temperature
+    temperature = 0.7;
   }
 
   try {
