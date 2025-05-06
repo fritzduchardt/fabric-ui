@@ -23,11 +23,6 @@ spec:
           - name: API_DOMAIN
             value: {{ .Values.ui.backendUrl }}
         image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
+        imagePullPolicy: Always
         ports:
         - containerPort: {{ .Values.ui.port }}
-        volumeMounts:
-        - name: ui-assets
-          mountPath: /usr/share/nginx/html
-      volumes:
-      - name: ui-assets
-        emptyDir: {}

@@ -20,15 +20,19 @@ spec:
       containers:
       - name: {{ .Release.Name }}-backend
         image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
+        imagePullPolicy: Always
         ports:
         - containerPort: {{ .Values.backend.port }}
         # Mount the fabric secret env file
         volumeMounts:
         - name: fabric-env
-          mountPath: /root/.config/fabric/env
-          subPath: env
+          mountPath: /root/.config/fabric/.env
+          subPath: .env
         - name: sync
-          mountPath: /root/.config/fabric/patterns
+          mountPath: /root/obsidian
+        env:
+          - name: OBSIDIAN_VAULT_PATH
+            value: /root/obsidian
       # Define the volumes for fabric and sync
       volumes:
       - name: fabric-env

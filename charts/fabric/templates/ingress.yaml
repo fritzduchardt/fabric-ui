@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fabric-backend
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: fabric.friclu
+      http:
+        paths:
+          - backend:
+              service:
+                name: fabric-ui
+                port:
+                  number: {{ .Values.ui.port }}
+            path: /
+            pathType: ImplementationSpecific
+{{/*  tls:*/}}
+{{/*    - hosts:*/}}
+{{/*        - ha-friclu.duckdns.org*/}}
+{{/*      secretName: ha-certificate*/}}

@@ -8,6 +8,6 @@ ui:
   tag: "master"
   port: 80
   replicas: 1
-  backendUrl: http://fabric
+  backendUrl: http://fabric-backend.friclu
 service:
   type: ClusterIP
