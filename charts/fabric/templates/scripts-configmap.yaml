@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ui-scripts
+  labels:
+    app: {{ .Release.Name }}
+    component: ui
+data:
+  # UI application JavaScript
+  app.js: |-
+{{ .Files.Get "scripts/app.js" | indent 4 }}
+  # UI HTML entrypoint
+  index.html: |-
+{{ .Files.Get "scripts/index.html" | indent 4 }}
+

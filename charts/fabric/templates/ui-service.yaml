@@ -9,7 +9,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
   - port: {{ .Values.ui.port }}
-    targetPort: {{ .Values.ui.port }}
+    targetPort: {{ .Values.ui.targetPort }}
     name: http
   selector:
     app: {{ .Release.Name }}

@@ -1,28 +1,40 @@
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: fabric
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+  annotations:
+    # enable regex in paths and rewrite /api/... to /... when proxying to backend
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
-  ingressClassName: nginx
+  ingressClassName: {{ .Values.ingress.className | quote }}
   rules:
-    - host: fabric.friclu
+    - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          - backend:
+          # UI path
+          - path: {{ .Values.ingress.path | quote }}
+            pathType: Prefix
+            backend:
               service:
-                name: fabric-ui
+                name: {{ .Release.Name }}-ui
                 port:
                   number: {{ .Values.ui.port }}
-            path: /
+          # API proxy path: strip /api prefix before sending to backend
+          - path: /api/(.*)
             pathType: ImplementationSpecific
-          - backend:
+            backend:
               service:
-                name: fabric-backend
+                name: {{ .Release.Name }}-backend
                 port:
                   number: {{ .Values.backend.port }}
-            path: /backend
-            pathType: ImplementationSpecific
-{{/*  tls:*/}}
-{{/*    - hosts:*/}}
-{{/*        - ha-friclu.duckdns.org*/}}
-{{/*      secretName: ha-certificate*/}}
+  {{- if .Values.ingress.tls.enabled }}
+  # TLS configuration for the UI ingress
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host | quote }}
+      secretName: {{ .Values.ingress.tls.secretName | quote }}
+  {{- end }}

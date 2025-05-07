@@ -1,13 +1,22 @@
+
 backend:
   image: "ghcr.io/fritzduchardt/fabric"
   tag: "main"
   port: 80
+  targetPort: 8080
   replicas: 1
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
   port: 80
-  replicas: 1
+  targetPort: 80
   backendUrl: http://fabric-backend.friclu
+ingress:
+  className: nginx
+  host: fabric.friclu
+  path: /
+  tls:
+    enabled: false
 service:
   type: ClusterIP
+

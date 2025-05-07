@@ -26,3 +26,12 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: {{ .Values.ui.port }}
+        volumeMounts:
+        - name: ui-scripts
+          mountPath: /usr/share/nginx/html
+          # mounts app.js and index.html from ConfigMap into web root
+      volumes:
+      - name: ui-scripts
+        configMap:
+          name: {{ .Release.Name }}-ui-scripts
+          defaultMode: 0644
