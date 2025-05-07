@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: fabric-backend
+  name: fabric
 spec:
   ingressClassName: nginx
   rules:
@@ -14,6 +14,13 @@ spec:
                 port:
                   number: {{ .Values.ui.port }}
             path: /
+            pathType: ImplementationSpecific
+          - backend:
+              service:
+                name: fabric-backend
+                port:
+                  number: {{ .Values.backend.port }}
+            path: /backend
             pathType: ImplementationSpecific
 {{/*  tls:*/}}
 {{/*    - hosts:*/}}

@@ -1,12 +1,17 @@
-FROM node:alpine
-# Use lightweight Node.js image
-WORKDIR /usr/src/app
-# Copy application files into the container
+FROM nginx:alpine
+
+# Define working directory inside container
+WORKDIR /usr/share/nginx/html
+
+# Remove default Nginx static assets
+RUN rm -rf ./*
+
+# Copy application files into the Nginx html directory
 COPY index.html .
 COPY app.js .
-# Install http-server globally to serve static files
-RUN npm install -g http-server
+
 # Expose port 80 for HTTP traffic
 EXPOSE 80
-# Start http-server on all interfaces at port 80
-CMD ["http-server", ".", "-p", "80", "-a", "0.0.0.0"]
+
+# Start Nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]

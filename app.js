@@ -1,6 +1,6 @@
 // API domain configuration
-const apiDomain = process.env.API_DOMAIN || 'http://localhost:8080';
-// Environment-configurable API endpoints based on apiDomain
+const apiDomain = 'http://fabric.friclu/backend'; // Hardcoded default since process.env isn't available in browser
+// API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
 const modelsUrl = `${apiDomain}/models/names`;
