@@ -210,15 +210,11 @@ form.addEventListener('submit', async e => {
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-  const continueChat = document.getElementById('continue-chat').checked;
   if (!text) return;
-  let sessionName;
-  if (continueChat) {
-    sessionName = localStorage.getItem('sessionName') ? localStorage.getItem('sessionName') : new Date().toISOString();
-  } else {
-    sessionName = new Date().toISOString();
-  }
-  localStorage.setItem('sessionName', sessionName);
+
+  // Always start a new session per submit
+  const sessionName = new Date().toISOString();
+
   addMessage(text, 'user');
   showLoading();
   let temperature;
@@ -297,24 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
-  // Create and add the continue chat checkbox with label on the left
-  const continueChatContainer = document.createElement('div');
-  continueChatContainer.className = 'd-flex align-items-center me-2';
-  const continueChatLabel = document.createElement('label');
-  continueChatLabel.className = 'form-check-label me-1';
-  continueChatLabel.htmlFor = 'continue-chat';
-  continueChatLabel.textContent = 'Chat:';
-  const continueChatCheckbox = document.createElement('input');
-  continueChatCheckbox.type = 'checkbox';
-  continueChatCheckbox.className = 'form-check-input';
-  continueChatCheckbox.id = 'continue-chat';
-  // append label first so it's on the left, then the checkbox
-  continueChatContainer.appendChild(continueChatLabel);
-  continueChatContainer.appendChild(continueChatCheckbox);
-  const buttonContainer = document.querySelector('.button-container');
-  buttonContainer.parentNode.insertBefore(continueChatContainer, buttonContainer);
-
-  // Add CSS for enhanced selects and form-check layout
+  // Add CSS for enhanced selects
   const style = document.createElement('style');
   style.textContent = `
     .enhanced-select {
@@ -332,9 +311,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .dropdown-item.active {
       background-color: #007bff;
       color: #fff;
-    }
-    .d-flex.align-items-center {
-      gap: .25rem;
     }
   `;
   document.head.appendChild(style);
