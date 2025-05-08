@@ -12,9 +12,3 @@ data:
   # UI HTML entrypoint
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}
-  # Chrome App manifest
-  manifest.json: |-
-{{ .Files.Get "scripts/manifest.json" | indent 4 }}
-  # Service worker for offline caching
-  sw.js: |-
-{{ .Files.Get "scripts/sw.js" | indent 4 }}
