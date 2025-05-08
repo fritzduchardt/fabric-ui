@@ -26,13 +26,13 @@ spec:
         # Mount the fabric secret env file
         volumeMounts:
         - name: fabric-env
-          mountPath: /root/.config/fabric/.env
+          mountPath: /home/fabric/.config/fabric/.env
           subPath: .env
         - name: sync
-          mountPath: /root/obsidian
+          mountPath: /home/fabric/obsidian
         env:
           - name: OBSIDIAN_VAULT_PATH
-            value: /root/obsidian
+            value: /home/fabric/obsidian
       # Define the volumes for fabric and sync
       volumes:
       - name: fabric-env

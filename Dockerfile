@@ -11,6 +11,9 @@ RUN rm -rf ./*
 RUN rm -f /etc/nginx/nginx.conf \
   && rm -rf /etc/nginx/conf.d
 
+# Copy images from build context to Nginx html/images folder
+COPY images ./usr/share/nginx/html/images
+
 # Expose port 80 for HTTP traffic
 EXPOSE 80
 

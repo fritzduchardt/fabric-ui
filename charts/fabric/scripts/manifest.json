@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Chat UI App",
+  "version": "1.0.0",
+  "description": "Chat with API",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://fabric-friclu.duckdns.org/*"
+  ]
+}
+

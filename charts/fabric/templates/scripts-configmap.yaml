@@ -12,3 +12,6 @@ data:
   # UI HTML entrypoint
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}
+  # Chrome App manifest
+  manifest.json: |-
+{{ .Files.Get "scripts/manifest.json" | indent 4 }}
