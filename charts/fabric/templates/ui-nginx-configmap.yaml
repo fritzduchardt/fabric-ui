@@ -27,6 +27,18 @@ data:
         # Default file to serve
         index index.html;
 
+        # Proxy API requests to backend service, stripping /api prefix
+        location /api/ {
+          # Forward requests to backend service defined by Helm values,
+          proxy_pass http://{{ .Release.Name }}-backend:{{ .Values.backend.port }}/;
+          # Preserve client information
+          proxy_http_version 1.1;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
         # SPA fallback: serve index.html for non-file routes
         location / {
           try_files $uri $uri/ /index.html;
