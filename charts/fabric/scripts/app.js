@@ -216,8 +216,18 @@ form.addEventListener('submit', async e => {
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
+  const continueChat = document.getElementById('continue-chat').checked;
 
   if (!text) return;
+
+  let sessionName
+  if (continueChat) {
+    sessionName = localStorage.getItem('sessionName') ? localStorage.getItem('sessionName') : new Date().toISOString();
+  } else {
+    sessionName = new Date().toISOString()
+  }
+  localStorage.setItem('sessionName', sessionName);
+
   addMessage(text, 'user');
   showLoading(); // do not clear input here to preserve user input
 
@@ -231,6 +241,7 @@ form.addEventListener('submit', async e => {
   try {
     const payload = {
       prompts: [{
+        sessionName: sessionName, // include session identifier
         userInput: text,
         vendor: "openai",
         model,
@@ -299,6 +310,29 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
+  // Create and add the continue chat checkbox
+  const formControls = document.querySelector('.form-controls') || document.querySelector('.button-container').parentNode;
+
+  const continueChatContainer = document.createElement('div');
+  continueChatContainer.className = 'form-check me-2 d-flex align-items-center';
+
+  const continueChatCheckbox = document.createElement('input');
+  continueChatCheckbox.type = 'checkbox';
+  continueChatCheckbox.className = 'form-check-input';
+  continueChatCheckbox.id = 'continue-chat';
+
+  const continueChatLabel = document.createElement('label');
+  continueChatLabel.className = 'form-check-label ms-1';
+  continueChatLabel.htmlFor = 'continue-chat';
+  continueChatLabel.textContent = 'Chat: ';
+
+  continueChatContainer.appendChild(continueChatCheckbox);
+  continueChatContainer.appendChild(continueChatLabel);
+
+  // Insert the checkbox container before the buttons
+  const buttonContainer = document.querySelector('.button-container');
+  buttonContainer.parentNode.insertBefore(continueChatContainer, buttonContainer);
+
   // Add CSS for enhanced selects
   const style = document.createElement('style');
   style.textContent = `
@@ -317,6 +351,13 @@ document.addEventListener('DOMContentLoaded', () => {
     .dropdown-item.active {
       background-color: #007bff;
       color: #fff;
+    }
+    .form-check {
+      display: flex;
+      align-items: center;
+    }
+    .form-check-input {
+      margin-right: 0.5rem;
     }
   `;
   document.head.appendChild(style);
