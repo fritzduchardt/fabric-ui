@@ -136,8 +136,7 @@ form.addEventListener('submit', async e => {
   const obs = obsidianSelect.value || '';
   if (!text) return;
   addMessage(text, 'user');
-  input.value = '';
-  showLoading();
+  showLoading(); // do not clear input here to preserve user input
 
   let temperature;
   if (model === 'o4-mini') {
@@ -215,4 +214,16 @@ document.addEventListener('DOMContentLoaded', () => {
   loadPatterns();
   loadModels();
   loadObsidianFiles();
+
+  // add clear button next to user input to allow manual clearing
+  const clearBtn = document.createElement('button');
+  clearBtn.type = 'button';
+  clearBtn.id = 'clear-input-button';
+  clearBtn.className = 'btn btn-outline-secondary ms-2';
+  clearBtn.textContent = 'Clear';
+  input.parentNode.insertBefore(clearBtn, input.nextSibling);
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    input.focus();
+  });
 });
