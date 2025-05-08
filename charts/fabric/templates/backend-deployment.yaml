@@ -31,6 +31,8 @@ spec:
         - name: sync
           mountPath: /home/fabric/obsidian
         env:
+          - name: FABRIC_CONFIG_HOME
+            value: {{ .Values.backend.fabricConfigHome }}
           - name: OBSIDIAN_VAULT_PATH
             value: /home/fabric/obsidian
       # Define the volumes for fabric and sync

@@ -5,6 +5,7 @@ backend:
   port: 80
   targetPort: 8080
   replicas: 1
+  fabricConfigHome: "/home/fabric/.config/fabric"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
