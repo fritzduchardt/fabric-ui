@@ -17,6 +17,11 @@ spec:
         app: {{ .Release.Name }}
         component: backend
     spec:
+      # Node selector for backend pods
+      {{- if .Values.backend.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.backend.nodeSelector | indent 8 }}
+      {{- end }}
       containers:
       - name: {{ .Release.Name }}-backend
         image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
@@ -34,7 +39,7 @@ spec:
           - name: FABRIC_CONFIG_HOME
             value: {{ .Values.backend.fabricConfigHome }}
           - name: OBSIDIAN_VAULT_PATH
-            value: /home/fabric/obsidian
+            value: {{ .Values.backend.obsidianPath }}
       # Define the volumes for fabric and sync
       volumes:
       - name: fabric-env

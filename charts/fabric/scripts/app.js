@@ -1,3 +1,4 @@
+
 // API domain configuration
 const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
@@ -13,17 +14,51 @@ const modelSelect = document.getElementById('model-select');
 const obsidianSelect = document.getElementById('obsidian-select');
 const messagesEl = document.getElementById('messages');
 
+// add a typeahead search input before a select element
+function addTypeAhead(selectEl, placeholderText) {
+  // create wrapper to contain search input and select
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('typeahead-wrapper');
+  // create search input
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.className = 'form-control mb-2';
+  searchInput.placeholder = placeholderText;
+  // insert wrapper into DOM before selectEl
+  selectEl.parentNode.insertBefore(wrapper, selectEl);
+  wrapper.appendChild(searchInput);
+  wrapper.appendChild(selectEl);
+  // filter options on input
+  searchInput.addEventListener('input', () => {
+    const filter = searchInput.value.trim().toLowerCase();
+    Array.from(selectEl.options).forEach(opt => {
+      const text = opt.textContent.toLowerCase();
+      opt.hidden = filter !== '' && !text.includes(filter);
+    });
+    // Automatically select first visible option after filtering
+    const visibleOptions = Array.from(selectEl.options).filter(opt => !opt.hidden);
+    if (visibleOptions.length > 0) {
+      selectEl.value = visibleOptions[0].value;
+      // dispatch change event in case other code listens to selection changes
+      const evt = new Event('change', { bubbles: true });
+      selectEl.dispatchEvent(evt);
+    }
+  });
+}
+
 async function loadPatterns() {
   try {
     const res = await fetch(patternsUrl);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
     patternInput.innerHTML = '';
+    // choose obsidian_author if available, otherwise general
+    const defaultPattern = patterns.includes('obsidian_author') ? 'obsidian_author' : 'general';
     patterns.forEach(p => {
       const o = document.createElement('option');
       o.value = p;
       o.textContent = p;
-      if (p === 'general') o.selected = true;
+      if (p === defaultPattern) o.selected = true; // default to obsidian_author or general
       patternInput.appendChild(o);
     });
   } catch (e) {
@@ -41,7 +76,7 @@ async function loadModels() {
     o.textContent = m;
     modelSelect.appendChild(o);
   });
-  modelSelect.value = 'o4-mini';
+  modelSelect.value = 'o4-mini'; // default model
 }
 
 async function loadObsidianFiles() {
@@ -60,6 +95,8 @@ async function loadObsidianFiles() {
       o.textContent = f;
       obsidianSelect.appendChild(o);
     });
+    // default to 'sleep' file if present
+    obsidianSelect.value = files.includes('Health/Sleep.md') ? 'Health/Sleep.md' : '';
   } catch (e) {
     console.error(e);
     addMessage(`Error loading files: ${e.message}`, 'bot');
@@ -171,6 +208,10 @@ form.addEventListener('submit', async e => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  // initialize typeahead search for each pulldown
+  addTypeAhead(patternInput, 'Search patterns');
+  addTypeAhead(modelSelect, 'Search models');
+  addTypeAhead(obsidianSelect, 'Search files');
   loadPatterns();
   loadModels();
   loadObsidianFiles();
