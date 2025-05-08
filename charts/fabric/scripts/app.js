@@ -81,10 +81,18 @@ function createEnhancedSelect(id, placeholder) {
       activeItem.classList.add('active');
       activeItem.scrollIntoView({ block: 'nearest' });
     } else if (e.key === 'Enter') {
-      const active = dropdownMenu.querySelector('.dropdown-item.active');
-      if (active) {
+      // If only one visible item, select it directly
+      const visibleItems = Array.from(dropdownMenu.querySelectorAll('.dropdown-item'))
+        .filter(item => item.style.display !== 'none');
+      if (visibleItems.length === 1) {
         e.preventDefault();
-        active.click();
+        visibleItems[0].click();
+      } else {
+        const active = dropdownMenu.querySelector('.dropdown-item.active');
+        if (active) {
+          e.preventDefault();
+          active.click();
+        }
       }
     } else if (e.key === 'Escape') {
       dropdownMenu.classList.remove('show');
