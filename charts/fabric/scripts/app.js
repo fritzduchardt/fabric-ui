@@ -9,58 +9,109 @@ const obsidianUrl = `${apiDomain}/obsidian/files`;
 
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
-const patternInput = document.getElementById('pattern-input');
-const modelSelect = document.getElementById('model-select');
-const obsidianSelect = document.getElementById('obsidian-select');
 const messagesEl = document.getElementById('messages');
 
-// add a typeahead search input before a select element
-function addTypeAhead(selectEl, placeholderText) {
-  // create wrapper to contain search input and select
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('typeahead-wrapper');
-  // create search input
+// Create enhanced select elements to replace standard pulldowns
+function createEnhancedSelect(id, placeholder) {
+  const container = document.createElement('div');
+  container.classList.add('enhanced-select');
+
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
-  searchInput.className = 'form-control mb-2';
-  searchInput.placeholder = placeholderText;
-  // insert wrapper into DOM before selectEl
-  selectEl.parentNode.insertBefore(wrapper, selectEl);
-  wrapper.appendChild(searchInput);
-  wrapper.appendChild(selectEl);
-  // filter options on input
-  searchInput.addEventListener('input', () => {
-    const filter = searchInput.value.trim().toLowerCase();
-    Array.from(selectEl.options).forEach(opt => {
-      const text = opt.textContent.toLowerCase();
-      opt.hidden = filter !== '' && !text.includes(filter);
-    });
-    // Automatically select first visible option after filtering
-    const visibleOptions = Array.from(selectEl.options).filter(opt => !opt.hidden);
-    if (visibleOptions.length > 0) {
-      selectEl.value = visibleOptions[0].value;
-      // dispatch change event in case other code listens to selection changes
-      const evt = new Event('change', { bubbles: true });
-      selectEl.dispatchEvent(evt);
+  searchInput.id = `${id}-search`;
+  searchInput.className = 'form-control';
+  searchInput.placeholder = placeholder;
+
+  const dropdownMenu = document.createElement('div');
+  dropdownMenu.classList.add('dropdown-menu');
+  dropdownMenu.id = `${id}-dropdown`;
+
+  container.appendChild(searchInput);
+  container.appendChild(dropdownMenu);
+
+  // Show dropdown on focus
+  searchInput.addEventListener('focus', () => {
+    dropdownMenu.classList.add('show');
+  });
+
+  // Hide dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!container.contains(e.target)) {
+      dropdownMenu.classList.remove('show');
     }
   });
+
+  // Filter items on input
+  searchInput.addEventListener('input', () => {
+    const filter = searchInput.value.trim().toLowerCase();
+    const items = dropdownMenu.querySelectorAll('.dropdown-item');
+
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = filter === '' || text.includes(filter) ? 'block' : 'none';
+    });
+  });
+
+  return {
+    container,
+    searchInput,
+    dropdownMenu,
+
+    // Add items to the dropdown
+    setItems(items, defaultValue = '') {
+      dropdownMenu.innerHTML = '';
+
+      items.forEach(item => {
+        const dropdownItem = document.createElement('a');
+        dropdownItem.classList.add('dropdown-item');
+        dropdownItem.href = '#';
+        dropdownItem.textContent = item;
+        dropdownItem.dataset.value = item;
+
+        dropdownItem.addEventListener('click', (e) => {
+          e.preventDefault();
+          searchInput.value = item;
+          searchInput.dataset.value = item;
+          dropdownMenu.classList.remove('show');
+
+          // Dispatch change event
+          const changeEvent = new Event('change', { bubbles: true });
+          searchInput.dispatchEvent(changeEvent);
+        });
+
+        dropdownMenu.appendChild(dropdownItem);
+      });
+
+      // Set default value if provided
+      if (defaultValue && items.includes(defaultValue)) {
+        searchInput.value = defaultValue;
+        searchInput.dataset.value = defaultValue;
+      } else if (items.length > 0) {
+        searchInput.value = items[0];
+        searchInput.dataset.value = items[0];
+      }
+    },
+
+    // Get the currently selected value
+    getValue() {
+      return searchInput.dataset.value || searchInput.value;
+    }
+  };
 }
+
+// Create enhanced selects
+const patternSelect = createEnhancedSelect('pattern-input', 'Search patterns');
+const modelSelect = createEnhancedSelect('model-select', 'Search models');
+const obsidianSelect = createEnhancedSelect('obsidian-select', 'Search files');
 
 async function loadPatterns() {
   try {
     const res = await fetch(patternsUrl);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
-    patternInput.innerHTML = '';
     // choose obsidian_author if available, otherwise general
     const defaultPattern = patterns.includes('obsidian_author') ? 'obsidian_author' : 'general';
-    patterns.forEach(p => {
-      const o = document.createElement('option');
-      o.value = p;
-      o.textContent = p;
-      if (p === defaultPattern) o.selected = true; // default to obsidian_author or general
-      patternInput.appendChild(o);
-    });
+    patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
     addMessage(`Error loading patterns: ${e.message}`, 'bot');
@@ -69,14 +120,7 @@ async function loadPatterns() {
 
 async function loadModels() {
   const defaults = ['o4-mini', 'claude-3-7-sonnet-latest', 'deepseek-reasoner'];
-  modelSelect.innerHTML = '';
-  defaults.forEach(m => {
-    const o = document.createElement('option');
-    o.value = m;
-    o.textContent = m;
-    modelSelect.appendChild(o);
-  });
-  modelSelect.value = 'o4-mini'; // default model
+  modelSelect.setItems(defaults, 'o4-mini');
 }
 
 async function loadObsidianFiles() {
@@ -84,19 +128,10 @@ async function loadObsidianFiles() {
     const res = await fetch(obsidianUrl);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const files = await res.json();
-    obsidianSelect.innerHTML = '';
-    const noneOpt = document.createElement('option');
-    noneOpt.value = '';
-    noneOpt.textContent = '(no file)';
-    obsidianSelect.appendChild(noneOpt);
-    files.forEach(f => {
-      const o = document.createElement('option');
-      o.value = f;
-      o.textContent = f;
-      obsidianSelect.appendChild(o);
-    });
+    const allOptions = ['(no file)', ...files];
     // default to 'sleep' file if present
-    obsidianSelect.value = files.includes('Health/Sleep.md') ? 'Health/Sleep.md' : '';
+    const defaultFile = files.includes('Health/Sleep.md') ? 'Health/Sleep.md' : '(no file)';
+    obsidianSelect.setItems(allOptions, defaultFile);
   } catch (e) {
     console.error(e);
     addMessage(`Error loading files: ${e.message}`, 'bot');
@@ -131,9 +166,10 @@ function hideLoading() {
 form.addEventListener('submit', async e => {
   e.preventDefault();
   const text = input.value.trim();
-  const pattern = patternInput.value || 'general';
-  const model = modelSelect.value || 'gpt-4';
-  const obs = obsidianSelect.value || '';
+  const pattern = patternSelect.getValue() || 'general';
+  const model = modelSelect.getValue() || 'gpt-4';
+  const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
+
   if (!text) return;
   addMessage(text, 'user');
   showLoading(); // do not clear input here to preserve user input
@@ -207,10 +243,33 @@ form.addEventListener('submit', async e => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // initialize typeahead search for each pulldown
-  addTypeAhead(patternInput, 'Search patterns');
-  addTypeAhead(modelSelect, 'Search models');
-  addTypeAhead(obsidianSelect, 'Search files');
+  // Replace the original select elements with enhanced ones
+  const patternInputOriginal = document.getElementById('pattern-input');
+  const modelSelectOriginal = document.getElementById('model-select');
+  const obsidianSelectOriginal = document.getElementById('obsidian-select');
+
+  patternInputOriginal.parentNode.replaceChild(patternSelect.container, patternInputOriginal);
+  modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
+  obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
+
+  // Add CSS for enhanced selects
+  const style = document.createElement('style');
+  style.textContent = `
+    .enhanced-select {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .enhanced-select .dropdown-menu {
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .enhanced-select .dropdown-menu.show {
+      display: block;
+    }
+  `;
+  document.head.appendChild(style);
+
   loadPatterns();
   loadModels();
   loadObsidianFiles();
