@@ -10,13 +10,12 @@ ui:
   tag: "master"
   port: 80
   targetPort: 80
-  backendUrl: http://fabric-backend.friclu
 ingress:
   className: nginx
-  host: fabric.friclu
+  host: fabric-friclu.duckdns.org
   path: /
   tls:
-    enabled: false
+    enabled: true
+    secretName: fabric-certificate
 service:
   type: ClusterIP
-

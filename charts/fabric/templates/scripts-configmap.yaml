@@ -12,4 +12,3 @@ data:
   # UI HTML entrypoint
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}
-

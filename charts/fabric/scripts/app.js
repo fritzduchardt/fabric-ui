@@ -1,5 +1,5 @@
 // API domain configuration
-const apiDomain = 'http://fabric.friclu/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;

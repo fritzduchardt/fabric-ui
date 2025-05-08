@@ -29,9 +29,15 @@ spec:
         volumeMounts:
         - name: ui-scripts
           mountPath: /usr/share/nginx/html
-          # mounts app.js and index.html from ConfigMap into web root
+        - name: ui-nginx-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
       volumes:
       - name: ui-scripts
         configMap:
           name: {{ .Release.Name }}-ui-scripts
+          defaultMode: 0644
+      - name: ui-nginx-config
+        configMap:
+          name: {{ .Release.Name }}-ui-nginx-config
           defaultMode: 0644

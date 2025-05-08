@@ -1,0 +1,49 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ui-nginx-config
+  labels:
+    app: {{ .Release.Name }}
+    component: ui
+data:
+  nginx.conf: |-
+    events {
+      worker_connections 1024;
+    }
+    http {
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+      sendfile on;
+      keepalive_timeout 65;
+
+      server {
+        # Bind to the configured UI port
+        listen {{ .Values.ui.targetPort }};
+        # Catch-all server_name
+        server_name _;
+        # Document root for UI files
+        root /usr/share/nginx/html;
+        # Default file to serve
+        index index.html;
+
+        # SPA fallback: serve index.html for non-file routes
+        location / {
+          try_files $uri $uri/ /index.html;
+        }
+
+        # Serve static assets directly, returning 404 if missing
+        location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {
+          try_files $uri =404;
+          # Cache static assets for maximum duration
+          expires max;
+          # Disable access logs for assets
+          access_log off;
+        }
+
+        # Deny access to hidden files (e.g., .env, .git)
+        location ~ /\. {
+          deny all;
+        }
+      }
+    }

@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fabric-certificate
+spec:
+  dnsNames:
+    - fabric-friclu.duckdns.org
+  duration: 2160h
+  issuerRef:
+    kind: ClusterIssuer
+    name: duckdns-github-production
+  renewBefore: 360h
+  secretName: fabric-certificate
+  subject:
+    organizations:
+      - friclu
