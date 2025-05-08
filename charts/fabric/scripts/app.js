@@ -22,6 +22,11 @@ function createEnhancedSelect(id, placeholder) {
   searchInput.className = 'form-control';
   searchInput.placeholder = placeholder;
 
+  // Add focus event to select all text when clicked
+  searchInput.addEventListener('focus', () => {
+    searchInput.select();
+  });
+
   const dropdownMenu = document.createElement('div');
   dropdownMenu.classList.add('dropdown-menu');
   dropdownMenu.id = `${id}-dropdown`;
@@ -45,11 +50,45 @@ function createEnhancedSelect(id, placeholder) {
   searchInput.addEventListener('input', () => {
     const filter = searchInput.value.trim().toLowerCase();
     const items = dropdownMenu.querySelectorAll('.dropdown-item');
-
     items.forEach(item => {
       const text = item.textContent.toLowerCase();
       item.style.display = filter === '' || text.includes(filter) ? 'block' : 'none';
+      // Remove active state when filtering
+      item.classList.remove('active');
     });
+  });
+
+  // Keyboard navigation for dropdown items
+  searchInput.addEventListener('keydown', (e) => {
+    const isOpen = dropdownMenu.classList.contains('show');
+    if (!isOpen) return;
+    const items = Array.from(dropdownMenu.querySelectorAll('.dropdown-item'))
+      .filter(item => item.style.display !== 'none');
+    if (e.key === 'ArrowDown' && items.length) {
+      e.preventDefault();
+      let currentIndex = items.findIndex(item => item.classList.contains('active'));
+      let nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length;
+      items.forEach(i => i.classList.remove('active'));
+      const activeItem = items[nextIndex];
+      activeItem.classList.add('active');
+      activeItem.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp' && items.length) {
+      e.preventDefault();
+      let currentIndex = items.findIndex(item => item.classList.contains('active'));
+      let nextIndex = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length;
+      items.forEach(i => i.classList.remove('active'));
+      const activeItem = items[nextIndex];
+      activeItem.classList.add('active');
+      activeItem.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      const active = dropdownMenu.querySelector('.dropdown-item.active');
+      if (active) {
+        e.preventDefault();
+        active.click();
+      }
+    } else if (e.key === 'Escape') {
+      dropdownMenu.classList.remove('show');
+    }
   });
 
   return {
@@ -267,6 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
     .enhanced-select .dropdown-menu.show {
       display: block;
     }
+    .dropdown-item.active {
+      background-color: #007bff;
+      color: #fff;
+    }
   `;
   document.head.appendChild(style);
 
@@ -274,13 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
   loadModels();
   loadObsidianFiles();
 
-  // add clear button next to user input to allow manual clearing
-  const clearBtn = document.createElement('button');
-  clearBtn.type = 'button';
-  clearBtn.id = 'clear-input-button';
-  clearBtn.className = 'btn btn-outline-secondary ms-2';
-  clearBtn.textContent = 'Clear';
-  input.parentNode.insertBefore(clearBtn, input.nextSibling);
+  // Add select all text functionality to user input field too
+  input.addEventListener('focus', () => {
+    input.select();
+  });
+
+  // Set up the clear button functionality
+  const clearBtn = document.getElementById('clear-button');
   clearBtn.addEventListener('click', () => {
     input.value = '';
     input.focus();
