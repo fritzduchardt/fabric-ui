@@ -11,6 +11,11 @@ const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const messagesEl = document.getElementById('messages');
 
+// Ensure user-input is a single-line text field
+input.setAttribute('type', 'text');
+input.setAttribute('rows', '1');
+input.style.resize = 'none';
+
 // Create enhanced select elements to replace standard pulldowns
 function createEnhancedSelect(id, placeholder) {
   const container = document.createElement('div');
@@ -53,7 +58,6 @@ function createEnhancedSelect(id, placeholder) {
     items.forEach(item => {
       const text = item.textContent.toLowerCase();
       item.style.display = filter === '' || text.includes(filter) ? 'block' : 'none';
-      // Remove active state when filtering
       item.classList.remove('active');
     });
   });
@@ -81,7 +85,6 @@ function createEnhancedSelect(id, placeholder) {
       activeItem.classList.add('active');
       activeItem.scrollIntoView({ block: 'nearest' });
     } else if (e.key === 'Enter') {
-      // If only one visible item, select it directly
       const visibleItems = Array.from(dropdownMenu.querySelectorAll('.dropdown-item'))
         .filter(item => item.style.display !== 'none');
       if (visibleItems.length === 1) {
@@ -107,29 +110,22 @@ function createEnhancedSelect(id, placeholder) {
     // Add items to the dropdown
     setItems(items, defaultValue = '') {
       dropdownMenu.innerHTML = '';
-
       items.forEach(item => {
         const dropdownItem = document.createElement('a');
         dropdownItem.classList.add('dropdown-item');
         dropdownItem.href = '#';
         dropdownItem.textContent = item;
         dropdownItem.dataset.value = item;
-
         dropdownItem.addEventListener('click', (e) => {
           e.preventDefault();
           searchInput.value = item;
           searchInput.dataset.value = item;
           dropdownMenu.classList.remove('show');
-
-          // Dispatch change event
           const changeEvent = new Event('change', { bubbles: true });
           searchInput.dispatchEvent(changeEvent);
         });
-
         dropdownMenu.appendChild(dropdownItem);
       });
-
-      // Set default value if provided
       if (defaultValue && items.includes(defaultValue)) {
         searchInput.value = defaultValue;
         searchInput.dataset.value = defaultValue;
@@ -156,7 +152,6 @@ async function loadPatterns() {
     const res = await fetch(patternsUrl);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
-    // choose obsidian_author if available, otherwise general
     const defaultPattern = patterns.includes('obsidian_author') ? 'obsidian_author' : 'general';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
@@ -176,8 +171,7 @@ async function loadObsidianFiles() {
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const files = await res.json();
     const allOptions = ['(no file)', ...files];
-    // default to 'sleep' file if present
-    const defaultFile = files.includes('Health/Sleep.md') ? 'Health/Sleep.md' : '(no file)';
+    const defaultFile = '(no file)';
     obsidianSelect.setItems(allOptions, defaultFile);
   } catch (e) {
     console.error(e);
@@ -217,31 +211,26 @@ form.addEventListener('submit', async e => {
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
   const continueChat = document.getElementById('continue-chat').checked;
-
   if (!text) return;
-
-  let sessionName
+  let sessionName;
   if (continueChat) {
     sessionName = localStorage.getItem('sessionName') ? localStorage.getItem('sessionName') : new Date().toISOString();
   } else {
-    sessionName = new Date().toISOString()
+    sessionName = new Date().toISOString();
   }
   localStorage.setItem('sessionName', sessionName);
-
   addMessage(text, 'user');
-  showLoading(); // do not clear input here to preserve user input
-
+  showLoading();
   let temperature;
   if (model === 'o4-mini') {
     temperature = 1.0;
   } else {
     temperature = 0.7;
   }
-
   try {
     const payload = {
       prompts: [{
-        sessionName: sessionName, // include session identifier
+        sessionName: sessionName,
         userInput: text,
         vendor: "openai",
         model,
@@ -269,7 +258,6 @@ form.addEventListener('submit', async e => {
     m.appendChild(b);
     messagesEl.appendChild(m);
     messagesEl.scrollTop = messagesEl.scrollHeight;
-
     const reader = res.body.getReader();
     const dec = new TextDecoder();
     let done = false, buf = '';
@@ -305,35 +293,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const patternInputOriginal = document.getElementById('pattern-input');
   const modelSelectOriginal = document.getElementById('model-select');
   const obsidianSelectOriginal = document.getElementById('obsidian-select');
-
   patternInputOriginal.parentNode.replaceChild(patternSelect.container, patternInputOriginal);
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
-  // Create and add the continue chat checkbox
-  const formControls = document.querySelector('.form-controls') || document.querySelector('.button-container').parentNode;
-
+  // Create and add the continue chat checkbox with label on the left
   const continueChatContainer = document.createElement('div');
-  continueChatContainer.className = 'form-check me-2 d-flex align-items-center';
-
+  continueChatContainer.className = 'd-flex align-items-center me-2';
+  const continueChatLabel = document.createElement('label');
+  continueChatLabel.className = 'form-check-label me-1';
+  continueChatLabel.htmlFor = 'continue-chat';
+  continueChatLabel.textContent = 'Chat:';
   const continueChatCheckbox = document.createElement('input');
   continueChatCheckbox.type = 'checkbox';
   continueChatCheckbox.className = 'form-check-input';
   continueChatCheckbox.id = 'continue-chat';
-
-  const continueChatLabel = document.createElement('label');
-  continueChatLabel.className = 'form-check-label ms-1';
-  continueChatLabel.htmlFor = 'continue-chat';
-  continueChatLabel.textContent = 'Chat: ';
-
-  continueChatContainer.appendChild(continueChatCheckbox);
+  // append label first so it's on the left, then the checkbox
   continueChatContainer.appendChild(continueChatLabel);
-
-  // Insert the checkbox container before the buttons
+  continueChatContainer.appendChild(continueChatCheckbox);
   const buttonContainer = document.querySelector('.button-container');
   buttonContainer.parentNode.insertBefore(continueChatContainer, buttonContainer);
 
-  // Add CSS for enhanced selects
+  // Add CSS for enhanced selects and form-check layout
   const style = document.createElement('style');
   style.textContent = `
     .enhanced-select {
@@ -352,12 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
       background-color: #007bff;
       color: #fff;
     }
-    .form-check {
-      display: flex;
-      align-items: center;
-    }
-    .form-check-input {
-      margin-right: 0.5rem;
+    .d-flex.align-items-center {
+      gap: .25rem;
     }
   `;
   document.head.appendChild(style);
@@ -366,9 +343,21 @@ document.addEventListener('DOMContentLoaded', () => {
   loadModels();
   loadObsidianFiles();
 
-  // Add select all text functionality to user input field too
+  // Add select all text functionality to user input field
   input.addEventListener('focus', () => {
     input.select();
+  });
+
+  // Send the form on Enter key for single-line input
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (form.requestSubmit) {
+        form.requestSubmit();
+      } else {
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
+      }
+    }
   });
 
   // Set up the clear button functionality
