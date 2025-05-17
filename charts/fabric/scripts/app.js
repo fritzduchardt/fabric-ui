@@ -1,11 +1,13 @@
+let currentSession = new Date().toISOString();  // generate timestamp to use as session
+let lastPrompt = '';  // store last user prompt
+
 // API domain configuration
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
-const modelsUrl = `${apiDomain}/models/names`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
 
 const form = document.getElementById('chat-form');
@@ -219,22 +221,19 @@ function hideLoading() {
 form.addEventListener('submit', async e => {
   e.preventDefault();
   const text = input.value.trim();
+  if (!text) return;
+  lastPrompt = text;  // store the prompt for the chat button
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-  if (!text) return;
 
-  // Always start a new session per submit
-  const sessionName = new Date().toISOString();
+  // use the persistent session for this conversation
+  const sessionName = currentSession;
 
   addMessage(text, 'user');
   showLoading();
-  let temperature;
-  if (model === 'o4-mini') {
-    temperature = 1.0;
-  } else {
-    temperature = 0.7;
-  }
+  let temperature = model === 'o4-mini' ? 1.0 : 0.7;
+
   try {
     const payload = {
       prompts: [{
@@ -293,6 +292,8 @@ form.addEventListener('submit', async e => {
   } catch (err) {
     hideLoading();
     addMessage(`Error: ${err.message}`, 'bot');
+  } finally {
+    input.value = '';  // clear input after sending
   }
 });
 
@@ -348,10 +349,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Set up the clear button functionality
-  const clearBtn = document.getElementById('clear-button');
-  clearBtn.addEventListener('click', () => {
-    input.value = '';
+  // Change clear button to chat button
+  const chatBtn = document.getElementById('clear-button');
+  chatBtn.id = 'chat-button';
+  chatBtn.textContent = 'Chat';
+  // When chat button is pressed, resend last prompt with same session
+  chatBtn.addEventListener('click', () => {
+    if (!lastPrompt) return;
+    input.value = lastPrompt;
+    if (form.requestSubmit) {
+      form.requestSubmit();
+    } else {
+      form.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
     input.focus();
   });
 });
