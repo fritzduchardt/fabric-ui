@@ -370,7 +370,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!lastPrompt) return;
     // Set flag to indicate chat button was pressed
     isChatButtonPressed = true;
-    input.value = lastPrompt;
     if (form.requestSubmit) {
       form.requestSubmit();
     } else {

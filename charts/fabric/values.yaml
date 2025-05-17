@@ -8,6 +8,7 @@ backend:
     kubernetes.io/hostname: friclu-1
   fabricConfigHome: "/home/fabric/.config/fabric"
   obsidianPath: "/home/fabric/obsidian/private"
+  patternPath: "/home/fabric/obsidian/patterns"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"

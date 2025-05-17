@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,6 +41,8 @@ spec:
             value: {{ .Values.backend.fabricConfigHome }}
           - name: OBSIDIAN_VAULT_PATH
             value: {{ .Values.backend.obsidianPath }}
+          - name: FABRIC_PATTERN_PATH
+            value: {{ .Values.backend.patternPath }}
       # Define the volumes for fabric and sync
       volumes:
       - name: fabric-env
