@@ -1,9 +1,11 @@
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
+let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
+let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -222,13 +224,23 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   const text = input.value.trim();
   if (!text) return;
+
+  // Generate new session ID for each new submission unless chat button was pressed
+  if (!isChatButtonPressed) {
+    // Save current session as last session before generating a new one
+    lastSession = currentSession;
+    currentSession = new Date().toISOString();
+  } else {
+    // Use the last session when chat button is pressed
+    currentSession = lastSession;
+    // Reset the flag after using it
+    isChatButtonPressed = false;
+  }
+
   lastPrompt = text;  // store the prompt for the chat button
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-
-  // use the persistent session for this conversation
-  const sessionName = currentSession;
 
   addMessage(text, 'user');
   showLoading();
@@ -237,7 +249,7 @@ form.addEventListener('submit', async e => {
   try {
     const payload = {
       prompts: [{
-        sessionName: sessionName,
+        sessionName: currentSession,
         userInput: text,
         vendor: "openai",
         model,
@@ -356,6 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // When chat button is pressed, resend last prompt with same session
   chatBtn.addEventListener('click', () => {
     if (!lastPrompt) return;
+    // Set flag to indicate chat button was pressed
+    isChatButtonPressed = true;
     input.value = lastPrompt;
     if (form.requestSubmit) {
       form.requestSubmit();
