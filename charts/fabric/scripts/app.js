@@ -1,9 +1,10 @@
-
 // API domain configuration
 const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
+const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const modelsUrl = `${apiDomain}/models/names`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
 
@@ -157,6 +158,17 @@ async function loadPatterns() {
   } catch (e) {
     console.error(e);
     addMessage(`Error loading patterns: ${e.message}`, 'bot');
+  }
+}
+
+async function generatePatterns() {
+  try {
+    const res = await fetch(patternsGenerateUrl, { method: 'POST' });
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    await loadPatterns();
+  } catch (e) {
+    console.error(e);
+    addMessage(`Error generating patterns: ${e.message}`, 'bot');
   }
 }
 
@@ -315,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 
-  loadPatterns();
+  generatePatterns();
   loadModels();
   loadObsidianFiles();
 
