@@ -1,11 +1,12 @@
+
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -275,6 +276,7 @@ form.addEventListener('submit', async e => {
     m.classList.add('message', 'bot');
     const b = document.createElement('div');
     b.classList.add('bubble');
+    b.style.maxWidth = '100%'; // Use entire width of screen for response messages
     b.dataset.markdown = '';
     m.appendChild(b);
     messagesEl.appendChild(m);
@@ -370,6 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     .obsidian-link:hover {
       text-decoration: underline;
+    }
+    .message.bot .bubble {
+      max-width: 100% !important; /* Override the default max-width */
     }
   `;
   document.head.appendChild(style);
