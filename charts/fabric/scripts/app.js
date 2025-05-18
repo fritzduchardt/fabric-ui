@@ -5,8 +5,8 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -24,6 +24,10 @@ input.style.resize = 'none';
 
 // Transform Obsidian Markdown to HTML snippet
 function transformObsidianMarkdown(md) {
+  // Strip out checkboxes
+  md = md.replace(/\[ \]/g, ''); // Remove unchecked boxes
+  md = md.replace(/\[x\]/gi, ''); // Remove checked boxes (case insensitive)
+
   let html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
   // Transform wikilinks [[Page|alias]] and [[Page]]
   html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
