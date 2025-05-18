@@ -18,21 +18,22 @@ const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const messagesEl = document.getElementById('messages');
 
-// Ensure user-input is a single-line text field
-input.setAttribute('type', 'text');
-input.setAttribute('rows', '1');
+// Ensure user-input is a two-line text field
+input.setAttribute('rows', '2');
 input.style.resize = 'none';
 
 // Create enhanced select elements to replace standard pulldowns
 function createEnhancedSelect(id, placeholder) {
   const container = document.createElement('div');
   container.classList.add('enhanced-select');
+  container.style.width = '100%'; // ensure container fills available width
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.id = `${id}-search`;
   searchInput.className = 'form-control';
   searchInput.placeholder = placeholder;
+  searchInput.style.width = '100%'; // ensure input fills container
 
   // Add focus event to select all text when clicked
   searchInput.addEventListener('focus', () => {
@@ -42,6 +43,9 @@ function createEnhancedSelect(id, placeholder) {
   const dropdownMenu = document.createElement('div');
   dropdownMenu.classList.add('dropdown-menu');
   dropdownMenu.id = `${id}-dropdown`;
+  dropdownMenu.style.width = '100%'; // ensure dropdown fills container
+  dropdownMenu.style.left = '0';
+  dropdownMenu.style.right = '0';
 
   container.appendChild(searchInput);
   container.appendChild(dropdownMenu);
@@ -320,15 +324,21 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
-  // Add CSS for enhanced selects and uniform buttons
+  // Add CSS for enhanced selects and uniform buttons, ensure full width
   const style = document.createElement('style');
   style.textContent = `
     .enhanced-select {
       position: relative;
       margin-bottom: 1rem;
+      width: 100%;
+    }
+    .enhanced-select .form-control {
+      width: 100%;
     }
     .enhanced-select .dropdown-menu {
-      width: 100%;
+      width: 100% !important;
+      left: 0;
+      right: 0;
       max-height: 200px;
       overflow-y: auto;
     }

@@ -27,11 +27,11 @@
       flex: 1;
       overflow-y: auto;
       padding: 1rem;
-      background: rgba(255,255,255,0.8);
+      background: rgba(255, 255, 255, 0.8);
     }
 
     .message {
-      margin-bottom: .75rem;
+      margin-bottom: 0.75rem;
       display: flex;
     }
 
@@ -44,7 +44,7 @@
     }
 
     .bubble {
-      padding: .5rem 1rem;
+      padding: 0.5rem 1rem;
       border-radius: 1rem;
       max-width: 75%;
     }
@@ -61,26 +61,26 @@
 
     /* Add spacing and subtle borders on form elements */
     #chat-form {
-      gap: .1rem;
+      gap: 0.1rem;
     }
 
     #chat-form .form-select,
     #chat-form .form-control {
-      border: 1px solid rgba(0,0,0,0.2);
-      border-radius: .25rem;
-      padding: .5rem;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 0.25rem;
+      padding: 0.5rem;
     }
 
     #chat-form button.btn {
-      border: 1px solid rgba(0,0,0,0.2);
-      border-radius: .25rem;
-      padding: .5rem 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 0.25rem;
+      padding: 2px; /* reduced padding */
     }
 
-    /* Button container for right alignment */
-    .button-container {
-      display: flex;
-      justify-content: flex-end;
+    /* Ensure buttons fill available space equally */
+    .button-row .btn {
+      flex: 1;
+      min-width: 0;
     }
 
     /* Search row styling */
@@ -88,39 +88,47 @@
       display: flex;
       flex-direction: row;
       width: 100%;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    /* Ensure dropdowns in search row fill available width equally */
+    .search-row .form-select {
+      flex: 1;
+      min-width: 0;
     }
 
-    /* Input field with increased height */
-    #user-input {
-      height: 80px; /* Increased height */
-      resize: none; /* Prevent resizing */
+    /* Button row styling */
+    .button-row {
+      display: flex;
+      flex-direction: row;
+      gap: 2px; /* reduced gap */
+      margin-bottom: 2px; /* reduced margin */
+      width: 100%;
     }
   </style>
 </head>
 <body>
   <div id="chat-container" class="container-fluid d-flex flex-column">
     <div id="messages"></div>
-    <form id="chat-form" class="d-flex flex-column p-2" autocomplete="off">
-      <!-- Search boxes in a single row above the input field -->
+    <form id="chat-form" class="p-2" autocomplete="off">
+      <div class="mb-1">
+        <textarea id="user-input" class="form-control" placeholder="Type a message" rows="2" required></textarea>
+      </div>
       <div class="search-row">
-        <select id="pattern-input" class="form-select me-2" style="max-width:200px;">
+        <select id="pattern-input" class="form-select">
           <option>Loading patterns...</option>
         </select>
-        <select id="model-select" class="form-select me-2" style="max-width:200px;">
+        <select id="model-select" class="form-select">
           <option>Loading models...</option>
         </select>
-        <select id="obsidian-select" class="form-select" style="max-width:300px;">
+        <select id="obsidian-select" class="form-select">
           <option>Loading files...</option>
         </select>
       </div>
-      <!-- Input field and buttons in a separate row -->
-      <div class="d-flex flex-grow-1">
-        <textarea id="user-input" class="form-control" placeholder="Type a message" required></textarea>
-        <div class="button-container ms-2">
-          <button id="clear-button" type="button" class="btn btn-outline-secondary me-2">Clear</button>
-          <button type="submit" class="btn btn-primary">Send</button>
-        </div>
+      <div class="button-row">
+        <button id="clear-button" type="button" class="btn btn-outline-secondary">Clear</button>
+        <button type="submit" class="btn btn-primary">Send</button>
       </div>
     </form>
   </div>
