@@ -5,8 +5,7 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -22,20 +21,30 @@ const messagesEl = document.getElementById('messages');
 input.setAttribute('rows', '2');
 input.style.resize = 'none';
 
+// Transform Obsidian Markdown to HTML snippet
+function transformObsidianMarkdown(md) {
+  let html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
+  // Transform wikilinks [[Page|alias]] and [[Page]]
+  html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
+    const text = a || p;
+    const href = `${apiDomain}/obsidian/files/${encodeURIComponent(p)}`;
+    return `<a class="obsidian-link" href="${href}">${text}</a>`;
+  });
+  return html;
+}
+
 // Create enhanced select elements to replace standard pulldowns
 function createEnhancedSelect(id, placeholder) {
   const container = document.createElement('div');
   container.classList.add('enhanced-select');
-  container.style.width = '100%'; // ensure container fills available width
+  container.style.width = '100%';
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.id = `${id}-search`;
   searchInput.className = 'form-control';
   searchInput.placeholder = placeholder;
-  searchInput.style.width = '100%'; // ensure input fills container
-
-  // Add focus event to select all text when clicked
+  searchInput.style.width = '100%';
   searchInput.addEventListener('focus', () => {
     searchInput.select();
   });
@@ -43,26 +52,23 @@ function createEnhancedSelect(id, placeholder) {
   const dropdownMenu = document.createElement('div');
   dropdownMenu.classList.add('dropdown-menu');
   dropdownMenu.id = `${id}-dropdown`;
-  dropdownMenu.style.width = '100%'; // ensure dropdown fills container
+  dropdownMenu.style.width = '100%';
   dropdownMenu.style.left = '0';
   dropdownMenu.style.right = '0';
 
   container.appendChild(searchInput);
   container.appendChild(dropdownMenu);
 
-  // Show dropdown on focus
   searchInput.addEventListener('focus', () => {
     dropdownMenu.classList.add('show');
   });
 
-  // Hide dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!container.contains(e.target)) {
       dropdownMenu.classList.remove('show');
     }
   });
 
-  // Filter items on input
   searchInput.addEventListener('input', () => {
     const filter = searchInput.value.trim().toLowerCase();
     const items = dropdownMenu.querySelectorAll('.dropdown-item');
@@ -73,7 +79,6 @@ function createEnhancedSelect(id, placeholder) {
     });
   });
 
-  // Keyboard navigation for dropdown items
   searchInput.addEventListener('keydown', (e) => {
     const isOpen = dropdownMenu.classList.contains('show');
     if (!isOpen) return;
@@ -117,8 +122,6 @@ function createEnhancedSelect(id, placeholder) {
     container,
     searchInput,
     dropdownMenu,
-
-    // Add items to the dropdown
     setItems(items, defaultValue = '') {
       dropdownMenu.innerHTML = '';
       items.forEach(item => {
@@ -145,15 +148,12 @@ function createEnhancedSelect(id, placeholder) {
         searchInput.dataset.value = items[0];
       }
     },
-
-    // Get the currently selected value
     getValue() {
       return searchInput.dataset.value || searchInput.value;
     }
   };
 }
 
-// Create enhanced selects
 const patternSelect = createEnhancedSelect('pattern-input', 'Search patterns');
 const modelSelect = createEnhancedSelect('model-select', 'Search models');
 const obsidianSelect = createEnhancedSelect('obsidian-select', 'Search files');
@@ -193,8 +193,7 @@ async function loadObsidianFiles() {
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const files = await res.json();
     const allOptions = ['(no file)', ...files];
-    const defaultFile = '(no file)';
-    obsidianSelect.setItems(allOptions, defaultFile);
+    obsidianSelect.setItems(allOptions, '(no file)');
   } catch (e) {
     console.error(e);
     addMessage(`Error loading files: ${e.message}`, 'bot');
@@ -206,7 +205,7 @@ function addMessage(text, sender) {
   m.classList.add('message', sender);
   const b = document.createElement('div');
   b.classList.add('bubble');
-  b.innerHTML = text;
+  b.innerHTML = transformObsidianMarkdown(text);
   m.appendChild(b);
   messagesEl.appendChild(m);
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -231,19 +230,15 @@ form.addEventListener('submit', async e => {
   const text = input.value.trim();
   if (!text) return;
 
-  // Generate new session ID for each new submission unless chat button was pressed
   if (!isChatButtonPressed) {
-    // Save current session as last session before generating a new one
     lastSession = currentSession;
     currentSession = new Date().toISOString();
   } else {
-    // Use the last session when chat button is pressed
     currentSession = lastSession;
-    // Reset the flag after using it
     isChatButtonPressed = false;
   }
 
-  lastPrompt = text;  // store the prompt for the chat button
+  lastPrompt = text;
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
@@ -280,6 +275,7 @@ form.addEventListener('submit', async e => {
     m.classList.add('message', 'bot');
     const b = document.createElement('div');
     b.classList.add('bubble');
+    b.dataset.markdown = '';
     m.appendChild(b);
     messagesEl.appendChild(m);
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -301,7 +297,8 @@ form.addEventListener('submit', async e => {
           try {
             const obj = JSON.parse(d);
             const c = obj.content || '';
-            b.innerHTML += c.replace(/\n/g, '<br>');
+            b.dataset.markdown += c;
+            b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
             messagesEl.scrollTop = messagesEl.scrollHeight;
           } catch {}
         }
@@ -311,12 +308,15 @@ form.addEventListener('submit', async e => {
     hideLoading();
     addMessage(`Error: ${err.message}`, 'bot');
   } finally {
-    input.value = '';  // clear input after sending
+    input.value = '';
   }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Replace the original select elements with enhanced ones
+  const mdScript = document.createElement('script');
+  mdScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+  document.head.appendChild(mdScript);
+
   const patternInputOriginal = document.getElementById('pattern-input');
   const modelSelectOriginal = document.getElementById('model-select');
   const obsidianSelectOriginal = document.getElementById('obsidian-select');
@@ -324,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
-  // Add CSS for enhanced selects and uniform buttons, ensure full width
   const style = document.createElement('style');
   style.textContent = `
     .enhanced-select {
@@ -361,6 +360,13 @@ document.addEventListener('DOMContentLoaded', () => {
       border-color: yellow;
       color: #000;
     }
+    .obsidian-link {
+      color: #3a86ff;
+      text-decoration: none;
+    }
+    .obsidian-link:hover {
+      text-decoration: underline;
+    }
   `;
   document.head.appendChild(style);
 
@@ -368,12 +374,10 @@ document.addEventListener('DOMContentLoaded', () => {
   loadModels();
   loadObsidianFiles();
 
-  // Add select all text functionality to user input field
   input.addEventListener('focus', () => {
     input.select();
   });
 
-  // Send the form on Enter key for single-line input
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -385,11 +389,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Change clear button to chat button
   const chatBtn = document.getElementById('clear-button');
   chatBtn.id = 'chat-button';
   chatBtn.textContent = 'Chat';
-  // When chat button is pressed, resend last prompt with same session
   chatBtn.addEventListener('click', () => {
     if (!lastPrompt) return;
     isChatButtonPressed = true;
@@ -401,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
     input.focus();
   });
 
-  // Add Store button to call storelast endpoint
   const storeBtn = document.createElement('button');
   storeBtn.id = 'store-button';
   storeBtn.type = 'button';
