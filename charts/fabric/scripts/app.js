@@ -5,7 +5,8 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -27,8 +28,8 @@ function transformObsidianMarkdown(md) {
   // Transform wikilinks [[Page|alias]] and [[Page]]
   html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
     const text = a || p;
-    const href = `${apiDomain}/obsidian/files/${encodeURIComponent(p)}`;
-    return `<a class="obsidian-link" href="${href}">${text}</a>`;
+    // display as italic bold plain text
+    return `<i><b>${text}</b></i>`;
   });
   return html;
 }
