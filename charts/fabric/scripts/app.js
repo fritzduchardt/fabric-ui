@@ -5,8 +5,8 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -346,6 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
       height: 2.5rem;
       margin-right: 0.5rem;
     }
+    #chat-button {
+      background-color: yellow;
+      border-color: yellow;
+      color: #000;
+    }
   `;
   document.head.appendChild(style);
 
@@ -396,15 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     e.stopPropagation();
     if (!lastPrompt) return;
-    isChatButtonPressed = true;
     try {
       const res = await fetch(storeUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionName: lastSession, prompt: lastPrompt })
+        body: JSON.stringify({ sessionName: currentSession, prompt: lastPrompt })
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
-      addMessage('Stored last prompt', 'bot');
+      addMessage('Stored last result', 'bot');
     } catch (err) {
       addMessage(`Error storing: ${err.message}`, 'bot');
     }
