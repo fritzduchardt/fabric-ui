@@ -1,16 +1,18 @@
+
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
+const storeUrl = `${apiDomain}/storelast`;
 
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
@@ -318,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
-  // Add CSS for enhanced selects
+  // Add CSS for enhanced selects and uniform buttons
   const style = document.createElement('style');
   style.textContent = `
     .enhanced-select {
@@ -336,6 +338,13 @@ document.addEventListener('DOMContentLoaded', () => {
     .dropdown-item.active {
       background-color: #007bff;
       color: #fff;
+    }
+    #chat-form button {
+      min-width: 100px;
+      padding: 0.375rem 0.75rem;
+      font-size: 1rem;
+      height: 2.5rem;
+      margin-right: 0.5rem;
     }
   `;
   document.head.appendChild(style);
@@ -368,12 +377,36 @@ document.addEventListener('DOMContentLoaded', () => {
   // When chat button is pressed, resend last prompt with same session
   chatBtn.addEventListener('click', () => {
     if (!lastPrompt) return;
-    // Set flag to indicate chat button was pressed
     isChatButtonPressed = true;
     if (form.requestSubmit) {
       form.requestSubmit();
     } else {
       form.dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+    input.focus();
+  });
+
+  // Add Store button to call storelast endpoint
+  const storeBtn = document.createElement('button');
+  storeBtn.id = 'store-button';
+  storeBtn.type = 'button';
+  storeBtn.textContent = 'Store';
+  chatBtn.parentNode.insertBefore(storeBtn, chatBtn);
+  storeBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!lastPrompt) return;
+    isChatButtonPressed = true;
+    try {
+      const res = await fetch(storeUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionName: lastSession, prompt: lastPrompt })
+      });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      addMessage('Stored last prompt', 'bot');
+    } catch (err) {
+      addMessage(`Error storing: ${err.message}`, 'bot');
     }
     input.focus();
   });
