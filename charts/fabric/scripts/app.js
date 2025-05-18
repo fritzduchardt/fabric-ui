@@ -1,4 +1,3 @@
-
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
@@ -357,9 +356,13 @@ document.addEventListener('DOMContentLoaded', () => {
       margin-right: 0.5rem;
     }
     #chat-button {
-      background-color: yellow;
-      border-color: yellow;
-      color: #000;
+      background-color: #77dd77;
+      border-color: #77dd77;
+      color: #fff;
+    }
+    #chat-button:hover {
+      background-color: #66cc66;
+      border-color: #66cc66;
     }
     .obsidian-link {
       color: #3a86ff;
