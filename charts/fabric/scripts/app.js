@@ -24,17 +24,35 @@ input.style.resize = 'none';
 
 // Transform Obsidian Markdown to HTML snippet
 function transformObsidianMarkdown(md) {
-  // Strip out checkboxes
-  md = md.replace(/\[ \]/g, ''); // Remove unchecked boxes
-  md = md.replace(/\[x\]/gi, ''); // Remove checked boxes (case insensitive)
+  // Check for FILENAME: at the beginning of the content
+  let filenameInfo = '';
+  let content = md;
 
-  let html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
+  // Look for FILENAME: at the start of a line
+  const filenameMatch = md.match(/^FILENAME:\s*(.+)$/m);
+  if (filenameMatch) {
+    filenameInfo = filenameMatch[0];
+    // Remove the filename line from the content
+    content = md.replace(filenameMatch[0], '').trim();
+  }
+
+  // Strip out checkboxes
+  content = content.replace(/\[ \]/g, ''); // Remove unchecked boxes
+  content = content.replace(/\[x\]/gi, ''); // Remove checked boxes (case insensitive)
+
+  let html = window.marked ? marked.parse(content) : content.replace(/\n/g, '<br>');
   // Transform wikilinks [[Page|alias]] and [[Page]]
   html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
     const text = a || p;
     // display as italic bold plain text
     return `<i><b>${text}</b></i>`;
   });
+
+  // If we found a filename, add it to the top of the content in a small font with word-wrap
+  if (filenameInfo) {
+    html = `<div class="filename-info">${filenameInfo}</div>${html}`;
+  }
+
   return html;
 }
 
@@ -379,6 +397,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     .message.bot .bubble {
       max-width: 100% !important; /* Override the default max-width */
+    }
+    .filename-info {
+      font-size: 8pt;
+      background-color: #f0f0f0;
+      border-radius: 4px;
+      padding: 2px 4px;
+      color: #666;
+      word-wrap: break-word;
+      margin-bottom: 0.5rem;
     }
   `;
   document.head.appendChild(style);
