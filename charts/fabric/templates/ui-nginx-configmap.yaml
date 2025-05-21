@@ -29,7 +29,7 @@ data:
 
         # Proxy API requests to backend service, stripping /api prefix
         location /api/ {
-          # Forward requests to backend service defined by Helm values,
+          # Forward requests to backend service defined by Helm values
           proxy_pass http://{{ .Release.Name }}-backend:{{ .Values.backend.port }}/;
           # Preserve client information
           proxy_http_version 1.1;
