@@ -45,7 +45,7 @@ data:
         }
 
         # Serve static assets directly, returning 404 if missing
-        location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico)$ {
+        location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|json)$ {
           try_files $uri =404;
           # Cache static assets for maximum duration
           expires max;
