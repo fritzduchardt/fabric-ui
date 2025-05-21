@@ -12,3 +12,10 @@ data:
   # UI HTML entrypoint
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}
+  # PWA manifest
+  manifest.json: |-
+{{ .Files.Get "scripts/manifest.json" | indent 4 }}
+  # Service worker
+  service-worker.js: |-
+{{ .Files.Get "scripts/service-worker.js" | indent 4 }}
+
