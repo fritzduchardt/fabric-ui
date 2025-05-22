@@ -5,8 +5,8 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -429,6 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // On double-click, restore and select the last prompt in the textarea
+  input.addEventListener('dblclick', () => {
+    if (lastPrompt) {
+      input.value = lastPrompt;
+      input.select();
+    }
+  });
+
   const chatBtn = document.getElementById('clear-button');
   chatBtn.id = 'chat-button';
   chatBtn.textContent = 'Chat';
@@ -459,7 +467,11 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ sessionName: currentSession, prompt: lastPrompt })
       });
       if (!res.ok) throw new Error(`Status ${res.status}`);
-      addMessage('Stored last result', 'bot');
+      const data = await res.json();
+      const filename = data.filename || '';
+      addMessage(`Stored last result under ${filename}`, 'bot');
+      await loadPatterns();
+      await loadObsidianFiles();
     } catch (err) {
       addMessage(`Error storing: ${err.message}`, 'bot');
     }
