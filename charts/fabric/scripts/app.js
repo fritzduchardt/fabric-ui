@@ -5,8 +5,8 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -262,6 +262,9 @@ form.addEventListener('submit', async e => {
   }
 
   lastPrompt = text;
+  // enable store button only if lastPrompt starts with FILENAME:
+  const storeBtnCheck = document.getElementById('store-button');
+
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
@@ -324,6 +327,12 @@ form.addEventListener('submit', async e => {
             b.dataset.markdown += c;
             b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
             messagesEl.scrollTop = messagesEl.scrollHeight;
+            const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
+            if (filenameMatch) {
+              storeBtnCheck.disabled = false;
+            } else {
+              storeBtnCheck.disabled = true;
+            }
           } catch {}
         }
       }
@@ -455,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
   storeBtn.id = 'store-button';
   storeBtn.type = 'button';
   storeBtn.textContent = 'Store';
+  storeBtn.disabled = true;  // disabled until a prompt with FILENAME: is submitted
   chatBtn.parentNode.insertBefore(storeBtn, chatBtn);
   storeBtn.addEventListener('click', async (e) => {
     e.preventDefault();
@@ -469,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!res.ok) throw new Error(`Status ${res.status}`);
       const data = await res.json();
       const filename = data.filename || '';
-      addMessage(`Stored last result under ${filename}`, 'bot');
+      addMessage(`Stored last result under <i><b>${filename}</b></i>`, 'bot');
       await loadPatterns();
       await loadObsidianFiles();
     } catch (err) {
