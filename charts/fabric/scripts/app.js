@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const chatBtn = document.getElementById('clear-button');
+  const chatBtn = document.getElementById('chat-button');
   chatBtn.id = 'chat-button';
   chatBtn.textContent = 'Chat';
   chatBtn.addEventListener('click', () => {
