@@ -5,14 +5,14 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
 // API domain configuration
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
-const storeUrl = `${apiDomain}/storelast`;
+const storeUrl = `${apiDomain}/store`;
 
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
@@ -228,8 +228,37 @@ function addMessage(text, sender) {
   m.classList.add('message', sender);
   const b = document.createElement('div');
   b.classList.add('bubble');
+  b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
   m.appendChild(b);
+  // if this message contains a filename, add a little store button inside the bubble
+  if (text.match(/^FILENAME:\s*(.+)$/m)) {
+    const btn = document.createElement('button');
+    btn.className = 'store-message-button';
+    btn.textContent = 'Store';
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        const res = await fetch(storeUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionName: currentSession, prompt: b.dataset.markdown })
+        });
+        if (!res.ok) throw new Error(`Status ${res.status}`);
+        const data = await res.json();
+        const fn = data.filename || '';
+        const info = document.createElement('div');
+        info.className = 'filename-info';
+        info.innerHTML = `Stored under <i><b>${fn}</b></i>`;
+        b.appendChild(info);
+        btn.disabled = true;
+      } catch (err) {
+        console.error(err);
+      }
+    });
+    b.appendChild(btn);
+  }
   messagesEl.appendChild(m);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -262,8 +291,6 @@ form.addEventListener('submit', async e => {
   }
 
   lastPrompt = text;
-  // enable store button only if lastPrompt starts with FILENAME:
-  const storeBtnCheck = document.getElementById('store-button');
 
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
@@ -299,6 +326,7 @@ form.addEventListener('submit', async e => {
     hideLoading();
     const m = document.createElement('div');
     m.classList.add('message', 'bot');
+    m.style.position = 'relative';
     const b = document.createElement('div');
     b.classList.add('bubble');
     b.style.maxWidth = '100%'; // Use entire width of screen for response messages
@@ -329,9 +357,33 @@ form.addEventListener('submit', async e => {
             messagesEl.scrollTop = messagesEl.scrollHeight;
             const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
             if (filenameMatch) {
-              storeBtnCheck.disabled = false;
-            } else {
-              storeBtnCheck.disabled = true;
+              if (!m.querySelector('.store-message-button')) {
+                const storeMsgBtn = document.createElement('button');
+                storeMsgBtn.className = 'store-message-button';
+                storeMsgBtn.textContent = 'Store';
+                storeMsgBtn.addEventListener('click', async (ev) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  try {
+                    const resp = await fetch(storeUrl, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ sessionName: currentSession, message: b.dataset.markdown })
+                    });
+                    if (!resp.ok) throw new Error(`Status ${resp.status}`);
+                    const data = await resp.json();
+                    const fn = data.filename || '';
+                    const info = document.createElement('div');
+                    info.className = 'filename-info';
+                    info.innerHTML = `Stored under <i><b>${fn}</b></i>`;
+                    b.appendChild(info);
+                    storeMsgBtn.disabled = true;
+                  } catch (err) {
+                    console.error(err);
+                  }
+                });
+                b.appendChild(storeMsgBtn);
+              }
             }
           } catch {}
         }
@@ -359,6 +411,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const style = document.createElement('style');
   style.textContent = `
+    .message { position: relative; }
+    .bubble { position: relative; }
+    .store-message-button {
+      bottom: 4px;
+      left: 8px;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+    }
     .enhanced-select {
       position: relative;
       margin-bottom: 1rem;
@@ -408,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
       max-width: 100% !important; /* Override the default max-width */
     }
     .filename-info {
-      font-size: 8pt;
+      font-size: 9pt;
       background-color: #f0f0f0;
       border-radius: 4px;
       padding: 2px 4px;
@@ -456,34 +516,6 @@ document.addEventListener('DOMContentLoaded', () => {
       form.requestSubmit();
     } else {
       form.dispatchEvent(new Event('submit', { cancelable: true }));
-    }
-    input.focus();
-  });
-
-  const storeBtn = document.createElement('button');
-  storeBtn.id = 'store-button';
-  storeBtn.type = 'button';
-  storeBtn.textContent = 'Store';
-  storeBtn.disabled = true;  // disabled until a prompt with FILENAME: is submitted
-  chatBtn.parentNode.insertBefore(storeBtn, chatBtn);
-  storeBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!lastPrompt) return;
-    try {
-      const res = await fetch(storeUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionName: currentSession, prompt: lastPrompt })
-      });
-      if (!res.ok) throw new Error(`Status ${res.status}`);
-      const data = await res.json();
-      const filename = data.filename || '';
-      addMessage(`Stored last result under <i><b>${filename}</b></i>`, 'bot');
-      await loadPatterns();
-      await loadObsidianFiles();
-    } catch (err) {
-      addMessage(`Error storing: ${err.message}`, 'bot');
     }
     input.focus();
   });
