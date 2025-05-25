@@ -263,7 +263,7 @@ function addMessage(text, sender) {
   if (sender === 'user') {
     const promptBtn = document.createElement('button');
     promptBtn.className = 'prompt-again-button';
-    promptBtn.textContent = 'Prompt Again';
+    promptBtn.textContent = 'Prompt';
     promptBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
