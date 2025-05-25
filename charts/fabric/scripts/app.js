@@ -497,6 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
       color: #666;
       word-wrap: break-word;
       margin-bottom: 0.5rem;
+      margin-top: 0.5rem;
     }
   `;
   document.head.appendChild(style);
