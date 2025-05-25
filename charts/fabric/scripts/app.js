@@ -273,6 +273,18 @@ function addMessage(text, sender) {
     });
     b.appendChild(promptBtn);
   }
+  // add copy button only for bot messages
+  if (sender === 'bot') {
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-button';
+    copyBtn.textContent = 'Copy';
+    copyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      navigator.clipboard.writeText(b.dataset.markdown).catch(console.error);
+    });
+    b.appendChild(copyBtn);
+  }
   messagesEl.appendChild(m);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -403,6 +415,18 @@ form.addEventListener('submit', async e => {
         }
       }
     }
+    // add copy button after streaming complete
+    if (!b.querySelector('.copy-button')) {
+      const copyBtnStream = document.createElement('button');
+      copyBtnStream.className = 'copy-button';
+      copyBtnStream.textContent = 'Copy';
+      copyBtnStream.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigator.clipboard.writeText(b.dataset.markdown).catch(console.error);
+      });
+      b.appendChild(copyBtnStream);
+    }
   } catch (err) {
     hideLoading();
     addMessage(`Error: ${err.message}`, 'bot');
@@ -438,6 +462,13 @@ document.addEventListener('DOMContentLoaded', () => {
       right: 8px;
       font-size: 0.75rem;
       padding: 2px 4px;
+    }
+    .copy-button {
+      bottom: 4px;
+      right: 8px;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+      margin-left: 4px;
     }
     .enhanced-select {
       position: relative;
