@@ -259,6 +259,20 @@ function addMessage(text, sender) {
     });
     b.appendChild(btn);
   }
+  // add prompt again button for user messages
+  if (sender === 'user') {
+    const promptBtn = document.createElement('button');
+    promptBtn.className = 'prompt-again-button';
+    promptBtn.textContent = 'Prompt Again';
+    promptBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      input.value = b.dataset.markdown;
+      input.select();
+      input.focus();
+    });
+    b.appendChild(promptBtn);
+  }
   messagesEl.appendChild(m);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -416,6 +430,12 @@ document.addEventListener('DOMContentLoaded', () => {
     .store-message-button {
       bottom: 4px;
       left: 8px;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+    }
+    .prompt-again-button {
+      bottom: 4px;
+      right: 8px;
       font-size: 0.75rem;
       padding: 2px 4px;
     }
