@@ -20,6 +20,7 @@
       flex-direction: column;
       height: 100%;
       border-top: 10px solid lightblue; /* slim top border */
+      border-bottom: 10px solid lightblue; /* slim top border */
     }
     #messages {
       flex: 1;
@@ -54,7 +55,8 @@
     #chat-form .form-control {
       border: 1px solid rgba(0, 0, 0, 0.2);
       border-radius: 0.25rem;
-      padding: 0.5rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
     /* input and buttons layout */
     .input-with-buttons {
@@ -130,6 +132,12 @@
     .search-row .enhanced-select:nth-child(2) {
       flex: 1;
       min-width: 0;
+    }
+    .p-2 {
+      padding-top: .5rem;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+      padding-bottom: 0 !important;
     }
   </style>
 </head>
