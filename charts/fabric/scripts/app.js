@@ -448,6 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
       width: 100%;
     }
     .enhanced-select .dropdown-menu {
+      position: absolute;
+      bottom: 100%;
+      top: auto;
       width: 100% !important;
       left: 0;
       right: 0;
