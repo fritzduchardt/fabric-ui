@@ -4,6 +4,22 @@ let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 
+// Convert markdown to plain text for clipboard
+function markdownToPlainText(md) {
+  // Restore line breaks and remove markdown constructs
+  let text = md;
+  // Transform wikilinks [[Page|alias]] and [[Page]]
+  text = text.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_, p, a) => a || p);
+  // Remove markdown links [text](url) -> text
+  text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+  // Remove bold and italic markers **, __, *, _
+  text = text.replace(/(\*\*|__)(.*?)\1/g, '$2');
+  text = text.replace(/(\*|_)(.*?)\1/g, '$2');
+  // Remove any remaining markdown link brackets
+  text = text.replace(/\[\[|\]\]/g, '');
+  return text;
+}
+
 // API domain configuration
 // const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
@@ -281,7 +297,7 @@ function addMessage(text, sender) {
     copyBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      navigator.clipboard.writeText(b.dataset.markdown).catch(console.error);
+      navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
     });
     b.appendChild(copyBtn);
   }
@@ -423,7 +439,7 @@ form.addEventListener('submit', async e => {
       copyBtnStream.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        navigator.clipboard.writeText(b.dataset.markdown).catch(console.error);
+        navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
       });
       b.appendChild(copyBtnStream);
     }
@@ -549,14 +565,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         form.dispatchEvent(new Event('submit', { cancelable: true }));
       }
-    }
-  });
-
-  // On double-click, restore and select the last prompt in the textarea
-  input.addEventListener('dblclick', () => {
-    if (lastPrompt) {
-      input.value = lastPrompt;
-      input.select();
     }
   });
 
