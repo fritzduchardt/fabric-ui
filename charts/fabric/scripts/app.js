@@ -441,7 +441,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     .enhanced-select {
       position: relative;
-      margin-bottom: 1rem;
       width: 100%;
     }
     .enhanced-select .form-control {
