@@ -38,33 +38,18 @@ const messagesEl = document.getElementById('messages');
 input.setAttribute('rows', '2');
 input.style.resize = 'none';
 
-// Transform Obsidian Markdown to HTML snippet
+// Transform Obsidian Markdown to HTML snippet, keeping filenames inline
 function transformObsidianMarkdown(md) {
-  // Check for FILENAME: at the beginning of the content
-  let filenameInfo = '';
-  let content = md;
-
-  // Look for FILENAME: at the start of a line
-  const filenameMatch = md.match(/^FILENAME:\s*(.+)$/m);
-  if (filenameMatch) {
-    filenameInfo = filenameMatch[0];
-    // Remove the filename line from the content
-    content = md.replace(filenameMatch[0], '').trim();
-  }
-
-  let html = window.marked ? marked.parse(content) : content.replace(/\n/g, '<br>');
+  // Convert markdown to HTML snippet
+  let html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
+  // Replace inline FILENAME lines with styled divs
+  html = html.replace(/<p>FILENAME:\s*(.+?)<\/p>/g, '<div class="filename-info">FILENAME: $1</div>');
   // Transform wikilinks [[Page|alias]] and [[Page]]
   html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
     const text = a || p;
     // display as italic bold plain text
     return `<i><b>${text}</b></i>`;
   });
-
-  // If we found a filename, add it to the top of the content in a small font with word-wrap
-  if (filenameInfo) {
-    html = `<div class="filename-info">${filenameInfo}</div>${html}`;
-  }
-
   return html;
 }
 
@@ -272,12 +257,16 @@ function addMessage(text, sender) {
         });
         if (!res.ok) throw new Error(`Status ${res.status}`);
         const data = await res.json();
-        const fn = data.filename || '';
-        const info = document.createElement('div');
-        info.className = 'filename-info';
-        info.innerHTML = `Stored under <i><b>${fn}</b></i>`;
-        b.appendChild(info);
+        const fns = data.filenames || [];
+        if (fns.length) {
+          const info = document.createElement('div');
+          info.className = 'filename-info';
+          info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
+          b.appendChild(info);
+        }
         btn.disabled = true;
+        await generatePatterns();
+        await loadObsidianFiles();
       } catch (err) {
         console.error(err);
       }
@@ -293,8 +282,9 @@ function addMessage(text, sender) {
       e.preventDefault();
       e.stopPropagation();
       input.value = b.dataset.markdown;
-      input.select();
       input.focus();
+      const pos = input.value.length;
+      input.setSelectionRange(pos, pos);
     });
     b.appendChild(promptBtn);
   }
@@ -348,6 +338,7 @@ form.addEventListener('submit', async e => {
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
 
   addMessage(text, 'user');
+  input.value = '';
   showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
 
@@ -408,7 +399,7 @@ form.addEventListener('submit', async e => {
             messagesEl.scrollTop = messagesEl.scrollHeight;
             const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
             if (filenameMatch) {
-              if (!m.querySelector('.store-message-button')) {
+              if (!b.querySelector('.store-message-button')) {
                 const storeMsgBtn = document.createElement('button');
                 storeMsgBtn.className = 'store-message-button';
                 storeMsgBtn.textContent = 'Store';
@@ -419,16 +410,20 @@ form.addEventListener('submit', async e => {
                     const resp = await fetch(storeUrl, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ sessionName: currentSession, message: b.dataset.markdown })
+                      body: JSON.stringify({ sessionName: currentSession, prompt: b.dataset.markdown })
                     });
                     if (!resp.ok) throw new Error(`Status ${resp.status}`);
                     const data = await resp.json();
-                    const fn = data.filename || '';
-                    const info = document.createElement('div');
-                    info.className = 'filename-info';
-                    info.innerHTML = `Stored under <i><b>${fn}</b></i>`;
-                    b.appendChild(info);
+                    const fns = data.filenames || [];
+                    if (fns.length) {
+                      const info = document.createElement('div');
+                      info.className = 'filename-info';
+                      info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
+                      b.appendChild(info);
+                    }
                     storeMsgBtn.disabled = true;
+                    await generatePatterns();
+                    await loadObsidianFiles();
                   } catch (err) {
                     console.error(err);
                   }
@@ -455,8 +450,6 @@ form.addEventListener('submit', async e => {
   } catch (err) {
     hideLoading();
     addMessage(`Error: ${err.message}`, 'bot');
-  } finally {
-    input.value = '';
   }
 });
 
