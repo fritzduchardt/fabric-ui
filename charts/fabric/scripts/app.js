@@ -80,8 +80,12 @@ function createEnhancedSelect(id, placeholder) {
   searchInput.className = 'form-control';
   searchInput.placeholder = placeholder;
   searchInput.style.width = '100%';
-  // Only select text on focus for non-model dropdowns
-  if (id !== 'model-select') {
+  // Prevent free text for model dropdown
+  if (id === 'model-select') {
+    searchInput.readOnly = true;
+    searchInput.style.cursor = 'pointer';
+  } else {
+    // Only select text on focus for non-model dropdowns
     searchInput.addEventListener('focus', () => {
       searchInput.select();
     });
@@ -100,6 +104,12 @@ function createEnhancedSelect(id, placeholder) {
   searchInput.addEventListener('focus', () => {
     dropdownMenu.classList.add('show');
   });
+  if (id === 'model-select') {
+    // also open on click for model-select
+    searchInput.addEventListener('click', () => {
+      dropdownMenu.classList.add('show');
+    });
+  }
 
   document.addEventListener('click', (e) => {
     if (!container.contains(e.target)) {
