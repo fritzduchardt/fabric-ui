@@ -52,10 +52,6 @@ function transformObsidianMarkdown(md) {
     content = md.replace(filenameMatch[0], '').trim();
   }
 
-  // Strip out checkboxes
-  content = content.replace(/\[ \]/g, ''); // Remove unchecked boxes
-  content = content.replace(/\[x\]/gi, ''); // Remove checked boxes (case insensitive)
-
   let html = window.marked ? marked.parse(content) : content.replace(/\n/g, '<br>');
   // Transform wikilinks [[Page|alias]] and [[Page]]
   html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
@@ -84,9 +80,12 @@ function createEnhancedSelect(id, placeholder) {
   searchInput.className = 'form-control';
   searchInput.placeholder = placeholder;
   searchInput.style.width = '100%';
-  searchInput.addEventListener('focus', () => {
-    searchInput.select();
-  });
+  // Only select text on focus for non-model dropdowns
+  if (id !== 'model-select') {
+    searchInput.addEventListener('focus', () => {
+      searchInput.select();
+    });
+  }
 
   const dropdownMenu = document.createElement('div');
   dropdownMenu.classList.add('dropdown-menu');
@@ -516,6 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
       font-size: 1rem;
       height: 2.5rem;
       margin-right: 0.5rem;
+      margin-bottom: 2px;
     }
     #chat-button {
       background-color: #77dd77;
