@@ -8,6 +8,8 @@ let isChatButtonPressed = false;  // track if chat button was pressed
 function markdownToPlainText(md) {
   // Restore line breaks and remove markdown constructs
   let text = md;
+  // Remove lines starting with FILENAME:
+  text = text.replace(/^FILENAME:.*$/gm, '');
   // Transform wikilinks [[Page|alias]] and [[Page]]
   text = text.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_, p, a) => a || p);
   // Remove markdown links [text](url) -> text
@@ -17,6 +19,8 @@ function markdownToPlainText(md) {
   text = text.replace(/(\*|_)(.*?)\1/g, '$2');
   // Remove any remaining markdown link brackets
   text = text.replace(/\[\[|\]\]/g, '');
+  // Remove any empty lines at the start of the text
+  text = text.replace(/^(?:\s*\r?\n)+/, '');
   return text;
 }
 
@@ -196,7 +200,13 @@ async function loadPatterns() {
     const res = await fetch(patternsUrl);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
-    const defaultPattern = patterns.includes('obsidian_author') ? 'obsidian_author' : 'general';
+    // reinstate previously selected pattern if still available
+    const prev = patternSelect.getValue();
+    const defaultPattern = prev && patterns.includes(prev)
+      ? prev
+      : patterns.includes('obsidian_author')
+        ? 'obsidian_author'
+        : 'general';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
@@ -226,7 +236,10 @@ async function loadObsidianFiles() {
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const files = await res.json();
     const allOptions = ['(no file)', ...files];
-    obsidianSelect.setItems(allOptions, '(no file)');
+    // reinstate previously selected file if still available
+    const prevFile = obsidianSelect.getValue();
+    const defaultFile = prevFile && allOptions.includes(prevFile) ? prevFile : '(no file)';
+    obsidianSelect.setItems(allOptions, defaultFile);
   } catch (e) {
     console.error(e);
     addMessage(`Error loading files: ${e.message}`, 'bot');
