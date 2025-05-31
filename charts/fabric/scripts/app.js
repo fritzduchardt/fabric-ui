@@ -333,19 +333,17 @@ function hideLoading() {
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
-  const text = input.value.trim();
-  if (!text) return;
-
+  let text = input.value.trim();  // allow empty input
+  if (text == "")  {
+    text = "No further instructions"
+  }
   if (!isChatButtonPressed) {
     lastSession = currentSession;
     currentSession = new Date().toISOString();
   } else {
-    currentSession = lastSession;
     isChatButtonPressed = false;
   }
-
   lastPrompt = text;
-
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
