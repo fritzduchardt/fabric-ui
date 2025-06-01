@@ -26,7 +26,7 @@ function markdownToPlainText(md) {
 
 // API domain configuration
 // const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'https://fabric-friclu.duckdns.org'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
