@@ -25,8 +25,8 @@ function markdownToPlainText(md) {
 }
 
 // API domain configuration
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -262,6 +262,12 @@ function addMessage(text, sender) {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
+      btn.disabled = true;
+      const spinner = document.createElement('span');
+      spinner.className = 'spinner-border spinner-border-sm ms-2';
+      spinner.role = 'status';
+      spinner.ariaHidden = 'true';
+      btn.appendChild(spinner);
       try {
         const res = await fetch(storeUrl, {
           method: 'POST',
@@ -277,11 +283,12 @@ function addMessage(text, sender) {
           info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
           b.appendChild(info);
         }
-        btn.disabled = true;
         await generatePatterns();
         await loadObsidianFiles();
       } catch (err) {
         console.error(err);
+      } finally {
+        spinner.remove();
       }
     });
     b.appendChild(btn);
@@ -417,6 +424,12 @@ form.addEventListener('submit', async e => {
                 storeMsgBtn.addEventListener('click', async (ev) => {
                   ev.preventDefault();
                   ev.stopPropagation();
+                  storeMsgBtn.disabled = true;
+                  const sp = document.createElement('span');
+                  sp.className = 'spinner-border spinner-border-sm ms-2';
+                  sp.role = 'status';
+                  sp.ariaHidden = 'true';
+                  storeMsgBtn.appendChild(sp);
                   try {
                     const resp = await fetch(storeUrl, {
                       method: 'POST',
@@ -432,11 +445,12 @@ form.addEventListener('submit', async e => {
                       info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
                       b.appendChild(info);
                     }
-                    storeMsgBtn.disabled = true;
                     await generatePatterns();
                     await loadObsidianFiles();
                   } catch (err) {
                     console.error(err);
+                  } finally {
+                    sp.remove();
                   }
                 });
                 b.appendChild(storeMsgBtn);
