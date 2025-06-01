@@ -246,9 +246,12 @@ async function loadObsidianFiles() {
   }
 }
 
-function addMessage(text, sender) {
+function addMessage(text, sender, isChat = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
+  if (sender === 'user') {
+    m.classList.add(isChat ? 'chat' : 'send');
+  }
   const b = document.createElement('div');
   b.classList.add('bubble');
   if (text.startsWith('Error')) {
@@ -353,6 +356,7 @@ form.addEventListener('submit', async e => {
   if (text == "")  {
     text = "No further instructions"
   }
+  const userIsChat = isChatButtonPressed;
   if (!isChatButtonPressed) {
     lastSession = currentSession;
     currentSession = new Date().toISOString();
@@ -364,7 +368,7 @@ form.addEventListener('submit', async e => {
   const model = modelSelect.getValue() || 'gpt-4';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
 
-  addMessage(text, 'user');
+  addMessage(text, 'user', userIsChat);
   input.value = '';
   showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
@@ -592,6 +596,14 @@ document.addEventListener('DOMContentLoaded', () => {
     .bubble.error {
       background-color: #f8d7da !important;
       color: #721c24 !important;
+    }
+    .message.user.chat .bubble {
+      background-color: yellow;
+      color: #000;
+    }
+    .message.user.send .bubble {
+      background-color: #add8e6;
+      color: #000;
     }
   `;
   document.head.appendChild(style);
