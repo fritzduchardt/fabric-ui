@@ -25,7 +25,8 @@ function markdownToPlainText(md) {
 }
 
 // API domain configuration
-const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'https://fabric-friclu.duckdns.org'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -344,6 +345,10 @@ function hideLoading() {
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  const chatBtn = document.getElementById('chat-button');
+  const sendBtn = document.querySelector('.btn-send');
+  chatBtn.disabled = true; // disable chat button while request is running
+  sendBtn.disabled = true; // disable send button while request is running
   let text = input.value.trim();  // allow empty input
   if (text == "")  {
     text = "No further instructions"
@@ -481,6 +486,10 @@ form.addEventListener('submit', async e => {
   } catch (err) {
     hideLoading();
     addMessage(`Error: ${err.message}`, 'bot');
+  } finally {
+    // re-enable chat and send buttons after request completes or errors
+    chatBtn.disabled = false;
+    sendBtn.disabled = false;
   }
 });
 
