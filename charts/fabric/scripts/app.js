@@ -598,11 +598,11 @@ document.addEventListener('DOMContentLoaded', () => {
       color: #721c24 !important;
     }
     .message.user.chat .bubble {
-      background-color: #fffacd;
+      background-color: #e1d14a;
       color: #000;
     }
     .message.user.send .bubble {
-      background-color: #00008b;
+      background-color: #2525b6;
       color: #fff;
     }
   `;
