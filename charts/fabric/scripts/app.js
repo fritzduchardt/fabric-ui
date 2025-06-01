@@ -565,8 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
       margin-bottom: 2px;
     }
     #chat-button {
-      background-color: #77dd77;
-      border-color: #77dd77;
+      background-color: #5fa96b;
+      border-color: #5fa96b;
       color: #fff;
     }
     #chat-button:hover {
@@ -598,11 +598,11 @@ document.addEventListener('DOMContentLoaded', () => {
       color: #721c24 !important;
     }
     .message.user.chat .bubble {
-      background-color: #e1d14a;
-      color: #000;
+      background-color: #5fa96b;
+      color: #fff;
     }
     .message.user.send .bubble {
-      background-color: #2525b6;
+      background-color: #0d6efd; /* match send button primary color */
       color: #fff;
     }
   `;
