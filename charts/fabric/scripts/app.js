@@ -26,7 +26,6 @@ function markdownToPlainText(md) {
 
 // API domain configuration
 const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
@@ -251,6 +250,9 @@ function addMessage(text, sender) {
   m.classList.add('message', sender);
   const b = document.createElement('div');
   b.classList.add('bubble');
+  if (text.startsWith('Error')) {
+    b.classList.add('error');
+  }
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
   m.appendChild(b);
@@ -287,6 +289,8 @@ function addMessage(text, sender) {
         await loadObsidianFiles();
       } catch (err) {
         console.error(err);
+        addMessage(`Error storing message: ${err.message}`, 'bot');
+        btn.disabled = false;
       } finally {
         spinner.remove();
       }
@@ -308,8 +312,8 @@ function addMessage(text, sender) {
     });
     b.appendChild(promptBtn);
   }
-  // add copy button only for bot messages
-  if (sender === 'bot') {
+  // add copy button only for bot messages that are not errors
+  if (sender === 'bot' && !text.startsWith('Error')) {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
@@ -449,6 +453,8 @@ form.addEventListener('submit', async e => {
                     await loadObsidianFiles();
                   } catch (err) {
                     console.error(err);
+                    addMessage(`Error storing message: ${err.message}`, 'bot');
+                    storeMsgBtn.disabled = false;
                   } finally {
                     sp.remove();
                   }
@@ -460,8 +466,8 @@ form.addEventListener('submit', async e => {
         }
       }
     }
-    // add copy button after streaming complete
-    if (!b.querySelector('.copy-button')) {
+    // add copy button after streaming complete if not an error
+    if (!b.classList.contains('error')) {
       const copyBtnStream = document.createElement('button');
       copyBtnStream.className = 'copy-button';
       copyBtnStream.textContent = 'Copy';
@@ -573,6 +579,10 @@ document.addEventListener('DOMContentLoaded', () => {
       word-wrap: break-word;
       margin-bottom: 0.5rem;
       margin-top: 0.5rem;
+    }
+    .bubble.error {
+      background-color: #f8d7da !important;
+      color: #721c24 !important;
     }
   `;
   document.head.appendChild(style);
