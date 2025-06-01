@@ -598,12 +598,12 @@ document.addEventListener('DOMContentLoaded', () => {
       color: #721c24 !important;
     }
     .message.user.chat .bubble {
-      background-color: yellow;
+      background-color: #fffacd;
       color: #000;
     }
     .message.user.send .bubble {
-      background-color: #add8e6;
-      color: #000;
+      background-color: #00008b;
+      color: #fff;
     }
   `;
   document.head.appendChild(style);
