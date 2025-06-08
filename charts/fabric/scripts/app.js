@@ -31,9 +31,10 @@ const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.en
 // const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
-const patternsUrl = `${apiDomain}/patterns/names`;
+const patternsUrl = `${apiDomain}/patterns`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
+const obsidianFileUrl = `${apiDomain}/obsidian/file`;
 const storeUrl = `${apiDomain}/store`;
 
 const form = document.getElementById('chat-form');
@@ -169,7 +170,51 @@ function createEnhancedSelect(id, placeholder) {
         dropdownItem.href = '#';
         dropdownItem.textContent = item;
         dropdownItem.dataset.value = item;
+
+        // Add show button for obsidian files
+        if (id === 'obsidian-select' && item !== '(no file)') {
+          const showBtn = document.createElement('button');
+          showBtn.className = 'show-file-button';
+          showBtn.textContent = 'Show';
+          showBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
+              if (!res.ok) throw new Error(`Status ${res.status}`);
+              const content = await res.text();
+              addMessage(`FILENAME: ${item}\n\n${content}`, 'bot');
+            } catch (err) {
+              console.error(err);
+              addMessage(`Error loading file: ${err.message}`, 'bot');
+            }
+          });
+          dropdownItem.appendChild(showBtn);
+        }
+
+        // Add show button for patterns
+        if (id === 'pattern-input') {
+          const showPatternBtn = document.createElement('button');
+          showPatternBtn.className = 'show-pattern-button';
+          showPatternBtn.textContent = 'Show';
+          showPatternBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              const res = await fetch(`${patternsUrl}/${encodeURIComponent(item)}`);
+              if (!res.ok) throw new Error(`Status ${res.status}`);
+              const content = await res.text();
+              addMessage(`FILENAME: ${item}\n\n${content}`, 'bot');
+            } catch (err) {
+              console.error(err);
+              addMessage(`Error loading pattern: ${err.message}`, 'bot');
+            }
+          });
+          dropdownItem.appendChild(showPatternBtn);
+        }
+
         dropdownItem.addEventListener('click', (e) => {
+          if (e.target.tagName === 'BUTTON') return; // Don't select if show button was clicked
           e.preventDefault();
           searchInput.value = item;
           searchInput.dataset.value = item;
@@ -199,7 +244,7 @@ const obsidianSelect = createEnhancedSelect('obsidian-select', 'Search files');
 
 async function loadPatterns() {
   try {
-    const res = await fetch(patternsUrl);
+    const res = await fetch(`${patternsUrl}/names`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
     // reinstate previously selected pattern if still available
@@ -396,7 +441,7 @@ form.addEventListener('submit', async e => {
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(e)
     });
     hideLoading();
     const m = document.createElement('div');
@@ -534,6 +579,17 @@ document.addEventListener('DOMContentLoaded', () => {
       padding: 2px 4px;
       margin-left: 4px;
     }
+    .show-file-button {
+      float: right;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+    }
+    .show-pattern-button {
+      float: right;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+      margin-left: 4px;
+    }
     .enhanced-select {
       position: relative;
       width: 100%;
@@ -557,14 +613,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .dropdown-item.active {
       background-color: #007bff;
       color: #fff;
-    }
-    #chat-form button {
-      min-width: 100px;
-      padding: 0.375rem 0.75rem;
-      font-size: 1rem;
-      height: 2.5rem;
-      margin-right: 0.5rem;
-      margin-bottom: 2px;
     }
     #chat-button {
       background-color: #5fa96b;
