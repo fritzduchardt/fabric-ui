@@ -10,6 +10,8 @@ function markdownToPlainText(md) {
   let text = md;
   // Remove lines starting with FILENAME:
   text = text.replace(/^FILENAME:.*$/gm, '');
+  // Convert markdown checkboxes to simple bullet points
+  text = text.replace(/^[*-]\s*\[[ xX]\]\s*(.*)$/gm, '- $1');
   // Transform wikilinks [[Page|alias]] and [[Page]]
   text = text.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_, p, a) => a || p);
   // Remove markdown links [text](url) -> text
@@ -25,8 +27,8 @@ function markdownToPlainText(md) {
 }
 
 // API domain configuration
-// const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
-const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
+const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
+// const apiDomain = 'https://fabric-friclu.duckdns.org/api'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
 const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns/names`;
