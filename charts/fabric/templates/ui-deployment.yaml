@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-ui
+  namespace: {{ .Release.Name }}
   labels:
     app: {{ .Release.Name }}
     component: ui
@@ -55,3 +56,4 @@ spec:
         configMap:
           name: {{ .Release.Name }}-ui-nginx-config
           defaultMode: 0644
+

@@ -2,6 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: fabric-certificate
+  namespace: {{ .Release.Name }}
 spec:
   dnsNames:
     - fabric-friclu.duckdns.org
@@ -14,3 +15,4 @@ spec:
   subject:
     organizations:
       - friclu
+

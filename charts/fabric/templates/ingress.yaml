@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}
+  namespace: {{ .Release.Name }}
   labels:
     app: {{ .Release.Name }}
   annotations:
@@ -27,3 +28,4 @@ spec:
         - {{ .Values.ingress.host | quote }}
       secretName: {{ .Values.ingress.tls.secretName | quote }}
   {{- end }}
+
