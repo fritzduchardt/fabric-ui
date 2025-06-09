@@ -3,6 +3,7 @@ let currentSession = new Date().toISOString();  // generate timestamp to use as 
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
+let abortController = null;  // controller for cancelling requests
 
 // Convert markdown to plain text for clipboard
 function markdownToPlainText(md) {
@@ -399,8 +400,10 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   const chatBtn = document.getElementById('chat-button');
   const sendBtn = document.querySelector('.btn-send');
+  const cancelBtn = document.getElementById('cancel-button');
   chatBtn.disabled = true;
   sendBtn.disabled = true;
+  cancelBtn.disabled = false;
   let text = input.value.trim();
   if (text == "")  {
     text = "No further instructions"
@@ -422,6 +425,7 @@ form.addEventListener('submit', async e => {
   showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
 
+  abortController = new AbortController();
   try {
     const payload = {
       prompts: [{
@@ -443,7 +447,8 @@ form.addEventListener('submit', async e => {
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: abortController.signal
     });
     hideLoading();
     const m = document.createElement('div');
@@ -538,10 +543,17 @@ form.addEventListener('submit', async e => {
     }
   } catch (err) {
     hideLoading();
-    addMessage(`Error: ${err.message}`, 'bot');
+    if (err.name === 'AbortError') {
+      addMessage('Request cancelled', 'bot');
+    } else {
+      addMessage(`Error: ${err.message}`, 'bot');
+    }
   } finally {
     chatBtn.disabled = false;
     sendBtn.disabled = false;
+    const cancelBtn2 = document.getElementById('cancel-button');
+    if (cancelBtn2) cancelBtn2.disabled = true;
+    abortController = null;
   }
 });
 
@@ -625,6 +637,16 @@ document.addEventListener('DOMContentLoaded', () => {
       background-color: #66cc66;
       border-color: #66cc66;
     }
+    #cancel-button {
+      background-color: #dc3545;
+      border-color: #dc3545;
+      color: #fff;
+      margin-left: 8px;
+    }
+    #cancel-button:hover {
+      background-color: #e55363;
+      border-color: #e55363;
+    }
     .obsidian-link {
       color: #3a86ff;
       text-decoration: none;
@@ -660,6 +682,18 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 
+  // Add Cancel button next to Chat button
+  const chatBtn = document.getElementById('chat-button');
+  const cancelBtn = document.createElement('button');
+  cancelBtn.id = 'cancel-button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.disabled = true;
+  cancelBtn.className = 'btn btn-secondary';
+  chatBtn.parentNode.insertBefore(cancelBtn, chatBtn.nextSibling);
+  cancelBtn.addEventListener('click', () => {
+    if (abortController) abortController.abort();
+  });
+
   showLoading();
   Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading());
   loadModels();
@@ -679,7 +713,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const chatBtn = document.getElementById('chat-button');
   chatBtn.id = 'chat-button';
   chatBtn.textContent = 'Chat';
   chatBtn.addEventListener('click', () => {
