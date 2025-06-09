@@ -183,7 +183,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               if (!res.ok) throw new Error(`Status ${res.status}`);
               const content = await res.text();
-              addMessage(`FILENAME: ${item}\n\n${content}`, 'bot');
+              addMessage(`FILENAME: ${item}\n\n${content}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
               addMessage(`Error loading file: ${err.message}`, 'bot');
@@ -205,7 +205,7 @@ function createEnhancedSelect(id, placeholder) {
               if (!res.ok) throw new Error(`Status ${res.status}`);
               const data = await res.json();
               const md = data.Pattern;  // extract Pattern field from JSON
-              addMessage(`FILENAME: ${item}\n\n${md}`, 'bot');
+              addMessage(`FILENAME: ${item}\n\n${md}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
               addMessage(`Error loading pattern: ${err.message}`, 'bot');
@@ -294,7 +294,8 @@ async function loadObsidianFiles() {
   }
 }
 
-function addMessage(text, sender, isChat = false) {
+// addMessage now accepts hideStore flag to suppress store button on show messages
+function addMessage(text, sender, isChat = false, hideStore = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
   if (sender === 'user') {
@@ -308,8 +309,8 @@ function addMessage(text, sender, isChat = false) {
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
   m.appendChild(b);
-  // if this message contains a filename, add a little store button inside the bubble
-  if (text.match(/^FILENAME:\s*(.+)$/m)) {
+  // if this message contains a filename, add a store button unless hideStore is true
+  if (!hideStore && text.match(/^FILENAME:\s*(.+)$/m)) {
     const btn = document.createElement('button');
     btn.className = 'store-message-button';
     btn.textContent = 'Store';
