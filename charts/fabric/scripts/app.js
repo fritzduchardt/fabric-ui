@@ -179,6 +179,11 @@ function createEnhancedSelect(id, placeholder) {
           showBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            // select this file in dropdown
+            searchInput.value = item;
+            searchInput.dataset.value = item;
+            const changeEvent = new Event('change', { bubbles: true });
+            searchInput.dispatchEvent(changeEvent);
             dropdownMenu.classList.remove('show');
             try {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
@@ -201,6 +206,11 @@ function createEnhancedSelect(id, placeholder) {
           showPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            // select this pattern in dropdown
+            searchInput.value = item;
+            searchInput.dataset.value = item;
+            const changeEvent = new Event('change', { bubbles: true });
+            searchInput.dispatchEvent(changeEvent);
             dropdownMenu.classList.remove('show');
             try {
               const res = await fetch(`${patternsUrl}/${encodeURIComponent(item)}`);
