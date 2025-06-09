@@ -9,6 +9,7 @@ backend:
   fabricConfigHome: "/home/fabric/.config/fabric"
   obsidianPath: "/home/fabric/obsidian/private"
   patternPath: "/home/fabric/obsidian/patterns"
+  personalName: "Fritz"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
