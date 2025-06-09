@@ -635,6 +635,9 @@ document.addEventListener('DOMContentLoaded', () => {
     .enhanced-select .dropdown-menu.show {
       display: block;
     }
+    .enhanced-select .dropdown-item {
+      font-size: 0.875rem;
+    }
     .dropdown-item.active {
       background-color: #007bff;
       color: #fff;
