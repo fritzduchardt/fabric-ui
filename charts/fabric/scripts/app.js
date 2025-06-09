@@ -641,7 +641,6 @@ document.addEventListener('DOMContentLoaded', () => {
       background-color: #dc3545;
       border-color: #dc3545;
       color: #fff;
-      margin-left: 8px;
     }
     #cancel-button:hover {
       background-color: #e55363;
@@ -679,6 +678,12 @@ document.addEventListener('DOMContentLoaded', () => {
       background-color: #0d6efd; /* match send button primary color */
       color: #fff;
     }
+    .button-group .btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+      height: 2rem;
+      min-width: 4rem;
+    }
   `;
   document.head.appendChild(style);
 
@@ -693,6 +698,16 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelBtn.addEventListener('click', () => {
     if (abortController) abortController.abort();
   });
+  // make cancel button the same width as chat and send buttons
+  const sendBtn = document.querySelector('.btn-send');
+  const updateCancelWidth = () => {
+    const targetWidth = Math.max(sendBtn.offsetWidth, chatBtn.offsetWidth);
+    cancelBtn.style.width = `${targetWidth}px`;
+    sendBtn.style.width = `${targetWidth}px`;
+    chatBtn.style.width = `${targetWidth}px`;
+  };
+  updateCancelWidth();
+  window.addEventListener('resize', updateCancelWidth);
 
   showLoading();
   Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading());
