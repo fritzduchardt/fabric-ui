@@ -15,6 +15,7 @@ ui:
   tag: "master"
   port: 80
   targetPort: 80
+  title: "Chat UI"
 ingress:
   className: nginx
   host: fabric-friclu.duckdns.org
@@ -24,3 +25,4 @@ ingress:
     secretName: fabric-certificate
 service:
   type: ClusterIP
+
