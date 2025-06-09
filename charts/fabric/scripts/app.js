@@ -660,9 +660,9 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 
-  generatePatterns();
+  showLoading();
+  Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading());
   loadModels();
-  loadObsidianFiles();
 
   input.addEventListener('focus', () => {
     input.select();
