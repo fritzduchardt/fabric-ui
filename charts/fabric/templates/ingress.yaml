@@ -28,4 +28,3 @@ spec:
         - {{ .Values.ingress.host | quote }}
       secretName: {{ .Values.ingress.tls.secretName | quote }}
   {{- end }}
-

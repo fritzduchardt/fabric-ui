@@ -18,7 +18,7 @@ ui:
   targetPort: 80
   title: "FritzGPT"
   iconPath: "icons/turtle"
-  backendUrl: "https://fabric-friclu.duckdns.org/api"
+  backendUrl: "https://{{ .Values.ingress.host }}/api"
 
 ingress:
   className: nginx
