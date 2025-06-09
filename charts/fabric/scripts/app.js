@@ -179,6 +179,7 @@ function createEnhancedSelect(id, placeholder) {
           showBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            dropdownMenu.classList.remove('show');
             try {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               if (!res.ok) throw new Error(`Status ${res.status}`);
@@ -200,6 +201,7 @@ function createEnhancedSelect(id, placeholder) {
           showPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
+            dropdownMenu.classList.remove('show');
             try {
               const res = await fetch(`${patternsUrl}/${encodeURIComponent(item)}`);
               if (!res.ok) throw new Error(`Status ${res.status}`);
