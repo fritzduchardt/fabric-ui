@@ -9,7 +9,7 @@ metadata:
 data:
   # UI application JavaScript
   app.js: |-
-{{ .Files.Get "scripts/app.js" | indent 4 }}
+{{ .Files.Get "scripts/app.js" | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" .Values.ui.backendUrl) | indent 4 }}
   # UI HTML entrypoint
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}
@@ -38,4 +38,3 @@ data:
   # Service worker
   service-worker.js: |-
 {{ .Files.Get "scripts/service-worker.js" | indent 4 }}
-

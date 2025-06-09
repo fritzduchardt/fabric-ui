@@ -10,6 +10,7 @@ backend:
   obsidianPath: "/home/fabric/obsidian/private"
   patternPath: "/home/fabric/obsidian/patterns"
   personalName: "Fritz"
+
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
@@ -17,6 +18,8 @@ ui:
   targetPort: 80
   title: "FritzGPT"
   iconPath: "icons/turtle"
+  backendUrl: "https://fabric-friclu.duckdns.org/api"
+
 ingress:
   className: nginx
   host: fabric-friclu.duckdns.org
@@ -24,10 +27,11 @@ ingress:
   tls:
     enabled: true
     secretName: fabric-certificate
+
 service:
   type: ClusterIP
+
 basicAuth:
   create: true
   secretName: ""
   authFile: "auth/htpasswd"
-
