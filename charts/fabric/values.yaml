@@ -10,6 +10,7 @@ backend:
   obsidianPath: "/home/fabric/obsidian/private"
   patternPath: "/home/fabric/obsidian/patterns"
   personalName: "Fritz"
+  fabricFiles: /volumes/syncthing/Sync
 
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
