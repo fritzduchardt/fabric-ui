@@ -15,8 +15,10 @@ RUN rm -f /etc/nginx/nginx.conf \
 COPY assets/favicon.ico /usr/share/nginx/html/favicon.ico
 
 # Copy icon-192.png under /icons
-COPY assets/icon-192.png /usr/share/nginx/html/icons/icon-192.png
-COPY assets/icon-512.png /usr/share/nginx/html/icons/icon-512.png
+COPY assets/turtle/icon-192.png /usr/share/nginx/html/icons/turtle/icon-192.png
+COPY assets/turtle/icon-512.png /usr/share/nginx/html/icons/turtle/icon-512.png
+COPY assets/cat/icon-192.png /usr/share/nginx/html/icons/cat/icon-192.png
+COPY assets/cat/icon-512.png /usr/share/nginx/html/icons/cat/icon-512.png
 
 # Expose port 80 for HTTP traffic
 EXPOSE 80

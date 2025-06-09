@@ -16,6 +16,7 @@ ui:
   port: 80
   targetPort: 80
   title: "FritzGPT"
+  iconPath: "icons/turtle"
 ingress:
   className: nginx
   host: fabric-friclu.duckdns.org
