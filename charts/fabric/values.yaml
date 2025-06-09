@@ -26,3 +26,8 @@ ingress:
     secretName: fabric-certificate
 service:
   type: ClusterIP
+basicAuth:
+  create: true
+  secretName: ""
+  authFile: "auth/htpasswd"
+

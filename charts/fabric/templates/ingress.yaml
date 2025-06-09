@@ -6,7 +6,7 @@ metadata:
     app: {{ .Release.Name }}
   annotations:
     nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: {{ .Release.Name }}-basic-auth
+    nginx.ingress.kubernetes.io/auth-secret: {{ default (printf "%s-basic-auth" .Release.Name) .Values.basicAuth.secretName }}
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
 spec:
   ingressClassName: {{ .Values.ingress.className | quote }}
