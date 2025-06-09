@@ -203,8 +203,9 @@ function createEnhancedSelect(id, placeholder) {
             try {
               const res = await fetch(`${patternsUrl}/${encodeURIComponent(item)}`);
               if (!res.ok) throw new Error(`Status ${res.status}`);
-              const content = await res.text();
-              addMessage(`FILENAME: ${item}\n\n${content}`, 'bot');
+              const data = await res.json();
+              const md = data.Pattern;  // extract Pattern field from JSON
+              addMessage(`FILENAME: ${item}\n\n${md}`, 'bot');
             } catch (err) {
               console.error(err);
               addMessage(`Error loading pattern: ${err.message}`, 'bot');
