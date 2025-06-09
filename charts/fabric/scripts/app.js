@@ -397,9 +397,9 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   const chatBtn = document.getElementById('chat-button');
   const sendBtn = document.querySelector('.btn-send');
-  chatBtn.disabled = true; // disable chat button while request is running
-  sendBtn.disabled = true; // disable send button while request is running
-  let text = input.value.trim();  // allow empty input
+  chatBtn.disabled = true;
+  sendBtn.disabled = true;
+  let text = input.value.trim();
   if (text == "")  {
     text = "No further instructions"
   }
@@ -441,7 +441,7 @@ form.addEventListener('submit', async e => {
     const res = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
-      body: JSON.stringify(e)
+      body: JSON.stringify(payload)
     });
     hideLoading();
     const m = document.createElement('div');
@@ -449,7 +449,7 @@ form.addEventListener('submit', async e => {
     m.style.position = 'relative';
     const b = document.createElement('div');
     b.classList.add('bubble');
-    b.style.maxWidth = '100%'; // Use entire width of screen for response messages
+    b.style.maxWidth = '100%';
     b.dataset.markdown = '';
     m.appendChild(b);
     messagesEl.appendChild(m);
@@ -538,7 +538,6 @@ form.addEventListener('submit', async e => {
     hideLoading();
     addMessage(`Error: ${err.message}`, 'bot');
   } finally {
-    // re-enable chat and send buttons after request completes or errors
     chatBtn.disabled = false;
     sendBtn.disabled = false;
   }
@@ -583,6 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
       float: right;
       font-size: 0.75rem;
       padding: 2px 4px;
+      margin-left: 4px;
     }
     .show-pattern-button {
       float: right;
