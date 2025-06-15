@@ -26,6 +26,7 @@ ui:
     - "grok-3-mini"
     - "mistral-large-latest"
     - "deepseek-reasoner"
+    - "gemini-2.0-pro-exp"
   defaultModel: "o4-mini"
   defaultPattern: "general"
 
