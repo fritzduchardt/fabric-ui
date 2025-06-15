@@ -540,17 +540,26 @@ form.addEventListener('submit', async e => {
         }
       }
     }
-    // add copy button after streaming complete if not an error
-    if (!b.classList.contains('error')) {
-      const copyBtnStream = document.createElement('button');
-      copyBtnStream.className = 'copy-button';
-      copyBtnStream.textContent = 'Copy';
-      copyBtnStream.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
-      });
-      b.appendChild(copyBtnStream);
+    // if streaming yielded no content, show error and re-enter previous prompt
+    if (b.dataset.markdown.trim() === '') {
+      b.classList.add('error');
+      b.dataset.markdown = 'Call to backend failed, please change model';
+      b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
+      input.value = lastPrompt;
+      input.focus();
+    } else {
+      // add copy button after streaming complete if not an error
+      if (!b.classList.contains('error')) {
+        const copyBtnStream = document.createElement('button');
+        copyBtnStream.className = 'copy-button';
+        copyBtnStream.textContent = 'Copy';
+        copyBtnStream.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+        });
+        b.appendChild(copyBtnStream);
+      }
     }
   } catch (err) {
     hideLoading();
