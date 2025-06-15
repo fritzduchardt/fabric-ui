@@ -23,6 +23,8 @@ ui:
   models:
     - "o4-mini"
     - "claude-3-7-sonnet-latest"
+    - "grok-3-mini"
+    - "mistral-large-latest"
     - "deepseek-reasoner"
   defaultModel: "o4-mini"
   defaultPattern: "general"
@@ -42,4 +44,3 @@ basicAuth:
   create: true
   secretName: ""
   authFile: "auth/htpasswd"
-
