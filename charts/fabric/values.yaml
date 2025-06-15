@@ -20,6 +20,12 @@ ui:
   title: "FritzGPT"
   iconPath: "icons/turtle"
   backendUrl: "https://{{ .Values.ingress.host }}/api"
+  models:
+    - "o4-mini"
+    - "claude-3-7-sonnet-latest"
+    - "deepseek-reasoner"
+  defaultModel: "o4-mini"
+  defaultPattern: "general"
 
 ingress:
   className: nginx
@@ -36,3 +42,4 @@ basicAuth:
   create: true
   secretName: ""
   authFile: "auth/htpasswd"
+

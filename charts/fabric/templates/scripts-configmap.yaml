@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,7 +10,13 @@ metadata:
 data:
   # UI application JavaScript
   app.js: |-
-{{ .Files.Get "scripts/app.js" | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" ( tpl .Values.ui.backendUrl . )  ) | indent 4 }}
+{{ .Files.Get "scripts/app.js"
+  | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" ( tpl .Values.ui.backendUrl . ))
+  | replace "const defaults = ['o4-mini', 'claude-3-7-sonnet-latest', 'deepseek-reasoner'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
+  | replace "modelSelect.setItems(defaults, 'o4-mini');" (printf "modelSelect.setItems(defaults, '%s');" .Values.ui.defaultModel)
+  | replace "const defaultPattern = 'general';" (printf "const defaultPattern = '%s';" .Values.ui.defaultPattern)
+  | replace "patternSelect.setItems(patterns, defaultPattern);" "patternSelect.setItems(patterns, defaultPattern);"
+  | indent 4 }}
   # UI HTML entrypoint
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}

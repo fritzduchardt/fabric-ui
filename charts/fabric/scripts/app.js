@@ -260,13 +260,7 @@ async function loadPatterns() {
     const res = await fetch(`${patternsUrl}/names`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
-    // reinstate previously selected pattern if still available
-    const prev = patternSelect.getValue();
-    const defaultPattern = prev && patterns.includes(prev)
-      ? prev
-      : patterns.includes('obsidian_author')
-        ? 'obsidian_author'
-        : 'general';
+    const defaultPattern = 'general';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
