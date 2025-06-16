@@ -257,10 +257,13 @@ const obsidianSelect = createEnhancedSelect('obsidian-select', 'Search files');
 
 async function loadPatterns() {
   try {
+    // Save previously selected pattern
+    const prevPattern = patternSelect.getValue();
     const res = await fetch(`${patternsUrl}/names`);
     if (!res.ok) throw new Error(`Status ${res.status}`);
     const patterns = await res.json();
-    const defaultPattern = 'general';
+    // Determine default: restore previous if still available, else 'general'
+    const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
