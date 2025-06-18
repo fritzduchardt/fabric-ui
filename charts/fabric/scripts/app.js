@@ -317,6 +317,11 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
   }
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
+  // ensure any links open in new tab
+  b.querySelectorAll('a').forEach(a => {
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+  });
   m.appendChild(b);
   // if this message contains a filename, add a store button unless hideStore is true
   if (!hideStore && text.match(/^FILENAME:\s*(.+)$/m)) {
@@ -489,6 +494,11 @@ form.addEventListener('submit', async e => {
             const c = obj.content || '';
             b.dataset.markdown += c;
             b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
+            // ensure links in streamed content open in new tab
+            b.querySelectorAll('a').forEach(a => {
+              a.setAttribute('target', '_blank');
+              a.setAttribute('rel', 'noopener noreferrer');
+            });
             messagesEl.scrollTop = messagesEl.scrollHeight;
             const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
             if (filenameMatch) {
@@ -542,6 +552,10 @@ form.addEventListener('submit', async e => {
       b.classList.add('error');
       b.dataset.markdown = 'Call to backend failed, please change model';
       b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
+      b.querySelectorAll('a').forEach(a => {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      });
       input.value = lastPrompt;
       input.focus();
     } else {
