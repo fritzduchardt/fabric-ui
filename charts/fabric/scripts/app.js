@@ -317,10 +317,28 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
   }
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
-  // ensure any links open in new tab
+  // ensure any links open in new tab and add Summarize button next to each
   b.querySelectorAll('a').forEach(a => {
     a.setAttribute('target', '_blank');
     a.setAttribute('rel', 'noopener noreferrer');
+    // Summarize button
+    const summarizeBtn = document.createElement('button');
+    summarizeBtn.className = 'summarize-button';
+    summarizeBtn.textContent = 'Summarize';
+    summarizeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // select summarize pattern
+      patternSelect.searchInput.value = 'summarize';
+      patternSelect.searchInput.dataset.value = 'summarize';
+      patternSelect.searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+      // copy link to input
+      input.value = a.href;
+      input.focus();
+      const pos = input.value.length;
+      input.setSelectionRange(pos, pos);
+    });
+    a.insertAdjacentElement('afterend', summarizeBtn);
   });
   m.appendChild(b);
   // if this message contains a filename, add a store button unless hideStore is true
@@ -619,6 +637,11 @@ document.addEventListener('DOMContentLoaded', () => {
     .copy-button {
       bottom: 4px;
       right: 8px;
+      font-size: 0.75rem;
+      padding: 2px 4px;
+      margin-left: 4px;
+    }
+    .summarize-button {
       font-size: 0.75rem;
       padding: 2px 4px;
       margin-left: 4px;
