@@ -317,6 +317,19 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
   }
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
+  // if sender is user, convert links to icons that open in new tab
+  if (sender === 'user') {
+    b.querySelectorAll('a').forEach(a => {
+      const href = a.href;
+      const icon = document.createElement('a');
+      icon.href = href;
+      icon.target = '_blank';
+      icon.rel = 'noopener noreferrer';
+      icon.textContent = '🔗';
+      icon.style.marginLeft = '4px';
+      a.replaceWith(icon);
+    });
+  }
   m.appendChild(b);
   // if this message contains a filename, add a store button unless hideStore is true
   if (!hideStore && text.match(/^FILENAME:\s*(.+)$/m)) {
