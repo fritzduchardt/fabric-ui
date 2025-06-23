@@ -37,6 +37,15 @@ const obsidianUrl = `${apiDomain}/obsidian/files`;
 const obsidianFileUrl = `${apiDomain}/obsidian/file`;
 const storeUrl = `${apiDomain}/store`;
 
+// Helper to throw error with status and body message
+async function checkResponse(res) {
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`${res.status} ${res.statusText}: ${errText}`);
+  }
+  return res;
+}
+
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const messagesEl = document.getElementById('messages');
@@ -179,7 +188,6 @@ function createEnhancedSelect(id, placeholder) {
           showBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            // select this file in dropdown
             searchInput.value = item;
             searchInput.dataset.value = item;
             const changeEvent = new Event('change', { bubbles: true });
@@ -187,12 +195,12 @@ function createEnhancedSelect(id, placeholder) {
             dropdownMenu.classList.remove('show');
             try {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
-              if (!res.ok) throw new Error(`Status ${res.status}`);
+              await checkResponse(res);
               const content = await res.text();
               addMessage(`FILENAME: ${item}\n\n${content}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
-              addMessage(`Error loading file: ${err.message}`, 'bot');
+              addMessage(`Error loading file (${err.message})`, 'bot');
             }
           });
           dropdownItem.appendChild(showBtn);
@@ -206,7 +214,6 @@ function createEnhancedSelect(id, placeholder) {
           showPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            // select this pattern in dropdown
             searchInput.value = item;
             searchInput.dataset.value = item;
             const changeEvent = new Event('change', { bubbles: true });
@@ -214,20 +221,20 @@ function createEnhancedSelect(id, placeholder) {
             dropdownMenu.classList.remove('show');
             try {
               const res = await fetch(`${patternsUrl}/${encodeURIComponent(item)}`);
-              if (!res.ok) throw new Error(`Status ${res.status}`);
+              await checkResponse(res);
               const data = await res.json();
-              const md = data.Pattern;  // extract Pattern field from JSON
+              const md = data.Pattern;
               addMessage(`FILENAME: ${item}\n\n${md}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
-              addMessage(`Error loading pattern: ${err.message}`, 'bot');
+              addMessage(`Error loading pattern (${err.message})`, 'bot');
             }
           });
           dropdownItem.appendChild(showPatternBtn);
         }
 
         dropdownItem.addEventListener('click', (e) => {
-          if (e.target.tagName === 'BUTTON') return; // Don't select if show button was clicked
+          if (e.target.tagName === 'BUTTON') return;
           e.preventDefault();
           searchInput.value = item;
           searchInput.dataset.value = item;
@@ -257,28 +264,26 @@ const obsidianSelect = createEnhancedSelect('obsidian-select', 'Search files');
 
 async function loadPatterns() {
   try {
-    // Save previously selected pattern
     const prevPattern = patternSelect.getValue();
     const res = await fetch(`${patternsUrl}/names`);
-    if (!res.ok) throw new Error(`Status ${res.status}`);
+    await checkResponse(res);
     const patterns = await res.json();
-    // Determine default: restore previous if still available, else 'general'
     const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
-    addMessage(`Error loading patterns: ${e.message}`, 'bot');
+    addMessage(`Error loading patterns (${e.message})`, 'bot');
   }
 }
 
 async function generatePatterns() {
   try {
     const res = await fetch(patternsGenerateUrl, { method: 'POST' });
-    if (!res.ok) throw new Error(`Status ${res.status}`);
+    await checkResponse(res);
     await loadPatterns();
   } catch (e) {
     console.error(e);
-    addMessage(`Error generating patterns: ${e.message}`, 'bot');
+    addMessage(`Error generating patterns (${e.message})`, 'bot');
   }
 }
 
@@ -290,16 +295,15 @@ async function loadModels() {
 async function loadObsidianFiles() {
   try {
     const res = await fetch(obsidianUrl);
-    if (!res.ok) throw new Error(`Status ${res.status}`);
+    await checkResponse(res);
     const files = await res.json();
     const allOptions = ['(no file)', ...files];
-    // reinstate previously selected file if still available
     const prevFile = obsidianSelect.getValue();
     const defaultFile = prevFile && allOptions.includes(prevFile) ? prevFile : '(no file)';
     obsidianSelect.setItems(allOptions, defaultFile);
   } catch (e) {
     console.error(e);
-    addMessage(`Error loading files: ${e.message}`, 'bot');
+    addMessage(`Error loading files (${e.message})`, 'bot');
   }
 }
 
@@ -317,7 +321,6 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
   }
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
-  // if sender is user, convert links to icons that open in new tab
   if (sender === 'user') {
     b.querySelectorAll('a').forEach(a => {
       const href = a.href;
@@ -331,7 +334,6 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     });
   }
   m.appendChild(b);
-  // if this message contains a filename, add a store button unless hideStore is true
   if (!hideStore && text.match(/^FILENAME:\s*(.+)$/m)) {
     const btn = document.createElement('button');
     btn.className = 'store-message-button';
@@ -351,7 +353,7 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionName: currentSession, prompt: b.dataset.markdown })
         });
-        if (!res.ok) throw new Error(`Status ${res.status}`);
+        await checkResponse(res);
         const data = await res.json();
         const fns = data.filenames || [];
         if (fns.length) {
@@ -364,7 +366,7 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
         await loadObsidianFiles();
       } catch (err) {
         console.error(err);
-        addMessage(`Error storing message: ${err.message}`, 'bot');
+        addMessage(`Error storing message (${err.message})`, 'bot');
         btn.disabled = false;
       } finally {
         spinner.remove();
@@ -372,7 +374,6 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     });
     b.appendChild(btn);
   }
-  // add prompt again button for user messages
   if (sender === 'user') {
     const promptBtn = document.createElement('button');
     promptBtn.className = 'prompt-again-button';
@@ -387,7 +388,6 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     });
     b.appendChild(promptBtn);
   }
-  // add copy button only for bot messages that are not errors
   if (sender === 'bot' && !text.startsWith('Error')) {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
@@ -471,6 +471,13 @@ form.addEventListener('submit', async e => {
       body: JSON.stringify(payload),
       signal: abortController.signal
     });
+    try {
+      await checkResponse(res);
+    } catch (err) {
+      hideLoading();
+      addMessage(`Error ${err.message}`, 'bot');
+      return;
+    }
     hideLoading();
     const m = document.createElement('div');
     m.classList.add('message', 'bot');
@@ -502,27 +509,22 @@ form.addEventListener('submit', async e => {
             const c = obj.content || '';
             b.dataset.markdown += c;
             b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
-            // ensure links in streamed content open in new tab
             b.querySelectorAll('a').forEach(a => {
               a.setAttribute('target', '_blank');
               a.setAttribute('rel', 'noopener noreferrer');
-              // Summarize button
               const summarizeBtn = document.createElement('button');
               summarizeBtn.className = 'summarize-button';
               summarizeBtn.textContent = 'Summarize';
               summarizeBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // select summarize pattern
                 patternSelect.searchInput.value = 'summarize';
                 patternSelect.searchInput.dataset.value = 'summarize';
                 patternSelect.searchInput.dispatchEvent(new Event('change', { bubbles: true }));
-                // copy link to input
                 input.value = a.href;
                 input.focus();
                 const pos = input.value.length;
                 input.setSelectionRange(pos, pos);
-                // auto submit form
                 if (form.requestSubmit) {
                   form.requestSubmit();
                 } else {
@@ -553,7 +555,7 @@ form.addEventListener('submit', async e => {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ sessionName: currentSession, prompt: b.dataset.markdown })
                     });
-                    if (!resp.ok) throw new Error(`Status ${resp.status}`);
+                    await checkResponse(resp);
                     const data = await resp.json();
                     const fns = data.filenames || [];
                     if (fns.length) {
@@ -566,7 +568,7 @@ form.addEventListener('submit', async e => {
                     await loadObsidianFiles();
                   } catch (err) {
                     console.error(err);
-                    addMessage(`Error storing message: ${err.message}`, 'bot');
+                    addMessage(`Error storing message (${err.message})`, 'bot');
                     storeMsgBtn.disabled = false;
                   } finally {
                     sp.remove();
@@ -579,19 +581,7 @@ form.addEventListener('submit', async e => {
         }
       }
     }
-    // if streaming yielded no content, show error and re-enter previous prompt
-    if (b.dataset.markdown.trim() === '') {
-      b.classList.add('error');
-      b.dataset.markdown = 'Call to backend failed, please change model';
-      b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
-      b.querySelectorAll('a').forEach(a => {
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer');
-      });
-      input.value = lastPrompt;
-      input.focus();
-    } else {
-      // add copy button after streaming complete if not an error
+    if (b.dataset.markdown.trim() !== '') {
       if (!b.classList.contains('error')) {
         const copyBtnStream = document.createElement('button');
         copyBtnStream.className = 'copy-button';
@@ -609,7 +599,7 @@ form.addEventListener('submit', async e => {
     if (err.name === 'AbortError') {
       addMessage('Request cancelled', 'bot');
     } else {
-      addMessage(`Error: ${err.message}`, 'bot');
+      addMessage(`Error (${err.message})`, 'bot');
     }
   } finally {
     chatBtn.disabled = false;
