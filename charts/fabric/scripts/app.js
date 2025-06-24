@@ -375,18 +375,21 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     b.appendChild(btn);
   }
   if (sender === 'user') {
-    const promptBtn = document.createElement('button');
-    promptBtn.className = 'prompt-again-button';
-    promptBtn.textContent = 'Prompt';
-    promptBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      input.value = b.dataset.markdown;
-      input.focus();
-      const pos = input.value.length;
-      input.setSelectionRange(pos, pos);
-    });
-    b.appendChild(promptBtn);
+    const mdTrim = b.dataset.markdown.trim();
+    if (mdTrim && mdTrim.toLowerCase() !== 'no further instructions') {
+      const promptBtn = document.createElement('button');
+      promptBtn.className = 'prompt-again-button';
+      promptBtn.textContent = 'Prompt';
+      promptBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        input.value = b.dataset.markdown;
+        input.focus();
+        const pos = input.value.length;
+        input.setSelectionRange(pos, pos);
+      });
+      b.appendChild(promptBtn);
+    }
   }
   if (sender === 'bot' && !text.startsWith('Error')) {
     const copyBtn = document.createElement('button');
