@@ -36,6 +36,9 @@ spec:
           mountPath: /usr/share/nginx/html/app.js
           subPath: app.js
         - name: ui-scripts
+          mountPath: /usr/share/nginx/html/lib.js
+          subPath: lib.js
+        - name: ui-scripts
           mountPath: /usr/share/nginx/html/index.html
           subPath: index.html
         - name: ui-scripts
@@ -56,4 +59,3 @@ spec:
         configMap:
           name: {{ .Release.Name }}-ui-nginx-config
           defaultMode: 0644
-
