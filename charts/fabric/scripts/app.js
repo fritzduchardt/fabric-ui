@@ -289,7 +289,7 @@ async function generatePatterns() {
 
 async function loadModels() {
   const defaults = ['o4-mini', 'claude-3-7-sonnet-latest', 'deepseek-reasoner', 'grok-3-mini', 'gemini-2.5-pro-preview-06-05', 'mistral-large-latest'];
-  modelSelect.setItems(defaults, 'o4-mini');
+  modelSelect.setItems(defaults, 'claude-3-7-sonnet-latest');
 }
 
 async function loadObsidianFiles() {
@@ -398,7 +398,14 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     copyBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+      // if message contains link with image inside, copy only link hrefs
+      const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
+      if (imageLinks.length) {
+        const hrefs = imageLinks.map(a => a.href).join('\n');
+        navigator.clipboard.writeText(hrefs).catch(console.error);
+      } else {
+        navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+      }
     });
     b.appendChild(copyBtn);
   }
@@ -594,7 +601,14 @@ form.addEventListener('submit', async e => {
         copyBtnStream.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+          // if message contains link with image inside, copy only link hrefs
+          const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
+          if (imageLinks.length) {
+            const hrefs = imageLinks.map(a => a.href).join('\n');
+            navigator.clipboard.writeText(hrefs).catch(console.error);
+          } else {
+            navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+          }
         });
         b.appendChild(copyBtnStream);
       }
