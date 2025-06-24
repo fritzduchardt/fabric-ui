@@ -510,6 +510,8 @@ form.addEventListener('submit', async e => {
             b.dataset.markdown += c;
             b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
             b.querySelectorAll('a').forEach(a => {
+              // skip summary on image links
+              if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
               a.setAttribute('target', '_blank');
               a.setAttribute('rel', 'noopener noreferrer');
               const summarizeBtn = document.createElement('button');
