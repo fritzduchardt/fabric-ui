@@ -1,11 +1,6 @@
 
-
-
-
-
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
 function transformObsidianMarkdown(md) {
-
     let html = '';
     let sections = [];
     const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
@@ -19,15 +14,16 @@ function transformObsidianMarkdown(md) {
             const htmlContent = window.marked ? marked.parse(section.content) : section.content.replace(/\n/g, '<br>');
             html += `
                 <details class="file-section" ${index === 0 ? 'open' : ''}>
-                    <summary class="filename-info">FILENAME: ${section.filename}</summary>
+                    <summary class="filename-info" onclick="document.querySelectorAll('.file-section').forEach(s=>{ if(s!==this.parentNode){ s.open = false; } });">
+                        FILENAME: ${section.filename}
+                    </summary>
                     <div class="file-content">
                         ${htmlContent}
                     </div>
                 </details>
             `;
         });
-    }
-    else {
+    } else {
         html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
     }
 
@@ -40,7 +36,6 @@ function transformObsidianMarkdown(md) {
 
     return html;
 }
-
 
 // Convert markdown to plain text for clipboard
 function markdownToPlainText(md) {
