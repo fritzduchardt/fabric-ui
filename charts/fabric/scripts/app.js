@@ -5,28 +5,6 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 let abortController = null;  // controller for cancelling requests
 
-// Convert markdown to plain text for clipboard
-function markdownToPlainText(md) {
-  // Restore line breaks and remove markdown constructs
-  let text = md;
-  // Remove lines starting with FILENAME:
-  text = text.replace(/^FILENAME:.*$/gm, '');
-  // Convert markdown checkboxes to simple bullet points
-  text = text.replace(/^[*-]\s*\[[ xX]\]\s*(.*)$/gm, '- $1');
-  // Transform wikilinks [[Page|alias]] and [[Page]]
-  text = text.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_, p, a) => a || p);
-  // Remove markdown links [text](url) -> text
-  text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
-  // Remove bold and italic markers **, __, *, _
-  text = text.replace(/(\*\*|__)(.*?)\1/g, '$2');
-  text = text.replace(/(\*|_)(.*?)\1/g, '$2');
-  // Remove any remaining markdown link brackets
-  text = text.replace(/\[\[|\]\]/g, '');
-  // Remove any empty lines at the start of the text
-  text = text.replace(/^(?:\s*\r?\n)+/, '');
-  return text;
-}
-
 // API domain configuration
 const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
@@ -54,20 +32,7 @@ const messagesEl = document.getElementById('messages');
 input.setAttribute('rows', '2');
 input.style.resize = 'none';
 
-// Transform Obsidian Markdown to HTML snippet, keeping filenames inline
-function transformObsidianMarkdown(md) {
-  // Convert markdown to HTML snippet
-  let html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
-  // Replace inline FILENAME lines with styled divs
-  html = html.replace(/<p>FILENAME:\s*(.+?)<\/p>/g, '<div class="filename-info">FILENAME: $1</div>');
-  // Transform wikilinks [[Page|alias]] and [[Page]]
-  html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
-    const text = a || p;
-    // display as italic bold plain text
-    return `<i><b>${text}</b></i>`;
-  });
-  return html;
-}
+
 
 // Create enhanced select elements to replace standard pulldowns
 function createEnhancedSelect(id, placeholder) {
@@ -640,132 +605,6 @@ document.addEventListener('DOMContentLoaded', () => {
   patternInputOriginal.parentNode.replaceChild(patternSelect.container, patternInputOriginal);
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
-
-  const style = document.createElement('style');
-  style.textContent = `
-    .message { position: relative; }
-    .bubble { position: relative; }
-    .store-message-button {
-      bottom: 4px;
-      left: 8px;
-      font-size: 0.75rem;
-      padding: 2px 4px;
-    }
-    .prompt-again-button {
-      bottom: 4px;
-      right: 8px;
-      font-size: 0.75rem;
-      padding: 2px 4px;
-    }
-    .copy-button {
-      bottom: 4px;
-      right: 8px;
-      font-size: 0.75rem;
-      padding: 2px 4px;
-      margin-left: 4px;
-    }
-    .summarize-button {
-      font-size: 0.75rem;
-      padding: 2px 4px;
-      margin-left: 4px;
-    }
-    .show-file-button {
-      float: right;
-      font-size: 0.75rem;
-      padding: 2px 4px;
-      margin-left: 4px;
-    }
-    .show-pattern-button {
-      float: right;
-      font-size: 0.75rem;
-      padding: 2px 4px;
-      margin-left: 4px;
-    }
-    .enhanced-select {
-      position: relative;
-      width: 100%;
-    }
-    .enhanced-select .form-control {
-      width: 100%;
-    }
-    .enhanced-select .dropdown-menu {
-      position: absolute;
-      bottom: 100%;
-      top: auto;
-      width: 100% !important;
-      left: 0;
-      right: 0;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-    .enhanced-select .dropdown-menu.show {
-      display: block;
-    }
-    .enhanced-select .dropdown-item {
-      font-size: 0.875rem;
-    }
-    .dropdown-item.active {
-      background-color: #007bff;
-      color: #fff;
-    }
-    #chat-button {
-      background-color: #5fa96b;
-      border-color: #5fa96b;
-      color: #fff;
-    }
-    #chat-button:hover {
-      background-color: #66cc66;
-      border-color: #66cc66;
-    }
-    #cancel-button {
-      background-color: #dc3545;
-      border-color: #dc3545;
-      color: #fff;
-    }
-    #cancel-button:hover {
-      background-color: #e55363;
-      border-color: #e55363;
-    }
-    .obsidian-link {
-      color: #3a86ff;
-      text-decoration: none;
-    }
-    .obsidian-link:hover {
-      text-decoration: underline;
-    }
-    .message.bot .bubble {
-      max-width: 100% !important; /* Override the default max-width */
-    }
-    .filename-info {
-      font-size: 9pt;
-      background-color: #f0f0f0;
-      border-radius: 4px;
-      padding: 2px 4px;
-      color: #666;
-      word-wrap: break-word;
-      margin-bottom: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .bubble.error {
-      background-color: #f8d7da !important;
-      color: #721c24 !important;
-    }
-    .message.user.chat .bubble {
-      background-color: #5fa96b;
-      color: #fff;
-    }
-    .message.user.send .bubble {
-      background-color: #0d6efd; /* match send button primary color */
-      color: #fff;
-    }
-    .button-group .btn {
-      padding: 0.375rem 0.75rem;
-      font-size: 0.875rem;
-      height: 2rem;
-      min-width: 4rem;
-    }
-  `;
-  document.head.appendChild(style);
 
   // Add Cancel button next to Chat button
   const chatBtn = document.getElementById('chat-button');
