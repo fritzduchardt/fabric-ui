@@ -288,7 +288,7 @@ async function generatePatterns() {
 }
 
 async function loadModels() {
-  const defaults = ['o4-mini', 'claude-3-7-sonnet-latest', 'deepseek-reasoner'];
+  const defaults = ['o4-mini', 'claude-3-7-sonnet-latest', 'deepseek-reasoner', 'grok-3-mini', 'gemini-2.5-pro-preview-06-05', 'mistral-large-latest'];
   modelSelect.setItems(defaults, 'o4-mini');
 }
 
