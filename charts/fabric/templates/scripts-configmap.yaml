@@ -18,6 +18,8 @@ data:
   | replace "patternSelect.setItems(patterns, defaultPattern);" "patternSelect.setItems(patterns, defaultPattern);"
   | indent 4 }}
   # UI HTML entrypoint
+  lib.js: |-
+{{ .Files.Get "scripts/lib.js" | indent 4 }}
   index.html: |-
 {{ .Files.Get "scripts/index.html" | indent 4 }}
   # PWA manifest with configurable icon path
