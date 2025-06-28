@@ -32,8 +32,6 @@ const messagesEl = document.getElementById('messages');
 input.setAttribute('rows', '2');
 input.style.resize = 'none';
 
-
-
 // Create enhanced select elements to replace standard pulldowns
 function createEnhancedSelect(id, placeholder) {
   const container = document.createElement('div');
@@ -46,12 +44,10 @@ function createEnhancedSelect(id, placeholder) {
   searchInput.className = 'form-control';
   searchInput.placeholder = placeholder;
   searchInput.style.width = '100%';
-  // Prevent free text for model dropdown
   if (id === 'model-select') {
     searchInput.readOnly = true;
     searchInput.style.cursor = 'pointer';
   } else {
-    // Only select text on focus for non-model dropdowns
     searchInput.addEventListener('focus', () => {
       searchInput.select();
     });
@@ -71,7 +67,6 @@ function createEnhancedSelect(id, placeholder) {
     dropdownMenu.classList.add('show');
   });
   if (id === 'model-select') {
-    // also open on click for model-select
     searchInput.addEventListener('click', () => {
       dropdownMenu.classList.add('show');
     });
@@ -145,7 +140,6 @@ function createEnhancedSelect(id, placeholder) {
         dropdownItem.textContent = item;
         dropdownItem.dataset.value = item;
 
-        // Add show button for obsidian files
         if (id === 'obsidian-select' && item !== '(no file)') {
           const showBtn = document.createElement('button');
           showBtn.className = 'show-file-button';
@@ -171,7 +165,6 @@ function createEnhancedSelect(id, placeholder) {
           dropdownItem.appendChild(showBtn);
         }
 
-        // Add show button for patterns
         if (id === 'pattern-input') {
           const showPatternBtn = document.createElement('button');
           showPatternBtn.className = 'show-pattern-button';
@@ -363,7 +356,6 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     copyBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      // if message contains link with image inside, copy actual image(s)
       const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
       if (imageLinks.length) {
         try {
@@ -495,7 +487,6 @@ form.addEventListener('submit', async e => {
             b.dataset.markdown += c;
             b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
             b.querySelectorAll('a').forEach(a => {
-              // skip summary on image links
               if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
               a.setAttribute('target', '_blank');
               a.setAttribute('rel', 'noopener noreferrer');
@@ -568,35 +559,37 @@ form.addEventListener('submit', async e => {
         }
       }
     }
-    if (b.dataset.markdown.trim() !== '') {
-      if (!b.classList.contains('error')) {
-        const copyBtnStream = document.createElement('button');
-        copyBtnStream.className = 'copy-button';
-        copyBtnStream.textContent = 'Copy';
-        copyBtnStream.addEventListener('click', async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          // if message contains link with image inside, copy actual image(s)
-          const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
-          if (imageLinks.length) {
-            try {
-              const items = await Promise.all(imageLinks.map(async a => {
-                const img = a.querySelector('img');
-                const src = img.src;
-                const res = await fetch(src);
-                const blob = await res.blob();
-                return new ClipboardItem({ [blob.type]: blob });
-              }));
-              await navigator.clipboard.write(items);
-            } catch (err) {
-              console.error(err);
-            }
-          } else {
-            navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+    // after stream ends, if no content received
+    if (b.dataset.markdown.trim() === '') {
+      b.classList.add('error');
+      b.dataset.markdown = 'No response from server. Check configuration and try again.';
+      b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
+    } else if (!b.classList.contains('error')) {
+      const copyBtnStream = document.createElement('button');
+      copyBtnStream.className = 'copy-button';
+      copyBtnStream.textContent = 'Copy';
+      copyBtnStream.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
+        if (imageLinks.length) {
+          try {
+            const items = await Promise.all(imageLinks.map(async a => {
+              const img = a.querySelector('img');
+              const src = img.src;
+              const res = await fetch(src);
+              const blob = await res.blob();
+              return new ClipboardItem({ [blob.type]: blob });
+            }));
+            await navigator.clipboard.write(items);
+          } catch (err) {
+            console.error(err);
           }
-        });
-        b.appendChild(copyBtnStream);
-      }
+        } else {
+          navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
+        }
+      });
+      b.appendChild(copyBtnStream);
     }
   } catch (err) {
     hideLoading();
@@ -626,7 +619,6 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelectOriginal.parentNode.replaceChild(modelSelect.container, modelSelectOriginal);
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
-  // Add Cancel button next to Chat button
   const chatBtn = document.getElementById('chat-button');
   const cancelBtn = document.createElement('button');
   cancelBtn.id = 'cancel-button';
@@ -637,7 +629,6 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelBtn.addEventListener('click', () => {
     if (abortController) abortController.abort();
   });
-  // make cancel button the same width as chat and send buttons
   const sendBtn = document.querySelector('.btn-send');
   const updateCancelWidth = () => {
     const targetWidth = Math.max(sendBtn.offsetWidth, chatBtn.offsetWidth);
