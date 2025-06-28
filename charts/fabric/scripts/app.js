@@ -360,14 +360,24 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
-    copyBtn.addEventListener('click', (e) => {
+    copyBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      // if message contains link with image inside, copy only link hrefs
+      // if message contains link with image inside, copy actual image(s)
       const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
       if (imageLinks.length) {
-        const hrefs = imageLinks.map(a => a.href).join('\n');
-        navigator.clipboard.writeText(hrefs).catch(console.error);
+        try {
+          const items = await Promise.all(imageLinks.map(async a => {
+            const img = a.querySelector('img');
+            const src = img.src;
+            const res = await fetch(src);
+            const blob = await res.blob();
+            return new ClipboardItem({ [blob.type]: blob });
+          }));
+          await navigator.clipboard.write(items);
+        } catch (err) {
+          console.error(err);
+        }
       } else {
         navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
       }
@@ -563,14 +573,24 @@ form.addEventListener('submit', async e => {
         const copyBtnStream = document.createElement('button');
         copyBtnStream.className = 'copy-button';
         copyBtnStream.textContent = 'Copy';
-        copyBtnStream.addEventListener('click', (e) => {
+        copyBtnStream.addEventListener('click', async (e) => {
           e.preventDefault();
           e.stopPropagation();
-          // if message contains link with image inside, copy only link hrefs
+          // if message contains link with image inside, copy actual image(s)
           const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
           if (imageLinks.length) {
-            const hrefs = imageLinks.map(a => a.href).join('\n');
-            navigator.clipboard.writeText(hrefs).catch(console.error);
+            try {
+              const items = await Promise.all(imageLinks.map(async a => {
+                const img = a.querySelector('img');
+                const src = img.src;
+                const res = await fetch(src);
+                const blob = await res.blob();
+                return new ClipboardItem({ [blob.type]: blob });
+              }));
+              await navigator.clipboard.write(items);
+            } catch (err) {
+              console.error(err);
+            }
           } else {
             navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
           }
