@@ -348,7 +348,22 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
       b.appendChild(promptBtn);
     }
   }
+
+  messagesEl.appendChild(m);
+
   if (sender === 'bot' && !text.startsWith('Error')) {
+    if (b.offsetHeight > messagesEl.clientHeight) {
+      const topBtn = document.createElement('button');
+      topBtn.className = 'top-button';
+      topBtn.textContent = 'Top';
+      topBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        b.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      b.appendChild(topBtn);
+    }
+
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
@@ -375,7 +390,7 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     });
     b.appendChild(copyBtn);
   }
-  messagesEl.appendChild(m);
+
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
@@ -564,6 +579,18 @@ form.addEventListener('submit', async e => {
       b.dataset.markdown = 'No response from server. Check configuration and try again.';
       b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
     } else if (!b.classList.contains('error')) {
+      if (b.offsetHeight > messagesEl.clientHeight) {
+        const topBtnStream = document.createElement('button');
+        topBtnStream.className = 'top-button';
+        topBtnStream.textContent = 'Top';
+        topBtnStream.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            b.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        b.appendChild(topBtnStream);
+      }
+
       const copyBtnStream = document.createElement('button');
       copyBtnStream.className = 'copy-button';
       copyBtnStream.textContent = 'Copy';
