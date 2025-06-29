@@ -392,6 +392,9 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
+    copyBtn.addEventListener('mousedown', () => copyBtn.classList.add('pressed'));
+    copyBtn.addEventListener('mouseup', () => copyBtn.classList.remove('pressed'));
+    copyBtn.addEventListener('mouseleave', () => copyBtn.classList.remove('pressed'));
     copyBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -608,6 +611,9 @@ form.addEventListener('submit', async e => {
       const copyBtnStream = document.createElement('button');
       copyBtnStream.className = 'copy-button';
       copyBtnStream.textContent = 'Copy';
+      copyBtnStream.addEventListener('mousedown', () => copyBtnStream.classList.add('pressed'));
+      copyBtnStream.addEventListener('mouseup', () => copyBtnStream.classList.remove('pressed'));
+      copyBtnStream.addEventListener('mouseleave', () => copyBtnStream.classList.remove('pressed'));
       copyBtnStream.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
