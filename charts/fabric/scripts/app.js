@@ -264,6 +264,43 @@ async function loadObsidianFiles() {
   }
 }
 
+// Manages the visibility of the 'Top' button on a message bubble
+function updateTopButton(bubble) {
+  const topButton = bubble.querySelector('.top-button');
+  const shouldHaveButton = bubble.offsetHeight > messagesEl.clientHeight;
+
+  if (shouldHaveButton && !topButton) {
+    const newTopBtn = document.createElement('button');
+    newTopBtn.className = 'top-button';
+    newTopBtn.textContent = 'Top';
+    newTopBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bubble.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    const copyButton = bubble.querySelector('.copy-button');
+    if (copyButton) {
+      bubble.insertBefore(newTopBtn, copyButton);
+    } else {
+      bubble.appendChild(newTopBtn);
+    }
+  } else if (!shouldHaveButton && topButton) {
+    topButton.remove();
+  }
+}
+
+// Updates all 'Top' buttons in the chat, useful on container resize
+function updateAllTopButtons() {
+  document.querySelectorAll('.message.bot .bubble:not(.error)').forEach(updateTopButton);
+}
+
+// Handles container resizing to dynamically show/hide 'Top' buttons
+if (messagesEl) {
+  const resizeObserver = new ResizeObserver(updateAllTopButtons);
+  resizeObserver.observe(messagesEl);
+}
+
 // addMessage now accepts hideStore flag to suppress store button on show messages
 function addMessage(text, sender, isChat = false, hideStore = false) {
   const m = document.createElement('div');
@@ -352,18 +389,6 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
   messagesEl.appendChild(m);
 
   if (sender === 'bot' && !text.startsWith('Error')) {
-    if (b.offsetHeight > messagesEl.clientHeight) {
-      const topBtn = document.createElement('button');
-      topBtn.className = 'top-button';
-      topBtn.textContent = 'Top';
-      topBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        b.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-      b.appendChild(topBtn);
-    }
-
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
@@ -389,6 +414,7 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
       }
     });
     b.appendChild(copyBtn);
+    updateTopButton(b);
   }
 
   messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -579,18 +605,6 @@ form.addEventListener('submit', async e => {
       b.dataset.markdown = 'No response from server. Check configuration and try again.';
       b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
     } else if (!b.classList.contains('error')) {
-      if (b.offsetHeight > messagesEl.clientHeight) {
-        const topBtnStream = document.createElement('button');
-        topBtnStream.className = 'top-button';
-        topBtnStream.textContent = 'Top';
-        topBtnStream.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            b.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-        b.appendChild(topBtnStream);
-      }
-
       const copyBtnStream = document.createElement('button');
       copyBtnStream.className = 'copy-button';
       copyBtnStream.textContent = 'Copy';
@@ -616,6 +630,7 @@ form.addEventListener('submit', async e => {
         }
       });
       b.appendChild(copyBtnStream);
+      updateTopButton(b);
     }
   } catch (err) {
     hideLoading();
