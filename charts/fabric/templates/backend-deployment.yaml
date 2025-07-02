@@ -41,6 +41,8 @@ spec:
             value: {{ .Values.backend.fabricConfigHome }}
           - name: OBSIDIAN_VAULT_PATH
             value: {{ .Values.backend.obsidianPath }}
+          - name: OBSIDIAN_VAULT_PATH_SHARED
+            value: {{ .Values.backend.obsidianPathShared }}
           - name: FABRIC_PATTERN_PATH
             value: {{ .Values.backend.patternPath }}
           - name: PERSONAL_NAME
@@ -53,4 +55,3 @@ spec:
       - name: sync
         persistentVolumeClaim:
           claimName: sync
-
