@@ -656,15 +656,6 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelBtn.addEventListener('click', () => {
     if (abortController) abortController.abort();
   });
-  const sendBtn = document.querySelector('.btn-send');
-  const updateCancelWidth = () => {
-    const targetWidth = Math.max(sendBtn.offsetWidth, chatBtn.offsetWidth);
-    cancelBtn.style.width = `${targetWidth}px`;
-    sendBtn.style.width = `${targetWidth}px`;
-    chatBtn.style.width = `${targetWidth}px`;
-  };
-  updateCancelWidth();
-  window.addEventListener('resize', updateCancelWidth);
 
   showLoading();
   Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading());
