@@ -155,7 +155,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               await checkResponse(res);
               const content = await res.text();
-              addMessage(`FILENAME: ${item}\n\n${content}`, 'bot', false, true);
+              addMessage(content, 'bot', false, true);
             } catch (err) {
               console.error(err);
               addMessage(`Error loading file (${err.message})`, 'bot');
@@ -386,9 +386,8 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     }
   }
 
-  messagesEl.appendChild(m);
-
-  if (sender === 'bot' && !text.startsWith('Error')) {
+  // hide copy button for request cancelled
+  if (sender === 'bot' && !text.startsWith('Error') && text !== 'Request cancelled') {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
@@ -419,6 +418,8 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     b.appendChild(copyBtn);
     updateTopButton(b);
   }
+
+  messagesEl.appendChild(m);
 
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -533,26 +534,6 @@ form.addEventListener('submit', async e => {
               if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
               a.setAttribute('target', '_blank');
               a.setAttribute('rel', 'noopener noreferrer');
-              // const summarizeBtn = document.createElement('button');
-              // summarizeBtn.className = 'summarize-button';
-              // summarizeBtn.textContent = 'Summarize';
-              // summarizeBtn.addEventListener('click', (e) => {
-              //   e.preventDefault();
-              //   e.stopPropagation();
-              //   patternSelect.searchInput.value = 'summarize';
-              //   patternSelect.searchInput.dataset.value = 'summarize';
-              //   patternSelect.searchInput.dispatchEvent(new Event('change', { bubbles: true }));
-              //   input.value = a.href;
-              //   input.focus();
-              //   const pos = input.value.length;
-              //   input.setSelectionRange(pos, pos);
-              //   if (form.requestSubmit) {
-              //     form.requestSubmit();
-              //   } else {
-              //     form.dispatchEvent(new Event('submit', { cancelable: true }));
-              //   }
-              // });
-              // a.insertAdjacentElement('afterend', summarizeBtn);
             });
             messagesEl.scrollTop = messagesEl.scrollHeight;
             const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
@@ -602,7 +583,6 @@ form.addEventListener('submit', async e => {
         }
       }
     }
-    // after stream ends, if no content received
     if (b.dataset.markdown.trim() === '') {
       b.classList.add('error');
       b.dataset.markdown = 'No response from server. Check configuration and try again.';
