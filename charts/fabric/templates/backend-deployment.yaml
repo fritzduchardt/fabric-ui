@@ -18,7 +18,6 @@ spec:
         app: {{ .Release.Name }}
         component: backend
     spec:
-      # Node selector for backend pods
       {{- if .Values.backend.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.backend.nodeSelector | indent 8 }}
@@ -29,25 +28,23 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: {{ .Values.backend.port }}
-        # Mount the fabric secret env file
         volumeMounts:
         - name: fabric-env
-          mountPath: /home/fabric/.config/fabric/.env
+          mountPath: "/home/fabric/.config/fabric/.env"
           subPath: .env
         - name: sync
-          mountPath: /home/fabric/obsidian
+          mountPath: "{{ .Values.backend.syncFilesMountPath }}"
         env:
           - name: FABRIC_CONFIG_HOME
-            value: {{ .Values.backend.fabricConfigHome }}
-          - name: OBSIDIAN_VAULT_PATH
-            value: {{ .Values.backend.obsidianPath }}
-          - name: OBSIDIAN_VAULT_PATH_SHARED
-            value: {{ .Values.backend.obsidianPathShared }}
+            value: "{{ .Values.backend.fabricConfigHome }}"
+          {{- range $index, $path := .Values.backend.obsidianFolders }}
+          - name: OBSIDIAN_VAULT_PATH_{{ add $index 1 }}
+            value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath $path }}"
+          {{- end }}
           - name: FABRIC_PATTERN_PATH
-            value: {{ .Values.backend.patternPath }}
+            value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
           - name: PERSONAL_NAME
             value: {{ .Values.backend.personalName | quote }}
-      # Define the volumes for fabric and sync
       volumes:
       - name: fabric-env
         secret:

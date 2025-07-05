@@ -6,12 +6,18 @@ backend:
   replicas: 1
   nodeSelector:
     kubernetes.io/hostname: friclu-1
+  # where fabric looks for configuration
   fabricConfigHome: "/home/fabric/.config/fabric"
-  obsidianPath: "/home/fabric/obsidian/private"
-  obsidianPathShared: "/home/fabric/obsidian/shared"
-  patternPath: "/home/fabric/obsidian/patterns"
+  # where all synced files are on the host node including patterns and obsidian files
+  syncFiles: /volumes/syncthings
+  # folder to which we mount the sync files in the backend pod
+  syncFilesMountPath: "/home/fabric/sync"
+  # folder within sync files that contain patterns
+  patternFolder: "Sync/patterns"
+  # folder within sync files that contain obsidian files
+  obsidianFolders:
+    - "Sync/private"
   personalName: "Fritz"
-  fabricFiles: /volumes/syncthing/Sync
 
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"

@@ -8,7 +8,7 @@ spec:
   capacity:
     storage: 2Gi
   hostPath:
-    path: {{ .Values.backend.fabricFiles }}
+    path: {{ .Values.backend.syncFiles }}
     type: ""
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
