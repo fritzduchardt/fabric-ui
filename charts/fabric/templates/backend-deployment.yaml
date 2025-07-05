@@ -39,7 +39,7 @@ spec:
             value: "{{ .Values.backend.fabricConfigHome }}"
           {{- range $index, $path := .Values.backend.obsidianFolders }}
           - name: OBSIDIAN_VAULT_PATH_{{ add $index 1 }}
-            value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath $path }}"
+            value: "{{ printf "%s/%s" $.Values.backend.syncFilesMountPath $path }}"
           {{- end }}
           - name: FABRIC_PATTERN_PATH
             value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
