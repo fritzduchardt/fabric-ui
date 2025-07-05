@@ -9,7 +9,7 @@ backend:
   # where fabric looks for configuration
   fabricConfigHome: "/home/fabric/.config/fabric"
   # where all synced files are on the host node including patterns and obsidian files
-  syncFiles: /volumes/syncthings
+  syncFiles: /volumes/syncthing
   # folder to which we mount the sync files in the backend pod
   syncFilesMountPath: "/home/fabric/sync"
   # folder within sync files that contain patterns
