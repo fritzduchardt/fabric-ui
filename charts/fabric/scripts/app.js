@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
@@ -138,11 +139,14 @@ function createEnhancedSelect(id, placeholder) {
         dropdownItem.href = '#';
         dropdownItem.textContent = item;
         dropdownItem.dataset.value = item;
+        dropdownItem.style.display = 'flex';              // use flex for alignment
+        dropdownItem.style.alignItems = 'center';         // center items vertically
 
         if (id === 'obsidian-select' && item !== '(no file)') {
           const showBtn = document.createElement('button');
           showBtn.className = 'show-file-button';
           showBtn.textContent = 'Show';
+          showBtn.style.marginLeft = 'auto';              // push Show button to the right
           showBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -162,12 +166,32 @@ function createEnhancedSelect(id, placeholder) {
             }
           });
           dropdownItem.appendChild(showBtn);
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'delete-file-button';
+          delBtn.textContent = 'Del';
+          delBtn.style.marginLeft = '8px';                  // small gap after Show button
+          delBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
+              await checkResponse(res);
+              await loadObsidianFiles();
+              addMessage(`Deleted file ${item}`, 'bot');
+            } catch (err) {
+              console.error(err);
+              addMessage(`Error deleting file (${err.message})`, 'bot');
+            }
+          });
+          dropdownItem.appendChild(delBtn);
         }
 
         if (id === 'pattern-input') {
           const showPatternBtn = document.createElement('button');
           showPatternBtn.className = 'show-pattern-button';
           showPatternBtn.textContent = 'Show';
+          showPatternBtn.style.marginLeft = 'auto';        // push Show button to the right
           showPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
