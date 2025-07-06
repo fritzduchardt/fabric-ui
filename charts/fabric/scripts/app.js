@@ -181,7 +181,7 @@ function createEnhancedSelect(id, placeholder) {
               await checkResponse(res);
               const data = await res.json();
               const md = data.Pattern;
-              addMessage(`FILENAME: ${item}\n\n${md}`, 'bot', false, true);
+              addMessage(`${md}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
               addMessage(`Error loading pattern (${err.message})`, 'bot');

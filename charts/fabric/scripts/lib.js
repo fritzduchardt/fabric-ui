@@ -3,7 +3,7 @@
 function transformObsidianMarkdown(md) {
     let html = '';
     let sections = [];
-    const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
+    const regex = /^FILENAME: (.+)\n([\s\S]*?)(?=^FILENAME: |$)/g;
 
     // find sections
     for (const [, filename, content] of md.matchAll(regex)) {
