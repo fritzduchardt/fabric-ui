@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
@@ -179,7 +180,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
               await checkResponse(res);
               await loadObsidianFiles();
-              addMessage(`Deleted file ${item}`, 'bot');
+              addMessage(`Deleted file ${item}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
               addMessage(`Error deleting file (${err.message})`, 'bot');
@@ -226,7 +227,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
               await checkResponse(res);
               await generatePatterns();
-              addMessage(`Deleted pattern ${item}`, 'bot');
+              addMessage(`Deleted pattern ${item}`, 'bot', false, true);
             } catch (err) {
               console.error(err);
               addMessage(`Error deleting pattern (${err.message})`, 'bot');
@@ -431,8 +432,8 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
     }
   }
 
-  // hide copy button for request cancelled
-  if (sender === 'bot' && !text.startsWith('Error') && text !== 'Request cancelled') {
+  // hide copy button for request cancelled or deletion messages
+  if (sender === 'bot' && !text.startsWith('Error') && text !== 'Request cancelled' && !text.startsWith('Deleted')) {
     const copyBtn = document.createElement('button');
     copyBtn.className = 'copy-button';
     copyBtn.textContent = 'Copy';
