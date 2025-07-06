@@ -12,6 +12,7 @@ const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
+const patternDeleteUrl = `${apiDomain}/deletepattern`;
 const obsidianFileUrl = `${apiDomain}/obsidian/file`;
 const storeUrl = `${apiDomain}/store`;
 
@@ -212,6 +213,25 @@ function createEnhancedSelect(id, placeholder) {
             }
           });
           dropdownItem.appendChild(showPatternBtn);
+
+          const delPatternBtn = document.createElement('button');
+          delPatternBtn.className = 'delete-pattern-button';
+          delPatternBtn.textContent = 'Del';
+          delPatternBtn.style.marginLeft = 'auto';         // match Show button alignment
+          delPatternBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              const res = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
+              await checkResponse(res);
+              await loadPatterns();
+              addMessage(`Deleted pattern ${item}`, 'bot');
+            } catch (err) {
+              console.error(err);
+              addMessage(`Error deleting pattern (${err.message})`, 'bot');
+            }
+          });
+          dropdownItem.appendChild(delPatternBtn);
         }
 
         dropdownItem.addEventListener('click', (e) => {
