@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
@@ -172,6 +171,7 @@ function createEnhancedSelect(id, placeholder) {
           delBtn.className = 'delete-file-button';
           delBtn.textContent = 'Del';
           delBtn.style.marginLeft = '8px';                  // small gap after Show button
+          delBtn.style.marginRight = '0';                   // right align with Show button
           delBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -217,14 +217,15 @@ function createEnhancedSelect(id, placeholder) {
           const delPatternBtn = document.createElement('button');
           delPatternBtn.className = 'delete-pattern-button';
           delPatternBtn.textContent = 'Del';
-          delPatternBtn.style.marginLeft = 'auto';         // match Show button alignment
+          delPatternBtn.style.marginLeft = '8px';         // small gap after Show button
+          delPatternBtn.style.marginRight = '0';          // right align with Show button
           delPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
             try {
               const res = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
               await checkResponse(res);
-              await loadPatterns();
+              await generatePatterns();
               addMessage(`Deleted pattern ${item}`, 'bot');
             } catch (err) {
               console.error(err);
