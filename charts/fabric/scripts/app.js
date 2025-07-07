@@ -64,11 +64,14 @@ function createEnhancedSelect(id, placeholder) {
   container.appendChild(searchInput);
   container.appendChild(dropdownMenu);
 
+  // Clear previous text when dropdown opens
   searchInput.addEventListener('focus', () => {
+    searchInput.value = '';
     dropdownMenu.classList.add('show');
   });
   if (id === 'model-select') {
     searchInput.addEventListener('click', () => {
+      searchInput.value = '';
       dropdownMenu.classList.add('show');
     });
   }
