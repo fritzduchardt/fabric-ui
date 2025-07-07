@@ -173,7 +173,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               await checkResponse(res);
               const content = await res.text();
-              addMessage(content, 'bot', false, true);
+              addMessage(content, 'bot', false, true, true);
               // Add Delete button to the message produced by Sw
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
@@ -222,7 +222,7 @@ function createEnhancedSelect(id, placeholder) {
               await checkResponse(res);
               const data = await res.json();
               const md = data.Pattern;
-              addMessage(`${md}`, 'bot', false, true);
+              addMessage(`${md}`, 'bot', false, true, true);
               // Add Delete button to the message produced by Sw
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
@@ -364,8 +364,8 @@ if (messagesEl) {
   resizeObserver.observe(messagesEl);
 }
 
-// addMessage now accepts hideStore flag to suppress store button on show messages
-function addMessage(text, sender, isChat = false, hideStore = false) {
+// addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
+function addMessage(text, sender, isChat = false, hideStore = false, fullWidth = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
   if (sender === 'user') {
@@ -373,6 +373,9 @@ function addMessage(text, sender, isChat = false, hideStore = false) {
   }
   const b = document.createElement('div');
   b.classList.add('bubble');
+  if (fullWidth) {
+    b.classList.add('full-width'); // full-width for Sw button messages
+  }
   if (text.startsWith('Error')) {
     b.classList.add('error');
   }
