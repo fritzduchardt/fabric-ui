@@ -202,26 +202,6 @@ function createEnhancedSelect(id, placeholder) {
             }
           });
           dropdownItem.appendChild(showBtn);
-
-          const delBtn = document.createElement('button');
-          delBtn.className = 'delete-file-button';
-          delBtn.textContent = 'Dt';
-          delBtn.style.marginLeft = '8px';                  // small gap after Sw button
-          delBtn.style.marginRight = '0';                   // right align with Sw button
-          delBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            try {
-              const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
-              await checkResponse(res);
-              await loadObsidianFiles();
-              addMessage(`Deleted file ${item}`, 'bot', false, true);
-            } catch (err) {
-              console.error(err);
-              addMessage(`Error deleting file (${err.message})`, 'bot');
-            }
-          });
-          dropdownItem.appendChild(delBtn);
         }
 
         if (id === 'pattern-input') {
@@ -271,26 +251,6 @@ function createEnhancedSelect(id, placeholder) {
             }
           });
           dropdownItem.appendChild(showPatternBtn);
-
-          const delPatternBtn = document.createElement('button');
-          delPatternBtn.className = 'delete-pattern-button';
-          delPatternBtn.textContent = 'Dt';
-          delPatternBtn.style.marginLeft = '8px';         // small gap after Sw button
-          delPatternBtn.style.marginRight = '0';          // right align with Sw button
-          delPatternBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            try {
-              const res = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
-              await checkResponse(res);
-              await generatePatterns();
-              addMessage(`Deleted pattern ${item}`, 'bot', false, true);
-            } catch (err) {
-              console.error(err);
-              addMessage(`Error deleting pattern (${err.message})`, 'bot');
-            }
-          });
-          dropdownItem.appendChild(delPatternBtn);
         }
 
         dropdownItem.addEventListener('click', (e) => {
