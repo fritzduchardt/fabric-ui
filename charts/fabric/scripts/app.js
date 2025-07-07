@@ -174,6 +174,28 @@ function createEnhancedSelect(id, placeholder) {
               await checkResponse(res);
               const content = await res.text();
               addMessage(content, 'bot', false, true);
+              // Add Delete button to the message produced by Sw
+              const lastMsg = messagesEl.querySelector('.message.bot:last-child');
+              const bubble = lastMsg.querySelector('.bubble');
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'delete-file-message-button';
+              deleteBtn.textContent = 'Delete';
+              deleteBtn.addEventListener('click', async (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                try {
+                  const delRes = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
+                  await checkResponse(delRes);
+                  await loadObsidianFiles();
+                  // remove the message bubble
+                  lastMsg.remove();
+                  addMessage(`Deleted file ${item}`, 'bot', false, true);
+                } catch (err) {
+                  console.error(err);
+                  addMessage(`Error deleting file (${err.message})`, 'bot');
+                }
+              });
+              bubble.appendChild(deleteBtn);
             } catch (err) {
               console.error(err);
               addMessage(`Error loading file (${err.message})`, 'bot');
@@ -221,6 +243,28 @@ function createEnhancedSelect(id, placeholder) {
               const data = await res.json();
               const md = data.Pattern;
               addMessage(`${md}`, 'bot', false, true);
+              // Add Delete button to the message produced by Sw
+              const lastMsg = messagesEl.querySelector('.message.bot:last-child');
+              const bubble = lastMsg.querySelector('.bubble');
+              const deletePatBtn = document.createElement('button');
+              deletePatBtn.className = 'delete-pattern-message-button';
+              deletePatBtn.textContent = 'Delete';
+              deletePatBtn.addEventListener('click', async (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                try {
+                  const delRes = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
+                  await checkResponse(delRes);
+                  await generatePatterns();
+                  // remove the message bubble
+                  lastMsg.remove();
+                  addMessage(`Deleted pattern ${item}`, 'bot', false, true);
+                } catch (err) {
+                  console.error(err);
+                  addMessage(`Error deleting pattern (${err.message})`, 'bot');
+                }
+              });
+              bubble.appendChild(deletePatBtn);
             } catch (err) {
               console.error(err);
               addMessage(`Error loading pattern (${err.message})`, 'bot');
