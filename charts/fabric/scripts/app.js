@@ -146,8 +146,8 @@ function createEnhancedSelect(id, placeholder) {
         if (id === 'obsidian-select' && item !== '(no file)') {
           const showBtn = document.createElement('button');
           showBtn.className = 'show-file-button';
-          showBtn.textContent = 'Show';
-          showBtn.style.marginLeft = 'auto';              // push Show button to the right
+          showBtn.textContent = 'Sw';
+          showBtn.style.marginLeft = 'auto';              // push Sw button to the right
           showBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -170,9 +170,9 @@ function createEnhancedSelect(id, placeholder) {
 
           const delBtn = document.createElement('button');
           delBtn.className = 'delete-file-button';
-          delBtn.textContent = 'Del';
-          delBtn.style.marginLeft = '8px';                  // small gap after Show button
-          delBtn.style.marginRight = '0';                   // right align with Show button
+          delBtn.textContent = 'Dt';
+          delBtn.style.marginLeft = '8px';                  // small gap after Sw button
+          delBtn.style.marginRight = '0';                   // right align with Sw button
           delBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -192,8 +192,8 @@ function createEnhancedSelect(id, placeholder) {
         if (id === 'pattern-input') {
           const showPatternBtn = document.createElement('button');
           showPatternBtn.className = 'show-pattern-button';
-          showPatternBtn.textContent = 'Show';
-          showPatternBtn.style.marginLeft = 'auto';        // push Show button to the right
+          showPatternBtn.textContent = 'Sw';
+          showPatternBtn.style.marginLeft = 'auto';        // push Sw button to the right
           showPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -217,9 +217,9 @@ function createEnhancedSelect(id, placeholder) {
 
           const delPatternBtn = document.createElement('button');
           delPatternBtn.className = 'delete-pattern-button';
-          delPatternBtn.textContent = 'Del';
-          delPatternBtn.style.marginLeft = '8px';         // small gap after Show button
-          delPatternBtn.style.marginRight = '0';          // right align with Show button
+          delPatternBtn.textContent = 'Dt';
+          delPatternBtn.style.marginLeft = '8px';         // small gap after Sw button
+          delPatternBtn.style.marginRight = '0';          // right align with Sw button
           delPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
