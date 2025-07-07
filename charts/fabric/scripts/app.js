@@ -37,7 +37,11 @@ input.style.resize = 'none';
 function createEnhancedSelect(id, placeholder) {
   const container = document.createElement('div');
   container.classList.add('enhanced-select');
-  container.style.width = '100%';
+  if (id === 'model-select') {
+    container.style.width = '120px';
+  } else {
+    container.style.width = '100%';
+  }
 
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
@@ -57,9 +61,15 @@ function createEnhancedSelect(id, placeholder) {
   const dropdownMenu = document.createElement('div');
   dropdownMenu.classList.add('dropdown-menu');
   dropdownMenu.id = `${id}-dropdown`;
-  dropdownMenu.style.width = '100%';
-  dropdownMenu.style.left = '0';
-  dropdownMenu.style.right = '0';
+  if (id === 'model-select') {
+    dropdownMenu.style.width = '200%';
+    dropdownMenu.style.left = 'auto';
+    dropdownMenu.style.right = '0';
+  } else {
+    dropdownMenu.style.width = '100%';
+    dropdownMenu.style.left = '0';
+    dropdownMenu.style.right = '0';
+  }
 
   container.appendChild(searchInput);
   container.appendChild(dropdownMenu);
