@@ -365,7 +365,7 @@ if (messagesEl) {
 }
 
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
-function addMessage(text, sender, isChat = false, hideStore = false, fullWidth = false) {
+function addMessage(text, sender, isChat = false, hideStore = false, view = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
   if (sender === 'user') {
@@ -373,14 +373,14 @@ function addMessage(text, sender, isChat = false, hideStore = false, fullWidth =
   }
   const b = document.createElement('div');
   b.classList.add('bubble');
-  if (fullWidth) {
+  if (view) {
     b.classList.add('full-width'); // full-width for Sw button messages
   }
   if (text.startsWith('Error')) {
     b.classList.add('error');
   }
   b.dataset.markdown = text;
-  b.innerHTML = transformObsidianMarkdown(text);
+  b.innerHTML = transformObsidianMarkdown(text, view);
   if (sender === 'user') {
     b.querySelectorAll('a').forEach(a => {
       const href = a.href;

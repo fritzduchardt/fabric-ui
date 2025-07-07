@@ -1,15 +1,15 @@
 
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
-function transformObsidianMarkdown(md) {
+function transformObsidianMarkdown(md, noFold) {
     let html = '';
     let sections = [];
-    const regex = /^FILENAME: (.+)\n([\s\S]*?)(?=^FILENAME: |$)/g;
+    const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
 
     // find sections
     for (const [, filename, content] of md.matchAll(regex)) {
         sections.push({ filename, content });
     }
-    if (sections.length > 0) {
+    if (!noFold && sections.length > 0) {
         sections.forEach((section, index) => {
             const htmlContent = window.marked ? marked.parse(section.content) : section.content.replace(/\n/g, '<br>');
             html += `
