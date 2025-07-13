@@ -8,7 +8,7 @@ function transformObsidianMarkdown(md, noFold) {
   for (const [, filename, content] of md.matchAll(regex)) {
     sections.push({ filename, content });
   }
-  if (!noFold && sections.length > 0) {
+  if (sections.length > 0) {
     sections.forEach((section, index) => {
       const htmlContent = window.marked ? marked.parse(section.content) : section.content.replace(/\n/g, '<br>');
       html += `
