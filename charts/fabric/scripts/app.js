@@ -616,7 +616,7 @@ form.addEventListener('submit', async e => {
             const obj = JSON.parse(d);
             const c = obj.content || '';
             b.dataset.markdown += c;
-            b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
+            b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, false, modelSelect.getValue());
             b.querySelectorAll('a').forEach(a => {
               if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
               a.setAttribute('target', '_blank');
