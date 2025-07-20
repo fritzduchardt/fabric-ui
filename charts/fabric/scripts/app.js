@@ -375,7 +375,7 @@ async function loadPatterns() {
     const res = await fetch(`${patternsUrl}/names`);
     await checkResponse(res);
     const patterns = await res.json();
-    const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general';
+    const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general-prompt';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
