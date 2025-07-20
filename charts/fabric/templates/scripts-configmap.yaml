@@ -12,7 +12,7 @@ data:
   app.js: |-
 {{ .Files.Get "scripts/app.js"
   | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" ( tpl .Values.ui.backendUrl . ))
-  | replace "const defaults = ['o4-mini', 'claude-3-7-sonnet-latest', 'deepseek-reasoner'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
+  | replace "const defaults = ['o3-mini'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
   | replace "modelSelect.setItems(defaults, 'o4-mini');" (printf "modelSelect.setItems(defaults, '%s');" .Values.ui.defaultModel)
   | replace "const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general';" (printf "const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : '%s';" .Values.ui.defaultPattern)
   | replace "patternSelect.setItems(patterns, defaultPattern);" "patternSelect.setItems(patterns, defaultPattern);"
