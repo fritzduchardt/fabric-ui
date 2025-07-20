@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 let currentSession = new Date().toISOString();  // generate timestamp to use as session
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
@@ -23,6 +22,94 @@ async function checkResponse(res) {
     throw new Error(`${res.status} ${res.statusText}: ${errText}`);
   }
   return res;
+}
+
+// Handles storing a message to a file
+async function storeMessageHandler(e, bubble) {
+    const btn = e.currentTarget;
+    e.preventDefault();
+    e.stopPropagation();
+    btn.disabled = true;
+    const spinner = document.createElement('span');
+    spinner.className = 'spinner-border spinner-border-sm ms-2';
+    spinner.role = 'status';
+    spinner.ariaHidden = 'true';
+    btn.appendChild(spinner);
+    try {
+        const res = await fetch(storeUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionName: currentSession, prompt: bubble.dataset.markdown })
+        });
+        await checkResponse(res);
+        const data = await res.json();
+        const fns = data.filenames || [];
+        if (fns.length) {
+            const info = document.createElement('div');
+            info.className = 'filename-info';
+            info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
+            bubble.appendChild(info);
+        }
+        await generatePatterns();
+        await loadObsidianFiles();
+    } catch (err) {
+        console.error(err);
+        addMessage(`Error storing message (${err.message})`, 'bot');
+        btn.disabled = false;
+    } finally {
+        spinner.remove();
+    }
+}
+
+// Adds a "Store" button to a message bubble if it contains a FILENAME
+function addStoreButtonIfNeeded(bubble) {
+  if (bubble.querySelector('.store-message-button')) return;
+
+  const text = bubble.dataset.markdown;
+  if (text.match(/^FILENAME:\s*(.+)$/m)) {
+    const btn = document.createElement('button');
+    btn.className = 'store-message-button';
+    btn.textContent = 'Store';
+    btn.addEventListener('click', (e) => storeMessageHandler(e, bubble));
+    bubble.appendChild(btn);
+  }
+}
+
+// Adds "Copy" and "Top" buttons to a bot message bubble
+function addCopyAndTopButtonsIfNeeded(bubble) {
+    const text = bubble.dataset.markdown;
+    if (bubble.querySelector('.copy-button') || text.startsWith('Error') || text === 'Request cancelled' || text.startsWith('Deleted')) {
+        return;
+    }
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-button';
+    copyBtn.textContent = 'Copy';
+    copyBtn.addEventListener('mousedown', () => copyBtn.classList.add('pressed'));
+    copyBtn.addEventListener('mouseup', () => copyBtn.classList.remove('pressed'));
+    copyBtn.addEventListener('mouseleave', () => copyBtn.classList.remove('pressed'));
+    copyBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const imageLinks = Array.from(bubble.querySelectorAll('a')).filter(a => a.querySelector('img'));
+        if (imageLinks.length) {
+            try {
+                const items = await Promise.all(imageLinks.map(async a => {
+                    const img = a.querySelector('img');
+                    const src = img.src;
+                    const res = await fetch(src);
+                    const blob = await res.blob();
+                    return new ClipboardItem({ [blob.type]: blob });
+                }));
+                await navigator.clipboard.write(items);
+            } catch (err) {
+                console.error(err);
+            }
+        } else {
+            navigator.clipboard.writeText(markdownToPlainText(bubble.dataset.markdown)).catch(console.error);
+        }
+    });
+    bubble.appendChild(copyBtn);
+    updateTopButton(bubble);
 }
 
 const form = document.getElementById('chat-form');
@@ -394,46 +481,14 @@ function addMessage(text, sender, isChat = false, hideStore = false, view = fals
     });
   }
   m.appendChild(b);
-  if (!hideStore && text.match(/^FILENAME:\s*(.+)$/m)) {
-    const btn = document.createElement('button');
-    btn.className = 'store-message-button';
-    btn.textContent = 'Store';
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      btn.disabled = true;
-      const spinner = document.createElement('span');
-      spinner.className = 'spinner-border spinner-border-sm ms-2';
-      spinner.role = 'status';
-      spinner.ariaHidden = 'true';
-      btn.appendChild(spinner);
-      try {
-        const res = await fetch(storeUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionName: currentSession, prompt: b.dataset.markdown })
-        });
-        await checkResponse(res);
-        const data = await res.json();
-        const fns = data.filenames || [];
-        if (fns.length) {
-          const info = document.createElement('div');
-          info.className = 'filename-info';
-          info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
-          b.appendChild(info);
-        }
-        await generatePatterns();
-        await loadObsidianFiles();
-      } catch (err) {
-        console.error(err);
-        addMessage(`Error storing message (${err.message})`, 'bot');
-        btn.disabled = false;
-      } finally {
-        spinner.remove();
-      }
-    });
-    b.appendChild(btn);
+
+  if (sender === 'bot') {
+    if (!hideStore) {
+        addStoreButtonIfNeeded(b);
+    }
+    addCopyAndTopButtonsIfNeeded(b);
   }
+
   if (sender === 'user') {
     const mdTrim = b.dataset.markdown.trim();
     if (mdTrim && mdTrim.toLowerCase() !== 'no further instructions') {
@@ -452,41 +507,7 @@ function addMessage(text, sender, isChat = false, hideStore = false, view = fals
     }
   }
 
-  // hide copy button for request cancelled or deletion messages
-  if (sender === 'bot' && !text.startsWith('Error') && text !== 'Request cancelled' && !text.startsWith('Deleted')) {
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy-button';
-    copyBtn.textContent = 'Copy';
-    copyBtn.addEventListener('mousedown', () => copyBtn.classList.add('pressed'));
-    copyBtn.addEventListener('mouseup', () => copyBtn.classList.remove('pressed'));
-    copyBtn.addEventListener('mouseleave', () => copyBtn.classList.remove('pressed'));
-    copyBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
-      if (imageLinks.length) {
-        try {
-          const items = await Promise.all(imageLinks.map(async a => {
-            const img = a.querySelector('img');
-            const src = img.src;
-            const res = await fetch(src);
-            const blob = await res.blob();
-            return new ClipboardItem({ [blob.type]: blob });
-          }));
-          await navigator.clipboard.write(items);
-        } catch (err) {
-          console.error(err);
-        }
-      } else {
-        navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
-      }
-    });
-    b.appendChild(copyBtn);
-    updateTopButton(b);
-  }
-
   messagesEl.appendChild(m);
-
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
@@ -602,49 +623,7 @@ form.addEventListener('submit', async e => {
               a.setAttribute('rel', 'noopener noreferrer');
             });
             messagesEl.scrollTop = messagesEl.scrollHeight;
-            const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
-            if (filenameMatch) {
-              if (!b.querySelector('.store-message-button')) {
-                const storeMsgBtn = document.createElement('button');
-                storeMsgBtn.className = 'store-message-button';
-                storeMsgBtn.textContent = 'Store';
-                storeMsgBtn.addEventListener('click', async (ev) => {
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                  storeMsgBtn.disabled = true;
-                  const sp = document.createElement('span');
-                  sp.className = 'spinner-border spinner-border-sm ms-2';
-                  sp.role = 'status';
-                  sp.ariaHidden = 'true';
-                  storeMsgBtn.appendChild(sp);
-                  try {
-                    const resp = await fetch(storeUrl, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ sessionName: currentSession, prompt: b.dataset.markdown })
-                    });
-                    await checkResponse(resp);
-                    const data = await resp.json();
-                    const fns = data.filenames || [];
-                    if (fns.length) {
-                      const info = document.createElement('div');
-                      info.className = 'filename-info';
-                      info.innerHTML = `Stored under ${fns.map(fn => `<i><b>${fn}</b></i>`).join(', ')}`;
-                      b.appendChild(info);
-                    }
-                    await generatePatterns();
-                    await loadObsidianFiles();
-                  } catch (err) {
-                    console.error(err);
-                    addMessage(`Error storing message (${err.message})`, 'bot');
-                    storeMsgBtn.disabled = false;
-                  } finally {
-                    sp.remove();
-                  }
-                });
-                b.appendChild(storeMsgBtn);
-              }
-            }
+            addStoreButtonIfNeeded(b);
           } catch {}
         }
       }
@@ -654,35 +633,7 @@ form.addEventListener('submit', async e => {
       b.dataset.markdown = 'No response from server. Check configuration and try again.';
       b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
     } else if (!b.classList.contains('error')) {
-      const copyBtnStream = document.createElement('button');
-      copyBtnStream.className = 'copy-button';
-      copyBtnStream.textContent = 'Copy';
-      copyBtnStream.addEventListener('mousedown', () => copyBtnStream.classList.add('pressed'));
-      copyBtnStream.addEventListener('mouseup', () => copyBtnStream.classList.remove('pressed'));
-      copyBtnStream.addEventListener('mouseleave', () => copyBtnStream.classList.remove('pressed'));
-      copyBtnStream.addEventListener('click', async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const imageLinks = Array.from(b.querySelectorAll('a')).filter(a => a.querySelector('img'));
-        if (imageLinks.length) {
-          try {
-            const items = await Promise.all(imageLinks.map(async a => {
-              const img = a.querySelector('img');
-              const src = img.src;
-              const res = await fetch(src);
-              const blob = await res.blob();
-              return new ClipboardItem({ [blob.type]: blob });
-            }));
-            await navigator.clipboard.write(items);
-          } catch (err) {
-            console.error(err);
-          }
-        } else {
-          navigator.clipboard.writeText(markdownToPlainText(b.dataset.markdown)).catch(console.error);
-        }
-      });
-      b.appendChild(copyBtnStream);
-      updateTopButton(b);
+      addCopyAndTopButtonsIfNeeded(b);
     }
   } catch (err) {
     hideLoading();
