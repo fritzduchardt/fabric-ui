@@ -396,7 +396,7 @@ async function generatePatterns() {
 
 async function loadModels() {
   const defaults = ['o3-mini'];
-  modelSelect.setItems(defaults, 'o4-mini');
+  modelSelect.setItems(defaults, 'o3-mini');
 }
 
 async function loadObsidianFiles() {
@@ -545,8 +545,8 @@ form.addEventListener('submit', async e => {
     isChatButtonPressed = false;
   }
   lastPrompt = text;
-  const pattern = patternSelect.getValue() || 'general';
-  const model = modelSelect.getValue() || 'gpt-4';
+  const pattern = patternSelect.getValue() || 'general_advice';
+  const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
 
   addMessage(text, 'user', userIsChat);
