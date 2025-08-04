@@ -30,6 +30,7 @@ data:
           # Forward requests to backend service defined by Helm values
           proxy_pass http://{{ .Release.Name }}-backend:{{ .Values.backend.port }}/;
           # Preserve client information
+          proxy_read_timeout 300s;
           proxy_http_version 1.1;
           proxy_set_header Host $host;
           proxy_set_header X-Real-IP $remote_addr;
@@ -54,4 +55,3 @@ data:
         }
       }
     }
-
