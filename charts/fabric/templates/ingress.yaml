@@ -10,6 +10,8 @@ metadata:
     nginx.ingress.kubernetes.io/auth-secret: {{ default (printf "%s-basic-auth" .Release.Name) .Values.basicAuth.secretName }}
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/client-body-timeout: "300"
+    nginx.ingress.kubernetes.io/client-header-timeout: "300"
 spec:
   ingressClassName: {{ .Values.ingress.className | quote }}
   rules:
