@@ -13,8 +13,8 @@ data:
 {{ .Files.Get "scripts/app.js"
   | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" ( tpl .Values.ui.backendUrl . ))
   | replace "const defaults = ['o3-mini'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
-  | replace "modelSelect.setItems(defaults, 'o4-mini');" (printf "modelSelect.setItems(defaults, '%s');" .Values.ui.defaultModel)
-  | replace "general-prompt" .Values.ui.defaultPattern
+  | replace "modelSelect.setItems(defaults, 'o3-mini');" (printf "modelSelect.setItems(defaults, '%s');" .Values.ui.defaultModel)
+  | replace "'general'" (printf "'%s'" .Values.ui.defaultPattern)
   | replace "patternSelect.setItems(patterns, defaultPattern);" "patternSelect.setItems(patterns, defaultPattern);"
   | indent 4 }}
   # UI HTML entrypoint

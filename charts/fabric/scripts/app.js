@@ -36,13 +36,24 @@ async function storeMessageHandler(e, bubble) {
     spinner.ariaHidden = 'true';
     btn.appendChild(spinner);
     try {
-        const res = await fetch(storeUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionName: currentSession, prompt: bubble.dataset.markdown })
-        });
-        await checkResponse(res);
-        const data = await res.json();
+        let data;
+        // retry until backend call succeeds
+        while (true) {
+            try {
+                const res = await fetch(storeUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionName: currentSession, prompt: bubble.dataset.markdown })
+                });
+                await checkResponse(res);
+                data = await res.json();
+                break;
+            } catch (err) {
+                console.error('Error storing message, retrying...', err);
+                // wait before retrying
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
         const fns = data.filenames || [];
         if (fns.length) {
             const info = document.createElement('div');
@@ -55,9 +66,9 @@ async function storeMessageHandler(e, bubble) {
     } catch (err) {
         console.error(err);
         addMessage(`Error storing message (${err.message})`, 'bot');
-        btn.disabled = false;
     } finally {
         spinner.remove();
+        btn.disabled = false;
     }
 }
 
@@ -372,10 +383,20 @@ const obsidianSelect = createEnhancedSelect('obsidian-select', 'Search files');
 async function loadPatterns() {
   try {
     const prevPattern = patternSelect.getValue();
-    const res = await fetch(`${patternsUrl}/names`);
-    await checkResponse(res);
-    const patterns = await res.json();
-    const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general-prompt';
+    let patterns;
+    // retry until backend call succeeds
+    while (true) {
+      try {
+        const res = await fetch(`${patternsUrl}/names`);
+        await checkResponse(res);
+        patterns = await res.json();
+        break;
+      } catch (err) {
+        console.error('Error loading patterns, retrying...', err);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+    const defaultPattern = prevPattern && patterns.includes(prevPattern) ? prevPattern : 'general';
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
@@ -401,9 +422,19 @@ async function loadModels() {
 
 async function loadObsidianFiles() {
   try {
-    const res = await fetch(obsidianUrl);
-    await checkResponse(res);
-    const files = await res.json();
+    let files;
+    // retry until backend call succeeds
+    while (true) {
+      try {
+        const res = await fetch(obsidianUrl);
+        await checkResponse(res);
+        files = await res.json();
+        break;
+      } catch (err) {
+        console.error('Error loading files, retrying...', err);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
     const allOptions = ['(no file)', ...files];
     const prevFile = obsidianSelect.getValue();
     const defaultFile = prevFile && allOptions.includes(prevFile) ? prevFile : '(no file)';
@@ -531,7 +562,7 @@ form.addEventListener('submit', async e => {
   const sendBtn = document.querySelector('.btn-send');
   const cancelBtn = document.getElementById('cancel-button');
   chatBtn.disabled = true;
-  sendBtn.disabled = true;
+  sendBtn.disabled = false;
   cancelBtn.disabled = false;
   let text = input.value.trim();
   if (text == "")  {
@@ -545,7 +576,7 @@ form.addEventListener('submit', async e => {
     isChatButtonPressed = false;
   }
   lastPrompt = text;
-  const pattern = patternSelect.getValue() || 'general_advice';
+  const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
 
