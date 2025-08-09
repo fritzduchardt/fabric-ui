@@ -18,6 +18,7 @@ backend:
   obsidianFolders:
     - "Sync/private"
   personalName: "Fritz"
+  journalFileRetroMonths: 3
 
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"

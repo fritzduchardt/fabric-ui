@@ -45,6 +45,8 @@ spec:
             value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
           - name: PERSONAL_NAME
             value: {{ .Values.backend.personalName | quote }}
+          - name: JOURNAL_FILE_RETRO_MONTHS
+            value: {{ .Values.backend.journalFileRetroMonths | quote }}
       volumes:
       - name: fabric-env
         secret:
