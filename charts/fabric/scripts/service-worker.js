@@ -1,5 +1,5 @@
 // Service worker for offline support and asset caching
-const CACHE_NAME = 'fabric-chat-v1';
+const CACHE_NAME = 'fabric-chat-v2';
 const URLs_TO_CACHE = [
   './',
   './index.html',
@@ -36,4 +36,3 @@ self.addEventListener('fetch', event => {
     )
   );
 });
-
