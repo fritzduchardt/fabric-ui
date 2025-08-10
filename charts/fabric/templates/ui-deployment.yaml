@@ -23,9 +23,6 @@ spec:
     spec:
       containers:
       - name: fabric-ui
-        env:
-          - name: API_DOMAIN
-            value: {{ .Values.ui.backendUrl }}
         image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
         imagePullPolicy: Always
         ports:
