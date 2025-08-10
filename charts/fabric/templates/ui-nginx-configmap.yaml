@@ -41,6 +41,13 @@ data:
         location / {
           try_files $uri $uri/ /index.html;
         }
+        # Service worker script: exact path, disable caching
+        location = /service-worker.js {
+          expires off;
+          add_header Cache-Control "no-cache, no-store, must-revalidate";
+          add_header Pragma "no-cache";
+          add_header Surrogate-Control "no-store";
+        }
         # Serve static assets directly, returning 404 if missing
         location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|json)$ {
           try_files $uri =404;

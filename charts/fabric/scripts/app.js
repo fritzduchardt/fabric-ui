@@ -714,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (form.requestSubmit) {
         form.requestSubmit();
