@@ -19,7 +19,10 @@ spec:
         component: ui
       annotations:
         # Add checksum annotation to force deployment restart when scripts configmap changes
-        checksum/scripts-config: {{ .Files.Get "scripts/app.js" | sha256sum }}
+        checksum/app-js: {{ .Files.Get "scripts/app.js" | sha256sum }}
+        checksum/service-worker-js: {{ .Files.Get "scripts/service-worker.js" | sha256sum }}
+        checksum/lib-js: {{ .Files.Get "scripts/lib.js" | sha256sum }}
+        checksum/index-html: {{ .Files.Get "scripts/index.html" | sha256sum }}
     spec:
       containers:
       - name: fabric-ui
