@@ -1,30 +1,20 @@
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Release.Name }}-ui-scripts
-  namespace: {{ .Release.Name }}
-  labels:
-    app: {{ .Release.Name }}
-    component: ui
-data:
-  # UI application JavaScript
-  app.js: |-
-{{ .Files.Get "scripts/app.js"
+{{- /*
+This block defines variables for each script file's content.
+These variables are used for two purposes:
+1. To be concatenated and hashed to create a unique cache version for the service worker.
+2. To populate the ConfigMap data below.
+This ensures that any change in the scripts or their templated values will result in a new cache version.
+*/}}
+{{- $appJsTpl := .Files.Get "scripts/app.js"
   | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" ( tpl .Values.ui.backendUrl . ))
   | replace "const defaults = ['o3-mini'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
   | replace "modelSelect.setItems(defaults, 'o3-mini');" (printf "modelSelect.setItems(defaults, '%s');" .Values.ui.defaultModel)
   | replace "'general'" (printf "'%s'" .Values.ui.defaultPattern)
   | replace "patternSelect.setItems(patterns, defaultPattern);" "patternSelect.setItems(patterns, defaultPattern);"
-  | indent 4 }}
-  # UI HTML entrypoint
-  lib.js: |-
-{{ .Files.Get "scripts/lib.js" | indent 4 }}
-  index.html: |-
-{{ .Files.Get "scripts/index.html" | indent 4 }}
-  # PWA manifest with configurable icon path
-  manifest.json: |-
-    {
+}}
+{{- $libJsTpl := .Files.Get "scripts/lib.js" }}
+{{- $indexHtmlTpl := .Files.Get "scripts/index.html" }}
+{{- $manifestJsonTpl := tpl (printf `    {
       "name": "{{ .Values.ui.title }}",
       "short_name": "{{ .Values.ui.title }}",
       "start_url": "./index.html",
@@ -43,7 +33,31 @@ data:
           "type": "image/png"
         }
       ]
-    }
+    }`) . }}
+{{- $serviceWorkerJsRaw := .Files.Get "scripts/service-worker.js" }}
+{{- /* Concatenate all content and create a hash for cache busting. */}}
+{{- $allContent := printf "%s%s%s%s%s" $appJsTpl $libJsTpl $indexHtmlTpl $manifestJsonTpl $serviceWorkerJsRaw }}
+{{- $cacheVersion := $allContent | sha256sum | substr 0 16 }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ui-scripts
+  namespace: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    component: ui
+data:
+  # UI application JavaScript
+  app.js: |-
+{{ $appJsTpl | indent 4 }}
+  # UI HTML entrypoint
+  lib.js: |-
+{{ $libJsTpl | indent 4 }}
+  index.html: |-
+{{ $indexHtmlTpl | indent 4 }}
+  # PWA manifest with configurable icon path
+  manifest.json: |-
+{{ $manifestJsonTpl }}
   # Service worker
   service-worker.js: |-
-{{ .Files.Get "scripts/service-worker.js" | indent 4 }}
+{{ $serviceWorkerJsRaw | replace "fabric-chat-cache-placeholder" (printf "fabric-chat-cache-%s" $cacheVersion) | indent 4 }}

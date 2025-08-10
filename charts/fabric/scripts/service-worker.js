@@ -1,9 +1,10 @@
 // Service worker for offline support and asset caching
-const CACHE_NAME = 'fabric-chat-v2';
+const CACHE_NAME = 'fabric-chat-cache-placeholder';
 const URLs_TO_CACHE = [
   './',
   './index.html',
   './app.js',
+  './lib.js',
   './manifest.json',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/marked/marked.min.js'
