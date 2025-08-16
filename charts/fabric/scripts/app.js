@@ -29,7 +29,6 @@ async function storeMessageHandler(e, bubble) {
     const btn = e.currentTarget;
     e.preventDefault();
     e.stopPropagation();
-    btn.disabled = true;
     const spinner = document.createElement('span');
     spinner.className = 'spinner-border spinner-border-sm ms-2';
     spinner.role = 'status';
@@ -63,12 +62,12 @@ async function storeMessageHandler(e, bubble) {
         }
         await generatePatterns();
         await loadObsidianFiles();
+        btn.disabled = true;
     } catch (err) {
         console.error(err);
         addMessage(`Error storing message (${err.message})`, 'bot');
     } finally {
         spinner.remove();
-        btn.disabled = false;
     }
 }
 
@@ -83,6 +82,24 @@ function addStoreButtonIfNeeded(bubble) {
     btn.textContent = 'Store';
     btn.addEventListener('click', (e) => storeMessageHandler(e, bubble));
     bubble.appendChild(btn);
+  }
+}
+
+function addPromptButtonIfNeeded(b) {
+  const mdTrim = b.dataset.markdown.trim();
+  if (mdTrim && mdTrim.toLowerCase() !== 'no further instructions') {
+    const promptBtn = document.createElement('button');
+    promptBtn.className = 'prompt-again-button';
+    promptBtn.textContent = 'Prompt';
+    promptBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      input.value = b.dataset.markdown;
+      input.focus();
+      const pos = input.value.length;
+      input.setSelectionRange(pos, pos);
+    });
+    b.appendChild(promptBtn);
   }
 }
 
@@ -416,7 +433,7 @@ async function generatePatterns() {
 }
 
 async function loadModels() {
-  const defaults = ['o3-mini'];
+  const defaults = ['o3-mini', 'o4-mini'];
   modelSelect.setItems(defaults, 'o3-mini');
 }
 
@@ -521,21 +538,7 @@ function addMessage(text, sender, isChat = false, hideStore = false, view = fals
   }
 
   if (sender === 'user') {
-    const mdTrim = b.dataset.markdown.trim();
-    if (mdTrim && mdTrim.toLowerCase() !== 'no further instructions') {
-      const promptBtn = document.createElement('button');
-      promptBtn.className = 'prompt-again-button';
-      promptBtn.textContent = 'Prompt';
-      promptBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        input.value = b.dataset.markdown;
-        input.focus();
-        const pos = input.value.length;
-        input.setSelectionRange(pos, pos);
-      });
-      b.appendChild(promptBtn);
-    }
+    addPromptButtonIfNeeded(b)
   }
 
   messagesEl.appendChild(m);
@@ -579,7 +582,6 @@ form.addEventListener('submit', async e => {
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-
   addMessage(text, 'user', userIsChat);
   input.value = '';
   showLoading();
@@ -647,7 +649,7 @@ form.addEventListener('submit', async e => {
             const obj = JSON.parse(d);
             const c = obj.content || '';
             b.dataset.markdown += c;
-            b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, false, modelSelect.getValue());
+            b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, false, model);
             b.querySelectorAll('a').forEach(a => {
               if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
               a.setAttribute('target', '_blank');
@@ -655,6 +657,7 @@ form.addEventListener('submit', async e => {
             });
             messagesEl.scrollTop = messagesEl.scrollHeight;
             addStoreButtonIfNeeded(b);
+            addPromptButtonIfNeeded(b);
           } catch {}
         }
       }
