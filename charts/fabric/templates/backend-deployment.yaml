@@ -24,7 +24,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Release.Name }}-backend
-        image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
+        image: "{{ .Values.backend.image }}{{- if .Values.backend.sha }}@{{ .Values.backend.sha }}{{- else }}:{{ .Values.backend.tag }}{{- end }}"
         imagePullPolicy: Always
         ports:
         - containerPort: {{ .Values.backend.port }}
@@ -56,3 +56,4 @@ spec:
       - name: sync
         persistentVolumeClaim:
           claimName: sync
+
