@@ -108,10 +108,12 @@ function addShareWithTelegramButton(b) {
   const shareBtn = document.createElement('button');
   shareBtn.className = 'share-button';
   shareBtn.textContent = 'Share';
+  shareBtn.disabled = false;
   shareBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     shareWithTelegram(telegramUrl, markdownToPlainText(b.dataset.markdown));
+    shareBtn.disabled = true;
   });
   b.appendChild(shareBtn);
 }
