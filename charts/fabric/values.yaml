@@ -19,6 +19,7 @@ backend:
     - "Sync/private"
   personalName: "Fritz"
   journalFileRetroMonths: 3
+  telegramBotToken: ""
 
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"

@@ -582,7 +582,7 @@ form.addEventListener('submit', async e => {
   sendBtn.disabled = false;
   cancelBtn.disabled = false;
   let text = input.value.trim();
-  if (text == "")  {
+  if (text == "") {
     text = "No further instructions"
   }
   const userIsChat = isChatButtonPressed;
@@ -601,103 +601,128 @@ form.addEventListener('submit', async e => {
   showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
 
-  abortController = new AbortController();
-  try {
-    const payload = {
-      prompts: [{
-        sessionName: currentSession,
-        userInput: text,
-        vendor: "openai",
-        model,
-        contextName: "general_context.md",
-        patternName: pattern,
-        strategyName: "",
-        obsidianFile: obs
-      }],
-      language: "en",
-      temperature: temperature,
-      topP: 1.0,
-      frequencyPenalty: 0.0,
-      presencePenalty: 0.0
-    };
-    const res = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
-      body: JSON.stringify(payload),
-      signal: abortController.signal
-    });
+  let lastError;
+  let success = false;
+
+  for (let attempt = 1; attempt <= 10 && !success; attempt++) {
+    abortController = new AbortController();
+    let messageBubbleElement = null; // To track the created bubble for cleanup
+
     try {
+      const payload = {
+        prompts: [{
+          sessionName: currentSession,
+          userInput: text,
+          vendor: "openai",
+          model,
+          contextName: "general_context.md",
+          patternName: pattern,
+          strategyName: "",
+          obsidianFile: obs
+        }],
+        language: "en",
+        temperature: temperature,
+        topP: 1.0,
+        frequencyPenalty: 0.0,
+        presencePenalty: 0.0
+      };
+
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+        body: JSON.stringify(payload),
+        signal: abortController.signal
+      });
+
       await checkResponse(res);
-    } catch (err) {
+
       hideLoading();
-      addMessage(`Error ${err.message}`, 'bot');
-      return;
-    }
-    hideLoading();
-    const m = document.createElement('div');
-    m.classList.add('message', 'bot');
-    m.style.position = 'relative';
-    const b = document.createElement('div');
-    b.classList.add('bubble');
-    b.style.maxWidth = '100%';
-    b.dataset.markdown = '';
-    m.appendChild(b);
-    messagesEl.appendChild(m);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    const reader = res.body.getReader();
-    const dec = new TextDecoder();
-    let done = false, buf = '';
-    while (!done) {
-      const { value, done: dr } = await reader.read();
-      done = dr;
-      if (value) {
-        buf += dec.decode(value, { stream: true });
-        const parts = buf.split('\n\n');
-        buf = parts.pop();
-        for (const p of parts) {
-          const line = p.trim();
-          if (!line.startsWith('data:')) continue;
-          const d = line.slice(5).trim();
-          if (d === '[DONE]') { done = true; break; }
-          try {
-            const obj = JSON.parse(d);
-            const c = obj.content || '';
-            b.dataset.markdown += c;
-            b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, false, model);
-            b.querySelectorAll('a').forEach(a => {
-              if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
-              a.setAttribute('target', '_blank');
-              a.setAttribute('rel', 'noopener noreferrer');
-            });
-            messagesEl.scrollTop = messagesEl.scrollHeight;
-            addStoreButtonIfNeeded(b);
-            addPromptButtonIfNeeded(b);
-            addShareWithTelegramButton(b);
-          } catch {}
+      const m = document.createElement('div');
+      messageBubbleElement = m; // Assign for potential cleanup
+      m.classList.add('message', 'bot');
+      m.style.position = 'relative';
+      const b = document.createElement('div');
+      b.classList.add('bubble');
+      b.style.maxWidth = '100%';
+      b.dataset.markdown = '';
+      m.appendChild(b);
+      messagesEl.appendChild(m);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let done = false, buf = '';
+      while (!done) {
+        const { value, done: dr } = await reader.read();
+        done = dr;
+        if (value) {
+          buf += dec.decode(value, { stream: true });
+          const parts = buf.split('\n\n');
+          buf = parts.pop();
+          for (const p of parts) {
+            const line = p.trim();
+            if (!line.startsWith('data:')) continue;
+            const d = line.slice(5).trim();
+            if (d === '[DONE]') { done = true; break; }
+            try {
+              const obj = JSON.parse(d);
+              const c = obj.content || '';
+              b.dataset.markdown += c;
+              b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, false, model);
+              b.querySelectorAll('a').forEach(a => {
+                if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
+                a.setAttribute('target', '_blank');
+                a.setAttribute('rel', 'noopener noreferrer');
+              });
+              messagesEl.scrollTop = messagesEl.scrollHeight;
+              addStoreButtonIfNeeded(b);
+              addPromptButtonIfNeeded(b);
+              addShareWithTelegramButton(b);
+            } catch {}
+          }
+        }
+      }
+
+      if (b.dataset.markdown.trim() === '') {
+        throw new Error('No response from server. Check configuration and try again.');
+      }
+
+      if (!b.classList.contains('error')) {
+        addCopyAndTopButtonsIfNeeded(b);
+      }
+
+      success = true; // Mark as success to exit the loop
+
+    } catch (err) {
+      lastError = err;
+
+      if (messageBubbleElement) {
+        messageBubbleElement.remove(); // Clean up failed bubble
+      }
+
+      if (err.name === 'AbortError') {
+        addMessage('Request cancelled', 'bot');
+        success = true; // Exit loop, not a retryable error
+      } else {
+        console.error(`Attempt ${attempt} failed:`, err);
+        if (attempt < 10) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
     }
-    if (b.dataset.markdown.trim() === '') {
-      b.classList.add('error');
-      b.dataset.markdown = 'No response from server. Check configuration and try again.';
-      b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
-    } else if (!b.classList.contains('error')) {
-      addCopyAndTopButtonsIfNeeded(b);
-    }
-  } catch (err) {
-    hideLoading();
-    if (err.name === 'AbortError') {
-      addMessage('Request cancelled', 'bot');
-    } else {
-      addMessage(`Error (${err.message})`, 'bot');
-    }
-  } finally {
-    chatBtn.disabled = false;
-    sendBtn.disabled = false;
-    const cancelBtn2 = document.getElementById('cancel-button');
-    if (cancelBtn2) cancelBtn2.disabled = true;
-    abortController = null;
   }
+
+  hideLoading();
+  if (!success && lastError) {
+    addMessage(`Error (${lastError.message})`, 'bot');
+  }
+
+  // Finally block
+  chatBtn.disabled = false;
+  sendBtn.disabled = false;
+  const cancelBtn2 = document.getElementById('cancel-button');
+  if (cancelBtn2) cancelBtn2.disabled = true;
+  abortController = null;
 });
 
 document.addEventListener('DOMContentLoaded', () => {
