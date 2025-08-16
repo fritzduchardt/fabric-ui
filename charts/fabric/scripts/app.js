@@ -13,6 +13,7 @@ const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
 const patternDeleteUrl = `${apiDomain}/deletepattern`;
 const obsidianFileUrl = `${apiDomain}/obsidian/file`;
+const telegramUrl = `${apiDomain}/telegram/send`;
 const storeUrl = `${apiDomain}/store`;
 
 // Helper to throw error with status and body message
@@ -101,6 +102,18 @@ function addPromptButtonIfNeeded(b) {
     });
     b.appendChild(promptBtn);
   }
+}
+
+function addShareWithTelegramButton(b) {
+  const shareBtn = document.createElement('button');
+  shareBtn.className = 'share-button';
+  shareBtn.textContent = 'Share';
+  shareBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    shareWithTelegram(telegramUrl, markdownToPlainText(b.dataset.markdown));
+  });
+  b.appendChild(shareBtn);
 }
 
 // Adds "Copy" and "Top" buttons to a bot message bubble
@@ -535,6 +548,7 @@ function addMessage(text, sender, isChat = false, hideStore = false, view = fals
         addStoreButtonIfNeeded(b);
     }
     addCopyAndTopButtonsIfNeeded(b);
+    addShareWithTelegramButton(b)
   }
 
   if (sender === 'user') {
@@ -658,6 +672,7 @@ form.addEventListener('submit', async e => {
             messagesEl.scrollTop = messagesEl.scrollHeight;
             addStoreButtonIfNeeded(b);
             addPromptButtonIfNeeded(b);
+            addShareWithTelegramButton(b);
           } catch {}
         }
       }

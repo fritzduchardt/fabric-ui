@@ -78,3 +78,35 @@ function fillAndSend(text) {
         form.dispatchEvent(new Event('submit', { cancelable: true }));
     }
 }
+
+// Share text with a configurable Telegram channel via a backend endpoint
+async function shareWithTelegram(endpoint, text) {
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: text, chat_id: "-4983351353" }),
+    });
+
+    if (!response.ok) {
+      let errorDetails = 'No details available.';
+      try {
+        const errorData = await response.json();
+        errorDetails = errorData.message || JSON.stringify(errorData);
+      } catch (e) {
+        errorDetails = await response.text();
+      }
+      console.error(`Failed to share with Telegram. Status: ${response.status}. Details: ${errorDetails}`);
+      alert(`Failed to share message with Telegram: ${response.statusText}`);
+      return;
+    }
+
+    console.log('Message shared with Telegram successfully.');
+  } catch (error) {
+    console.error('An error occurred while trying to share with Telegram:', error);
+    alert('An error occurred while trying to share with Telegram. Check the console for details.');
+  }
+}
