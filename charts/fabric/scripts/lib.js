@@ -1,5 +1,5 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
-function transformObsidianMarkdown(md, noFold, model) {
+function transformObsidianMarkdown(md, model) {
   let html = '';
   let sections = [];
   const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
@@ -47,6 +47,8 @@ function markdownToPlainText(md) {
   let text = md;
   // Remove lines starting with FILENAME:
   text = text.replace(/^FILENAME:.*$/gm, '');
+  // Convert markdown headers to uppercase
+  text = text.replace(/^#+\s*(.*)$/gm, (_match, content) => content.toUpperCase());
   // Convert markdown checkboxes to simple bullet points
   text = text.replace(/^[*-]\s*\[[ xX]\]\s*(.*)$/gm, '- $1');
   // Transform wikilinks [[Page|alias]] and [[Page]]

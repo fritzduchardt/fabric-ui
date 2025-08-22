@@ -66,7 +66,7 @@ async function storeMessageHandler(e, bubble) {
         btn.disabled = true;
     } catch (err) {
         console.error(err);
-        addMessage(`Error storing message (${err.message})`, 'bot');
+        addMessage(`Error storing message (${err.message})`, 'bot', false,  false, true, true, true);
     } finally {
         spinner.remove();
     }
@@ -303,7 +303,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               await checkResponse(res);
               const content = await res.text();
-              addMessage(content, 'bot', false, true, true);
+              addMessage(content, 'bot', false,  true, true, true, true);
               // Add Delete button to the message produced by Sw
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
@@ -319,16 +319,16 @@ function createEnhancedSelect(id, placeholder) {
                   await loadObsidianFiles();
                   // remove the message bubble
                   lastMsg.remove();
-                  addMessage(`Deleted file ${item}`, 'bot', false, true);
+                  addMessage(`Deleted file ${item}`, 'bot', false,  false, true, true, true);
                 } catch (err) {
                   console.error(err);
-                  addMessage(`Error deleting file (${err.message})`, 'bot');
+                  addMessage(`Error deleting file (${err.message})`, 'bot', false,  false, true, true, true);
                 }
               });
               bubble.appendChild(deleteBtn);
             } catch (err) {
               console.error(err);
-              addMessage(`Error loading file (${err.message})`, 'bot');
+              addMessage(`Error loading file (${err.message})`, 'bot', false,  false, true, true, true);
             }
           });
           dropdownItem.appendChild(showBtn);
@@ -352,8 +352,7 @@ function createEnhancedSelect(id, placeholder) {
               await checkResponse(res);
               const data = await res.json();
               const md = data.Pattern;
-              addMessage(`${md}`, 'bot', false, true, true);
-              // Add Delete button to the message produced by Sw
+              addMessage(`${md}`, 'bot', false,  true, true, true, true);
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
               const deletePatBtn = document.createElement('button');
@@ -368,16 +367,16 @@ function createEnhancedSelect(id, placeholder) {
                   await generatePatterns();
                   // remove the message bubble
                   lastMsg.remove();
-                  addMessage(`Deleted pattern ${item}`, 'bot', false, true);
+                  addMessage(`Deleted pattern ${item}`, 'bot', false,  false, true, true, true);
                 } catch (err) {
                   console.error(err);
-                  addMessage(`Error deleting pattern (${err.message})`, 'bot');
+                  addMessage(`Error deleting pattern (${err.message})`, 'bot', false,  false, true, true, true);
                 }
               });
               bubble.appendChild(deletePatBtn);
             } catch (err) {
               console.error(err);
-              addMessage(`Error loading pattern (${err.message})`, 'bot');
+              addMessage(`Error loading pattern (${err.message})`, 'bot', false,  false, true, true, true);
             }
           });
           dropdownItem.appendChild(showPatternBtn);
@@ -432,7 +431,7 @@ async function loadPatterns() {
     patternSelect.setItems(patterns, defaultPattern);
   } catch (e) {
     console.error(e);
-    addMessage(`Error loading patterns (${e.message})`, 'bot');
+    addMessage(`Error loading patterns (${e.message})`, 'bot', false,  false, true, true, true);
   }
 }
 
@@ -443,7 +442,7 @@ async function generatePatterns() {
     await loadPatterns();
   } catch (e) {
     console.error(e);
-    addMessage(`Error generating patterns (${e.message})`, 'bot');
+    addMessage(`Error generating patterns (${e.message})`, 'bot', false,  false, true, true, true);
   }
 }
 
@@ -473,7 +472,7 @@ async function loadObsidianFiles() {
     obsidianSelect.setItems(allOptions, defaultFile);
   } catch (e) {
     console.error(e);
-    addMessage(`Error loading files (${e.message})`, 'bot');
+    addMessage(`Error loading files (${e.message})`, 'bot', false,  false, true, true, true);
   }
 }
 
@@ -515,7 +514,7 @@ if (messagesEl) {
 }
 
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
-function addMessage(text, sender, isChat = false, hideStore = false, view = false) {
+function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
   if (sender === 'user') {
@@ -530,7 +529,7 @@ function addMessage(text, sender, isChat = false, hideStore = false, view = fals
     b.classList.add('error');
   }
   b.dataset.markdown = text;
-  b.innerHTML = transformObsidianMarkdown(text, view);
+  b.innerHTML = transformObsidianMarkdown(text);
   if (sender === 'user') {
     b.querySelectorAll('a').forEach(a => {
       const href = a.href;
@@ -545,18 +544,18 @@ function addMessage(text, sender, isChat = false, hideStore = false, view = fals
   }
   m.appendChild(b);
 
-  if (sender === 'bot') {
-    if (!hideStore) {
-        addStoreButtonIfNeeded(b);
-    }
+  if (!hideStore) {
+      addStoreButtonIfNeeded(b);
+  }
+  if (!hideCopy) {
     addCopyAndTopButtonsIfNeeded(b);
-    addShareWithTelegramButton(b)
   }
-
-  if (sender === 'user') {
-    addPromptButtonIfNeeded(b)
+  if (!hideShare) {
+    addShareWithTelegramButton(b);
   }
-
+  if (showPrompt) {
+    addPromptButtonIfNeeded(b);
+  }
   messagesEl.appendChild(m);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -598,7 +597,7 @@ form.addEventListener('submit', async e => {
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-  addMessage(text, 'user', userIsChat);
+  addMessage(text, 'user', userIsChat,  false, true, true, false, true);
   input.value = '';
   showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
@@ -670,7 +669,8 @@ form.addEventListener('submit', async e => {
               const obj = JSON.parse(d);
               const c = obj.content || '';
               b.dataset.markdown += c;
-              b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, false, model);
+              b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, model);
+              b.classList.add('full-width'); // full-width for Sw button messages
               b.querySelectorAll('a').forEach(a => {
                 if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
                 a.setAttribute('target', '_blank');
@@ -703,11 +703,12 @@ form.addEventListener('submit', async e => {
       }
 
       if (err.name === 'AbortError') {
-        addMessage('Request cancelled', 'bot');
+        addMessage('Request cancelled', 'bot', false, false, true, true, true);
         success = true; // Exit loop, not a retryable error
       } else {
         console.error(`Attempt ${attempt} failed:`, err);
         if (attempt < 10) {
+          addMessage('Retrying faithfully', 'bot', false, false, true, true, true);
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
@@ -716,7 +717,7 @@ form.addEventListener('submit', async e => {
 
   hideLoading();
   if (!success && lastError) {
-    addMessage(`Error (${lastError.message})`, 'bot');
+    addMessage(`Error (${lastError.message})`, 'bot', false,  false, true, true, true);
   }
 
   // Finally block
