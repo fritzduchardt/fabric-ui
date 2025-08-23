@@ -721,9 +721,9 @@ form.addEventListener('submit', async e => {
         success = true; // Exit loop, not a retryable error
       } else {
         console.error(`Attempt ${attempt} failed:`, err);
-        if (attempt < 10) {
-          addMessage('Retrying faithfully', 'bot', false, false, true, true, true);
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        if (attempt < 20) {
+          addMessage(`Retrying faithfully (${attempt}) ..`, 'bot', false, false, true, true, true);
+          await new Promise(resolve => setTimeout(resolve, 3000));
         }
       }
     }
