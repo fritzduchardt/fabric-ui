@@ -16,6 +16,25 @@ const obsidianFileUrl = `${apiDomain}/obsidian/file`;
 const telegramUrl = `${apiDomain}/telegram/send`;
 const storeUrl = `${apiDomain}/store`;
 
+// Model to vendor mapping
+const modelVendorMap = {
+  'o3-mini': 'OpenAI',
+  'o4-mini': 'OpenAI',
+  'gpt-5-mini': 'OpenAI',
+  'gemini-2.5-pro': 'Google',
+  'claude-3-5-sonnet': 'Anthropic',
+  'claude-3-opus': 'Anthropic',
+  'grok-4-0709': 'Groq',
+  'claude-3-7-sonnet-latest': 'Anthropic',
+  'claude-3-opus-latest': 'Anthropic'
+};
+
+async function loadModels() {
+  const defaults = ['o3-mini', 'o4-mini', 'claude-3-7-sonnet-latest', 'gpt-5-mini'];
+  modelSelect.setItems(defaults, 'o3-mini');
+}
+
+
 // Helper to throw error with status and body message
 async function checkResponse(res) {
   if (!res.ok) {
@@ -446,11 +465,6 @@ async function generatePatterns() {
   }
 }
 
-async function loadModels() {
-  const defaults = ['o3-mini', 'o4-mini'];
-  modelSelect.setItems(defaults, 'o3-mini');
-}
-
 async function loadObsidianFiles() {
   try {
     let files;
@@ -614,7 +628,7 @@ form.addEventListener('submit', async e => {
         prompts: [{
           sessionName: currentSession,
           userInput: text,
-          vendor: "openai",
+          vendor: modelVendorMap[model],
           model,
           contextName: "general_context.md",
           patternName: pattern,
