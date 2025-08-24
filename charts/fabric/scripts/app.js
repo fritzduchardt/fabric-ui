@@ -4,6 +4,39 @@ let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 let abortController = null;  // controller for cancelling requests
 
+const funnyRetryMessages = [
+    "Hang on, the hamsters are spinning up the wheel again...",
+    "Just a moment, we're negotiating with the server gnomes...",
+    "Reticulating splines...",
+    "The server is having a moment. Let's try that again.",
+    "Attempting to summon the digital spirits... Again.",
+    "Our carrier pigeon seems to have gotten lost. Resending...",
+    "Don't worry, we've dispatched a team of highly trained monkeys.",
+    "Trying to reconnect to the Matrix...",
+    "The server is playing hard to get. Let's be persistent.",
+    "Poking the server with a stick...",
+    "It's not you, it's me... I mean, the server. Retrying.",
+    "Let's give it another go. Third time's the charm, right?",
+    "The bits are flowing, just a little upstream. Trying again.",
+    "Our AI is contemplating the meaning of life. One more try.",
+    "Waking up the server from its nap...",
+    "Sending positive vibes to the server... and another request.",
+    "Hold tight, we're trying a different magic spell.",
+    "The server is probably just shy. Let's try again.",
+    "I think the server is on a coffee break. Let's wait and retry.",
+    "Re-calibrating the flux capacitor...",
+    "The server is busy watching cat videos. Retrying.",
+    "Maybe if we ask nicely this time? Retrying...",
+    "Our intern tripped over the server cable. Fixing and retrying.",
+    "Just a glitch in the simulation. We're on it.",
+    "The server is checking its horoscope. Let's try again in a sec.",
+    "I've got a good feeling about this next attempt.",
+    "Is this thing on? *taps mic* Retrying...",
+    "We're sending in the backup squirrels. Stand by.",
+    "The server seems to be running on dial-up. Patience, young padawan.",
+    "Okay, deep breaths. We can do this. Retrying..."
+];
+
 // API domain configuration
 const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
 // API endpoints based on apiDomain
@@ -542,6 +575,12 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   if (text.startsWith('Error')) {
     b.classList.add('error');
   }
+
+  // Color retry messages with pastel orange
+  if (funnyRetryMessages.some(msg => text.startsWith(msg))) {
+    b.style.backgroundColor = '#FFDAB9'; // PeachPuff
+  }
+
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
   if (sender === 'user') {
@@ -723,8 +762,10 @@ form.addEventListener('submit', async e => {
       } else {
         console.error(`Attempt ${attempt} failed:`, err);
         if (attempt < 20) {
-          addMessage(`Retrying faithfully (${attempt}) ..`, 'bot', false, false, true, true, true);
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          const randomIndex = Math.floor(Math.random() * funnyRetryMessages.length);
+          const retryMessage = funnyRetryMessages[randomIndex];
+          addMessage(`${retryMessage} (${attempt})`, 'bot', false, false, true, true, true);
+          await new Promise(resolve => setTimeout(resolve, 5000));
         }
       }
     }
