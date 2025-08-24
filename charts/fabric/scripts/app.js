@@ -21,7 +21,7 @@ const modelVendorMap = {
   'o3-mini': 'OpenAI',
   'o4-mini': 'OpenAI',
   'gpt-5-mini': 'OpenAI',
-  'gemini-2.5-pro': 'Google',
+  'gemini-2.5-pro': 'Gemini',
   'claude-3-5-sonnet': 'Anthropic',
   'claude-3-opus': 'Anthropic',
   'grok-4-0709': 'Groq',
@@ -576,16 +576,17 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
 
 function showLoading() {
   const loader = document.createElement('div');
-  loader.id = 'loader';
-  loader.className = 'text-center py-2';
+  loader.className = 'loader text-center py-2';
   loader.innerHTML = '<div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
   messagesEl.appendChild(loader);
   messagesEl.scrollTop = messagesEl.scrollHeight;
+  return loader;
 }
 
-function hideLoading() {
-  const l = document.getElementById('loader');
-  if (l) l.remove();
+function hideLoading(loader) {
+  if (loader && loader.parentNode) {
+    loader.remove();
+  }
 }
 
 form.addEventListener('submit', async e => {
@@ -613,7 +614,7 @@ form.addEventListener('submit', async e => {
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
   addMessage(text, 'user', userIsChat,  false, true, true, false, true);
   input.value = '';
-  showLoading();
+  const loader = showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
 
   let lastError;
@@ -651,7 +652,7 @@ form.addEventListener('submit', async e => {
 
       await checkResponse(res);
 
-      hideLoading();
+      hideLoading(loader);
       const m = document.createElement('div');
       messageBubbleElement = m; // Assign for potential cleanup
       m.classList.add('message', 'bot');
@@ -729,7 +730,7 @@ form.addEventListener('submit', async e => {
     }
   }
 
-  hideLoading();
+  hideLoading(loader);
   if (!success && lastError) {
     addMessage(`Error (${lastError.message})`, 'bot', false,  false, true, true, true);
   }
@@ -765,8 +766,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (abortController) abortController.abort();
   });
 
-  showLoading();
-  Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading());
+  const loader = showLoading();
+  Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading(loader));
   loadModels();
 
   input.addEventListener('focus', () => {
