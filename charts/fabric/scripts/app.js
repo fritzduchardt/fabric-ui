@@ -51,13 +51,12 @@ const storeUrl = `${apiDomain}/store`;
 
 // Model to vendor mapping
 const modelVendorMap = {
-  'o3-mini': 'OpenAI',
   'o4-mini': 'OpenAI',
   'gpt-5-mini': 'OpenAI',
   'gemini-2.5-pro': 'Gemini',
   'claude-3-5-sonnet': 'Anthropic',
   'claude-3-opus': 'Anthropic',
-  'grok-4-0709': 'Groq',
+  'grok-4-0709': 'GrokAI',
   'claude-3-7-sonnet-latest': 'Anthropic',
   'claude-3-opus-latest': 'Anthropic'
 };
