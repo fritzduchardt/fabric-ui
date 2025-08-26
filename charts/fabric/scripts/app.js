@@ -354,7 +354,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               await checkResponse(res);
               const content = await res.text();
-              addMessage(content, 'bot', false,  true, true, true, true);
+              addMessage(content, 'bot', false,  true, true, false, false);
               // Add Delete button to the message produced by Sw
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
