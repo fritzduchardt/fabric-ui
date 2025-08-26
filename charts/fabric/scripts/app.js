@@ -3,6 +3,7 @@ let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 let abortController = null;  // controller for cancelling requests
+let isRequestCancelled = false; // flag for cancellation during retry waits
 
 const funnyRetryMessages = [
     "Hang on, the hamsters are spinning up the wheel again...",
@@ -589,7 +590,7 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
       icon.href = href;
       icon.target = '_blank';
       icon.rel = 'noopener noreferrer';
-      icon.textContent = '🔗';
+      icon.textContent = a.textContent;
       icon.style.marginLeft = '4px';
       a.replaceWith(icon);
     });
@@ -635,6 +636,8 @@ form.addEventListener('submit', async e => {
   chatBtn.disabled = true;
   sendBtn.disabled = false;
   cancelBtn.disabled = false;
+  isRequestCancelled = false; // Reset cancellation flag on new submission
+
   let text = input.value.trim();
   if (text == "") {
     text = "No further instructions"
@@ -659,6 +662,9 @@ form.addEventListener('submit', async e => {
   let success = false;
 
   for (let attempt = 1; attempt <= 10 && !success; attempt++) {
+    if (isRequestCancelled) {
+        break;
+    }
     abortController = new AbortController();
     let messageBubbleElement = null; // To track the created bubble for cleanup
 
@@ -756,11 +762,10 @@ form.addEventListener('submit', async e => {
       }
 
       if (err.name === 'AbortError') {
-        addMessage('Request cancelled', 'bot', false, false, true, true, true);
-        success = true; // Exit loop, not a retryable error
+        success = true; // Exit loop, will be handled by isRequestCancelled flag
       } else {
         console.error(`Attempt ${attempt} failed:`, err);
-        if (attempt < 20) {
+        if (attempt < 10) {
           const randomIndex = Math.floor(Math.random() * funnyRetryMessages.length);
           const retryMessage = funnyRetryMessages[randomIndex];
           addMessage(`${retryMessage} (${attempt})`, 'bot', false, false, true, true, true);
@@ -771,7 +776,9 @@ form.addEventListener('submit', async e => {
   }
 
   hideLoading(loader);
-  if (!success && lastError) {
+  if (isRequestCancelled) {
+    addMessage('Request cancelled', 'bot', false, false, true, true, true);
+  } else if (!success && lastError) {
     addMessage(`Error (${lastError.message})`, 'bot', false,  false, true, true, true);
   }
 
@@ -803,6 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cancelBtn.className = 'btn btn-secondary';
   chatBtn.parentNode.insertBefore(cancelBtn, chatBtn.nextSibling);
   cancelBtn.addEventListener('click', () => {
+    isRequestCancelled = true;
     if (abortController) abortController.abort();
   });
 
