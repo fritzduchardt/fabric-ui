@@ -72,6 +72,8 @@ spec:
           value: "http://127.0.0.1:1234"
         - name: OAUTH2_PROXY_REDIRECT_URL
           value: "{{ .Values.oauth2Proxy.redirectUrl }}"
+        - name: OAUTH2_PROXY_EMAIL_DOMAINS
+          value: "*"
         ports:
         - name: http
           containerPort: 4180
