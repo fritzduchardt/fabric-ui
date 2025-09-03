@@ -58,7 +58,6 @@ oauth2Proxy:
   issuerUrl: ""
   clientID: ""
   clientSecret: ""
-  redirectUrl: ""
   cookieSecret: ""
   emailDomains: "*"
   proxyPort: 8888
