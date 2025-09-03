@@ -60,3 +60,4 @@ oauth2Proxy:
   clientSecret: ""
   redirectUrl: ""
   cookieSecret: ""
+  emailDomains: "*"
