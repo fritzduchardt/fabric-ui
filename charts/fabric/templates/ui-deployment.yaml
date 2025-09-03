@@ -29,7 +29,7 @@ spec:
         image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
         imagePullPolicy: Always
         ports:
-        - containerPort: {{ .Values.ui.port }}
+        - containerPort: {{ if .Values.oauth2Proxy.enabled }}1234{{ else }}{{ .Values.ui.port }}{{ end }}
         volumeMounts:
         - name: ui-scripts
           mountPath: /usr/share/nginx/html/app.js
@@ -69,7 +69,7 @@ spec:
         - name: OAUTH2_PROXY_HTTP_ADDRESS
           value: "0.0.0.0:4180"
         - name: OAUTH2_PROXY_UPSTREAM
-          value: "http://127.0.0.1:{{ .Values.ui.port }}"
+          value: "http://127.0.0.1:1234"
         - name: OAUTH2_PROXY_REDIRECT_URL
           value: "{{ .Values.oauth2Proxy.redirectUrl }}"
         ports:
