@@ -23,8 +23,8 @@ backend:
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
-  port: 80
-  targetPort: 80
+  servicePort: 80
+  containerPort: 8080
   title: "FritzGPT"
   iconPath: "icons/turtle"
   backendUrl: "https://{{ .Values.ingress.host }}/api"
@@ -61,3 +61,4 @@ oauth2Proxy:
   redirectUrl: ""
   cookieSecret: ""
   emailDomains: "*"
+  proxyPort: 8888

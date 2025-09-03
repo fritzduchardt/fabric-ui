@@ -18,7 +18,7 @@ data:
       keepalive_timeout 65;
       server {
         # Bind to the configured UI port
-        listen {{ .Values.ui.targetPort }};
+        listen {{ .Values.ui.containerPort }};
         # Catch-all server_name
         server_name _;
         # Document root for UI files

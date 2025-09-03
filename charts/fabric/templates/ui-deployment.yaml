@@ -29,7 +29,7 @@ spec:
         image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
         imagePullPolicy: Always
         ports:
-        - containerPort: {{ if .Values.oauth2Proxy.enabled }}1234{{ else }}{{ .Values.ui.port }}{{ end }}
+        - containerPort: {{ .Values.ui.containerPort }}
         volumeMounts:
         - name: ui-scripts
           mountPath: /usr/share/nginx/html/app.js
@@ -66,15 +66,17 @@ spec:
           value: "{{ .Values.oauth2Proxy.cookieSecret }}"
         - name: OAUTH2_PROXY_COOKIE_SECURE
           value: "true"
+        - name: OAUTH2_PROXY_HTTP_ADDRESS
+          value: "http://127.0.0.1:{{ .Values.oauth2Proxy.proxyPort }}"
         - name: OAUTH2_PROXY_UPSTREAM
-          value: "http://127.0.0.1:1234"
+          value: "http://127.0.0.1:{{ .Values.ui.containerPort }}"
         - name: OAUTH2_PROXY_REDIRECT_URL
           value: "{{ .Values.oauth2Proxy.redirectUrl }}"
         - name: OAUTH2_PROXY_EMAIL_DOMAINS
           value: "{{ .Values.oauth2Proxy.emailDomains }}"
         ports:
         - name: http
-          containerPort: 4180
+          containerPort: {{ .Values.oauth2Proxy.proxyPort }}
       {{- end }}
       volumes:
       - name: ui-scripts

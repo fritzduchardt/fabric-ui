@@ -24,11 +24,10 @@ spec:
               service:
                 name: {{ .Release.Name }}-ui
                 port:
-                  number: {{ .Values.ui.port }}
+                  number: {{ .Values.ui.servicePort }}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.ingress.host | quote }}
       secretName: {{ .Values.ingress.tls.secretName | quote }}
   {{- end }}
-

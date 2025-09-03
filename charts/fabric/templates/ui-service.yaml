@@ -9,8 +9,8 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-  - port: {{ .Values.ui.port }}
-    targetPort: {{ .Values.ui.targetPort }}
+  - port: {{ .Values.ui.servicePort }}
+    targetPort: {{ if .Values.oauth2Proxy.enabled }}{{ .Values.oauth2Proxy.proxyPort }}{{ else }}{{ .Values.ui.containerPort }}{{ end }}
     name: http
   selector:
     app: {{ .Release.Name }}
