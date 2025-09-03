@@ -20,7 +20,6 @@ backend:
   personalName: "Fritz"
   journalFileRetroMonths: 3
   telegramBotToken: ""
-
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
@@ -38,7 +37,6 @@ ui:
     - "gemini-2.5-pro"
   defaultModel: "o4-mini"
   defaultPattern: "journal"
-
 ingress:
   className: nginx
   host: fabric-friclu.duckdns.org
@@ -46,15 +44,13 @@ ingress:
   tls:
     enabled: true
     secretName: fabric-certificate
-
 service:
   type: ClusterIP
-
 basicAuth:
+  enabled: false
   create: true
   secretName: ""
   authFile: "auth/htpasswd"
-
 oauth2Proxy:
   enabled: false
   image: "quay.io/oauth2-proxy/oauth2-proxy"
