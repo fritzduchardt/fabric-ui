@@ -31,7 +31,6 @@ spec:
         ports:
         - containerPort: {{ .Values.ui.port }}
         volumeMounts:
-        # Mount individual script files to avoid overwriting other assets
         - name: ui-scripts
           mountPath: /usr/share/nginx/html/app.js
           subPath: app.js
@@ -50,6 +49,45 @@ spec:
         - name: ui-nginx-config
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
+      {{- if .Values.oauth2Proxy.enabled }}
+      - name: oauth2-proxy
+        image: "{{ .Values.oauth2Proxy.image }}:{{ .Values.oauth2Proxy.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: OAUTH2_PROXY_PROVIDER
+          value: "oidc"
+        - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+          value: "{{ .Values.oauth2Proxy.issuerUrl }}"
+        - name: OAUTH2_PROXY_CLIENT_ID
+          value: "{{ .Values.oauth2Proxy.clientID }}"
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          value: "{{ .Values.oauth2Proxy.clientSecret }}"
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          value: "{{ .Values.oauth2Proxy.cookieSecret }}"
+        - name: OAUTH2_PROXY_COOKIE_SECURE
+          value: "true"
+        - name: OAUTH2_PROXY_HTTP_ADDRESS
+          value: "0.0.0.0:4180"
+        - name: OAUTH2_PROXY_UPSTREAM
+          value: "http://127.0.0.1:{{ .Values.ui.port }}"
+        - name: OAUTH2_PROXY_REDIRECT_URL
+          value: "{{ .Values.oauth2Proxy.redirectUrl }}"
+        ports:
+        - name: http
+          containerPort: 4180
+        readinessProbe:
+          httpGet:
+            path: /oauth2/healthz
+            port: 4180
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /oauth2/healthz
+            port: 4180
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      {{- end }}
       volumes:
       - name: ui-scripts
         configMap:

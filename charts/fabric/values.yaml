@@ -54,3 +54,13 @@ basicAuth:
   create: true
   secretName: ""
   authFile: "auth/htpasswd"
+
+oauth2Proxy:
+  enabled: false
+  image: "quay.io/oauth2-proxy/oauth2-proxy"
+  tag: "v7.9.0"
+  issuerUrl: ""
+  clientID: ""
+  clientSecret: ""
+  redirectUrl: ""
+  cookieSecret: ""
