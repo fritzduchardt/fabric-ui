@@ -12,6 +12,11 @@ metadata:
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
     {{- end }}
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    {{- if .Values.oauth2Proxy.enabled }}
+    # oauth proxy sidecar sends a lot of data in the request headers
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "32k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+    {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className | quote }}
   rules:
