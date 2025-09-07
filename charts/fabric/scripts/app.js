@@ -650,6 +650,7 @@ form.addEventListener('submit', async e => {
     isChatButtonPressed = false;
   }
   lastPrompt = text;
+  localStorage.setItem('lastPrompt', lastPrompt);
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
@@ -791,6 +792,12 @@ form.addEventListener('submit', async e => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  const savedLastPrompt = localStorage.getItem('lastPrompt');
+  if (savedLastPrompt) {
+    lastPrompt = savedLastPrompt;
+    input.value = lastPrompt;
+  }
+
   const mdScript = document.createElement('script');
   mdScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
   document.head.appendChild(mdScript);
@@ -845,4 +852,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     input.focus();
   });
+
 });
