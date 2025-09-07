@@ -633,6 +633,7 @@ form.addEventListener('submit', async e => {
   const chatBtn = document.getElementById('chat-button');
   const sendBtn = document.querySelector('.btn-send');
   const cancelBtn = document.getElementById('cancel-button');
+  cancelBtn.type = "button";
   chatBtn.disabled = true;
   sendBtn.disabled = false;
   cancelBtn.disabled = false;
@@ -745,8 +746,8 @@ form.addEventListener('submit', async e => {
         }
       }
 
-      if (b.dataset.markdown.trim() === '') {
-        throw new Error('No response from server. Check configuration and try again.');
+      if (b.dataset.markdown.trim() === '' || b.dataset.markdown.trim() === 'Error: empty response') {
+        throw new Error('No response from server. Try again.');
       }
 
       if (!b.classList.contains('error')) {
