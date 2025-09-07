@@ -560,6 +560,13 @@ if (messagesEl) {
   resizeObserver.observe(messagesEl);
 }
 
+function autoScroll() {
+  const isScrolledNearBottom = messagesEl.scrollHeight - messagesEl.clientHeight - messagesEl.scrollTop < 300;
+  if (isScrolledNearBottom) {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+}
+
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
 function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false) {
   const m = document.createElement('div');
@@ -610,7 +617,7 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
     addPromptButtonIfNeeded(b);
   }
   messagesEl.appendChild(m);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  autoScroll();
 }
 
 function showLoading() {
@@ -618,7 +625,7 @@ function showLoading() {
   loader.className = 'loader text-center py-2';
   loader.innerHTML = '<div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Loading...</span></div>';
   messagesEl.appendChild(loader);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  autoScroll();
   return loader;
 }
 
@@ -709,7 +716,6 @@ form.addEventListener('submit', async e => {
       b.dataset.markdown = '';
       m.appendChild(b);
       messagesEl.appendChild(m);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
 
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -737,7 +743,6 @@ form.addEventListener('submit', async e => {
                 a.setAttribute('target', '_blank');
                 a.setAttribute('rel', 'noopener noreferrer');
               });
-              messagesEl.scrollTop = messagesEl.scrollHeight;
               addStoreButtonIfNeeded(b);
               addPromptButtonIfNeeded(b);
               addShareWithTelegramButton(b);
@@ -745,6 +750,7 @@ form.addEventListener('submit', async e => {
           }
         }
       }
+      autoScroll();
 
       if (b.dataset.markdown.trim() === '' || b.dataset.markdown.trim() === 'Error: empty response') {
         throw new Error('No response from server. Try again.');
