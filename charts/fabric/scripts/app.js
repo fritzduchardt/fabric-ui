@@ -561,10 +561,7 @@ if (messagesEl) {
 }
 
 function autoScroll() {
-  const isScrolledNearBottom = messagesEl.scrollHeight - messagesEl.clientHeight - messagesEl.scrollTop < 300;
-  if (isScrolledNearBottom) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
 }
 
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
@@ -617,7 +614,7 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
     addPromptButtonIfNeeded(b);
   }
   messagesEl.appendChild(m);
-  autoScroll();
+
 }
 
 function showLoading() {
@@ -750,7 +747,6 @@ form.addEventListener('submit', async e => {
           }
         }
       }
-      autoScroll();
 
       if (b.dataset.markdown.trim() === '' || b.dataset.markdown.trim() === 'Error: empty response') {
         throw new Error('No response from server. Try again.');
