@@ -9,7 +9,7 @@ spec:
   duration: 2160h
   issuerRef:
     kind: ClusterIssuer
-    name: duckdns-github-production
+    name: {{ .Values.ingress.tls.clusterIssuer }}
   renewBefore: 360h
   secretName: {{ .Values.ingress.tls.secretName | quote }}
   subject:
