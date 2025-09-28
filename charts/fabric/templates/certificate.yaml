@@ -1,3 +1,4 @@
+{{- if and .Values.ingress.tls.enabled .Values.ingress.tls.letsEncrypt.enabled }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -9,9 +10,10 @@ spec:
   duration: 2160h
   issuerRef:
     kind: ClusterIssuer
-    name: {{ .Values.ingress.tls.clusterIssuer }}
+    name: {{ .Values.ingress.tls.letsEncrypt.clusterIssuer }}
   renewBefore: 360h
-  secretName: {{ .Values.ingress.tls.secretName | quote }}
+  secretName: {{ .Values.ingress.tls.letsEncrypt.secretName | quote }}
   subject:
     organizations:
       - friclu
+  {{- end }}
