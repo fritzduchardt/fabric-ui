@@ -12,7 +12,7 @@ spec:
     kind: ClusterIssuer
     name: {{ .Values.ingress.tls.letsEncrypt.clusterIssuer }}
   renewBefore: 360h
-  secretName: {{ .Values.ingress.tls.letsEncrypt.secretName | quote }}
+  secretName: {{ .Values.ingress.tls.secretName | quote }}
   subject:
     organizations:
       - friclu

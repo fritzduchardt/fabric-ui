@@ -43,9 +43,9 @@ ingress:
   path: /
   tls:
     enabled: true
+    secretName: fabric-certificate
     letsEncrypt:
       enabled: true
-      secretName: fabric-certificate
       clusterIssuer: http01
 service:
   type: ClusterIP
