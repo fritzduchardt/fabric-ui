@@ -43,9 +43,12 @@ data:
           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
           proxy_set_header X-Forwarded-Proto $scheme;
         }
-        # SPA fallback: serve index.html for non-file routes
-        location / {
-          try_files $uri $uri/ /index.html;
+        # Allow acme http01 challenges
+        location ^~ /.well-known/ {
+          allow all;                                                                                                                                                                           # SPA fallback: serve index.html for non-file routes
+          root /usr/share/nginx/html;                                                                                                                                                           location / {
+        }
+        try_files $uri $uri/ /index.html;
         }
         # Service worker script: exact path, disable caching
         location = /service-worker.js {
