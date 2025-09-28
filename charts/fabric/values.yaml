@@ -44,7 +44,7 @@ ingress:
   tls:
     enabled: true
     secretName: fabric-certificate
-    clusterIssuer: http
+    clusterIssuer: http01
 service:
   type: ClusterIP
 basicAuth:
