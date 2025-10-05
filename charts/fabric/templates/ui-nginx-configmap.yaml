@@ -32,7 +32,7 @@ data:
         # Proxy API requests to backend service, stripping /api prefix
         location /api/ {
           # Forward requests to backend service defined by Helm values
-          proxy_pass {{ .Values.backendIp }}:{{ .Values.backend.port }}/;
+          proxy_pass {{ .Release.Name }}-backend:{{ .Values.backend.port }}/;
 
           # Settings for Server-Sent Events (SSE)
           proxy_set_header Connection '';
