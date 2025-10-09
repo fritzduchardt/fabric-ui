@@ -29,12 +29,12 @@ ui:
   iconPath: "icons/turtle"
   backendUrl: "https://{{ .Values.ingress.host }}/api"
   models:
-    - "o4-mini"
-    - "gpt-5"
-    - "claude-sonnet-4-20250514"
-    - "claude-opus-4-20250514"
-    - "grok-4-0709"
-    - "gemini-2.5-pro"
+    - 'gpt-5-mini'
+    - 'gemini-2.5-pro'
+    - 'claude-sonnet-4-20250514'
+    - 'claude-opus-4-1-20250805'
+    - 'grok-4-fast-reasoning'
+    - 'grok-4-fast-non-reasoning'
   defaultModel: "o4-mini"
   defaultPattern: "journal"
 ingress:
