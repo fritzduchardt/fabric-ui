@@ -1,10 +1,14 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
 function transformObsidianMarkdown(md, model) {
+  let html = "";
+  if (model) {
+    html = `<div style="position: absolute; top: 5px; right: 10px; font-size: 0.7em; color: #6c757d;">${model}</div>`;
+  }
+
   if (md.includes("<!-- HTML -->")) {
     console.debug("html only");
-    return md;
+    return html + md;
   }
-  let html = '';
   let sections = [];
   const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
 
@@ -36,11 +40,6 @@ function transformObsidianMarkdown(md, model) {
     const escaped = text.replace(/'/g, "\\'");
     return `<a href="#" onclick="fillAndSend('${escaped}');return false;">${text}</a>`;
   });
-
-  if (model) {
-    const modelInfoHtml = `<div style="position: absolute; top: 5px; right: 10px; font-size: 0.7em; color: #6c757d;">${model}</div>`;
-    html = modelInfoHtml + html;
-  }
 
   return html;
 }
