@@ -4,8 +4,7 @@ function transformObsidianMarkdown(md, model) {
   if (model) {
     html = `<div style="position: absolute; top: 5px; right: 10px; font-size: 0.7em; color: #6c757d;">${model}</div>`;
   }
-
-  if (md.includes("<!-- HTML -->")) {
+  if (md.startsWith("<!-- HTML -->")) {
     console.debug("html only");
     return html + md;
   }
