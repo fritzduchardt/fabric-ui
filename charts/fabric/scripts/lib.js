@@ -1,5 +1,9 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
 function transformObsidianMarkdown(md, model) {
+  if (md.includes("<!-- HTML -->")) {
+    console.debug("html only");
+    return md;
+  }
   let html = '';
   let sections = [];
   const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
