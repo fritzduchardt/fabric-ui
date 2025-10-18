@@ -116,7 +116,7 @@ async function storeMessageHandler(e, bubble) {
         btn.disabled = true;
     } catch (err) {
         console.error(err);
-        addMessage(`Error storing message (${err.message})`, 'bot', false,  false, true, true, true);
+        addMessage(`Error storing message (${err.message})`, 'bot', false, false, true, true, true);
     } finally {
         spinner.remove();
     }
@@ -238,6 +238,14 @@ function createEnhancedSelect(id, placeholder) {
     });
   }
 
+  if (id === 'pattern-input') {
+    const savedPattern = localStorage.getItem('lastPattern');
+    if (savedPattern) {
+      searchInput.dataset.value = savedPattern;
+      searchInput.value = savedPattern;
+    }
+  }
+
   const dropdownMenu = document.createElement('div');
   dropdownMenu.classList.add('dropdown-menu');
   dropdownMenu.id = `${id}-dropdown`;
@@ -321,12 +329,25 @@ function createEnhancedSelect(id, placeholder) {
     }
   });
 
+  searchInput.addEventListener('change', () => {
+    if (id === 'pattern-input') {
+      const val = searchInput.dataset.value || searchInput.value || '';
+      localStorage.setItem('lastPattern', val);
+    }
+  });
+
   return {
     container,
     searchInput,
     dropdownMenu,
     setItems(items, defaultValue = '') {
       dropdownMenu.innerHTML = '';
+      if (id === 'pattern-input') {
+        const saved = localStorage.getItem('lastPattern');
+        if (saved && items.includes(saved)) {
+          defaultValue = saved;
+        }
+      }
       items.forEach(item => {
         const dropdownItem = document.createElement('a');
         dropdownItem.classList.add('dropdown-item');
@@ -354,7 +375,6 @@ function createEnhancedSelect(id, placeholder) {
               await checkResponse(res);
               const content = await res.text();
               addMessage(content, 'bot', false,  true, true, false, false);
-              // Add Delete button to the message produced by Sw
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
               const deleteBtn = document.createElement('button');
@@ -367,7 +387,6 @@ function createEnhancedSelect(id, placeholder) {
                   const delRes = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
                   await checkResponse(delRes);
                   await loadObsidianFiles();
-                  // remove the message bubble
                   lastMsg.remove();
                   addMessage(`Deleted file ${item}`, 'bot', false,  false, true, true, true);
                 } catch (err) {
@@ -415,7 +434,6 @@ function createEnhancedSelect(id, placeholder) {
                   const delRes = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
                   await checkResponse(delRes);
                   await generatePatterns();
-                  // remove the message bubble
                   lastMsg.remove();
                   addMessage(`Deleted pattern ${item}`, 'bot', false,  false, true, true, true);
                 } catch (err) {
