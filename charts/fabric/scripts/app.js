@@ -644,6 +644,8 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
     });
     if (patternUsed) {
       b.dataset.pattern = patternUsed;
+      b.style.position = b.style.position || 'relative';
+      b.style.paddingTop = b.style.paddingTop || '26px';
       const patternBadge = document.createElement('div');
       patternBadge.className = 'pattern-used-badge';
       patternBadge.textContent = `${patternUsed}`;
