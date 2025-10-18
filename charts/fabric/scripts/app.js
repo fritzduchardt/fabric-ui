@@ -652,6 +652,31 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   }
   m.appendChild(b);
 
+  b.style.position = b.style.position || 'relative';
+  if (text.trim() === 'Request cancelled') {
+    const xBtn = document.createElement('button');
+    xBtn.className = 'request-cancelled-x';
+    xBtn.type = 'button';
+    xBtn.setAttribute('aria-label', 'Dismiss cancellation message');
+    xBtn.innerText = '✕';
+    xBtn.style.position = 'absolute';
+    xBtn.style.top = '6px';
+    xBtn.style.right = '6px';
+    xBtn.style.border = 'none';
+    xBtn.style.background = 'transparent';
+    xBtn.style.cursor = 'pointer';
+    xBtn.style.zIndex = '30';
+    xBtn.style.fontSize = '12px';
+    xBtn.style.lineHeight = '1';
+    xBtn.style.padding = '2px';
+    xBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      m.remove();
+    });
+    b.appendChild(xBtn);
+  }
+
   if (!hideStore) {
       addStoreButtonIfNeeded(b);
   }
