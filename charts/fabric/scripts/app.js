@@ -374,7 +374,7 @@ function createEnhancedSelect(id, placeholder) {
               const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
               await checkResponse(res);
               const content = await res.text();
-              addMessage(content, 'bot', false,  true, true, false, false);
+              addMessage(content, 'bot', false,  true, true, true, true, false, '', false);
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
               const deleteBtn = document.createElement('button');
@@ -421,7 +421,7 @@ function createEnhancedSelect(id, placeholder) {
               await checkResponse(res);
               const data = await res.json();
               const md = data.Pattern;
-              addMessage(`${md}`, 'bot', false,  true, true, true, true);
+              addMessage(`${md}`, 'bot', false,  true, true, true, true, false, '', false);
               const lastMsg = messagesEl.querySelector('.message.bot:last-child');
               const bubble = lastMsg.querySelector('.bubble');
               const deletePatBtn = document.createElement('button');
@@ -608,7 +608,7 @@ function addBubbleDeleteButton(messageEl) {
 }
 
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
-function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false, patternUsed = '') {
+function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false, patternUsed = '', hideDelete = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
   m.style.position = 'relative';
@@ -665,7 +665,9 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
     addPromptButtonIfNeeded(b);
   }
 
-  addBubbleDeleteButton(m);
+  if (!hideDelete) {
+    addBubbleDeleteButton(m);
+  }
   messagesEl.appendChild(m);
 
 }
@@ -836,7 +838,7 @@ form.addEventListener('submit', async e => {
 
   hideLoading(loader);
   if (isRequestCancelled) {
-    addMessage('Request cancelled', 'bot', false, false, true, true, true);
+    addMessage('Request cancelled', 'bot', false, false, true, true, true, false, '', true);
   } else if (!success && lastError) {
     addMessage(`Error (${lastError.message})`, 'bot', false,  false, true, true, true);
   }
