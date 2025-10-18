@@ -2,8 +2,8 @@ let currentSession = new Date().toISOString();  // generate timestamp to use as 
 let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
-let abortController = null;  // controller for cancelling requests
-let isRequestCancelled = false; // flag for cancellation during retry waits
+let abortControllers = new Map();  // map of requestId -> { controller, cancelled }
+let isRequestCancelled = false; // legacy flag kept for backward compatibility but not used for per-request cancellation
 
 const funnyRetryMessages = [
     "Hang on, the hamsters are spinning up the wheel again...",
@@ -669,7 +669,7 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
     addBubbleDeleteButton(m);
   }
   messagesEl.appendChild(m);
-
+  return m;
 }
 
 function showLoading() {
@@ -691,13 +691,8 @@ form.addEventListener('submit', async e => {
   e.preventDefault();
   const chatBtn = document.getElementById('chat-button');
   const sendBtn = document.querySelector('.btn-send');
-  const cancelBtn = document.getElementById('cancel-button');
-  cancelBtn.type = "button";
   chatBtn.disabled = true;
   sendBtn.disabled = false;
-  cancelBtn.disabled = false;
-  isRequestCancelled = false; // Reset cancellation flag on new submission
-
   let text = input.value.trim();
   if (text == "") {
     text = "No further instructions"
@@ -714,19 +709,41 @@ form.addEventListener('submit', async e => {
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-  addMessage(text, 'user', userIsChat,  false, true, true, false, true, pattern);
+  const requestId = `${Date.now()}-${Math.floor(Math.random()*100000)}`;
+  abortControllers.set(requestId, { controller: null, cancelled: false });
+  const userMsgEl = addMessage(text, 'user', userIsChat,  false, true, true, false, true, pattern);
+  const userBubble = userMsgEl.querySelector('.bubble');
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.id = `cancel-button-${requestId}`;
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.className = 'cancel-button-in-bubble';
+  cancelBtn.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    const entry = abortControllers.get(requestId);
+    if (!entry) return;
+    entry.cancelled = true;
+    if (entry.controller) {
+      try { entry.controller.abort(); } catch {}
+    }
+    cancelBtn.disabled = true;
+  });
+  userBubble.appendChild(cancelBtn);
+
   input.value = '';
   const loader = showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
 
   let lastError;
   let success = false;
+  const entryRef = abortControllers.get(requestId);
 
   for (let attempt = 1; attempt <= 10 && !success; attempt++) {
-    if (isRequestCancelled) {
+    const entry = abortControllers.get(requestId);
+    if (entry && entry.cancelled) {
         break;
     }
-    abortController = new AbortController();
     let messageBubbleElement = null; // To track the created bubble for cleanup
 
     try {
@@ -747,6 +764,15 @@ form.addEventListener('submit', async e => {
         frequencyPenalty: 0.0,
         presencePenalty: 0.0
       };
+
+      const abortController = new AbortController();
+      const currentEntry = abortControllers.get(requestId);
+      if (currentEntry) {
+        currentEntry.controller = abortController;
+        if (currentEntry.cancelled) {
+          abortController.abort();
+        }
+      }
 
       const res = await fetch(apiUrl, {
         method: 'POST',
@@ -823,7 +849,7 @@ form.addEventListener('submit', async e => {
       }
 
       if (err.name === 'AbortError') {
-        success = true; // Exit loop, will be handled by isRequestCancelled flag
+        success = true; // Exit loop, will be handled by entry.cancelled
       } else {
         console.error(`Attempt ${attempt} failed:`, err);
         if (attempt < 10) {
@@ -837,18 +863,18 @@ form.addEventListener('submit', async e => {
   }
 
   hideLoading(loader);
-  if (isRequestCancelled) {
+  const finalEntry = abortControllers.get(requestId);
+  if (finalEntry && finalEntry.cancelled) {
     addMessage('Request cancelled', 'bot', false, false, true, true, true, false, '', true);
   } else if (!success && lastError) {
     addMessage(`Error (${lastError.message})`, 'bot', false,  false, true, true, true);
   }
 
-  // Finally block
   chatBtn.disabled = false;
   sendBtn.disabled = false;
-  const cancelBtn2 = document.getElementById('cancel-button');
+  const cancelBtn2 = document.getElementById(`cancel-button-${requestId}`);
   if (cancelBtn2) cancelBtn2.disabled = true;
-  abortController = null;
+  abortControllers.delete(requestId);
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -870,17 +896,6 @@ document.addEventListener('DOMContentLoaded', () => {
   obsidianSelectOriginal.parentNode.replaceChild(obsidianSelect.container, obsidianSelectOriginal);
 
   const chatBtn = document.getElementById('chat-button');
-  const cancelBtn = document.createElement('button');
-  cancelBtn.id = 'cancel-button';
-  cancelBtn.textContent = 'Cancel';
-  cancelBtn.disabled = true;
-  cancelBtn.className = 'btn btn-secondary';
-  chatBtn.parentNode.insertBefore(cancelBtn, chatBtn.nextSibling);
-  cancelBtn.addEventListener('click', () => {
-    isRequestCancelled = true;
-    if (abortController) abortController.abort();
-  });
-
   const loader = showLoading();
   Promise.all([generatePatterns(), loadObsidianFiles()]).finally(() => hideLoading(loader));
   loadModels();
