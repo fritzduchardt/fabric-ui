@@ -608,7 +608,7 @@ function addBubbleDeleteButton(messageEl) {
 }
 
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
-function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false) {
+function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false, patternUsed = '') {
   const m = document.createElement('div');
   m.classList.add('message', sender);
   m.style.position = 'relative';
@@ -642,6 +642,13 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
       icon.style.marginLeft = '4px';
       a.replaceWith(icon);
     });
+    if (patternUsed) {
+      b.dataset.pattern = patternUsed;
+      const patternBadge = document.createElement('div');
+      patternBadge.className = 'pattern-used-badge';
+      patternBadge.textContent = `${patternUsed}`;
+      b.appendChild(patternBadge);
+    }
   }
   m.appendChild(b);
 
@@ -705,7 +712,7 @@ form.addEventListener('submit', async e => {
   const pattern = patternSelect.getValue() || 'general';
   const model = modelSelect.getValue() || 'o3-mini';
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
-  addMessage(text, 'user', userIsChat,  false, true, true, false, true);
+  addMessage(text, 'user', userIsChat,  false, true, true, false, true, pattern);
   input.value = '';
   const loader = showLoading();
   let temperature = model === 'o4-mini' ? 1.0 : 0.7;
