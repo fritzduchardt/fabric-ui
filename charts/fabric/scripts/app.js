@@ -580,10 +580,38 @@ function autoScroll() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
+// Adds a small delete 'x' button to every message container
+function addBubbleDeleteButton(messageEl) {
+  if (!messageEl || messageEl.querySelector('.bubble-delete-button')) return;
+  if (!messageEl.style.position) messageEl.style.position = 'relative';
+  const btn = document.createElement('button');
+  btn.className = 'bubble-delete-button';
+  btn.type = 'button';
+  btn.setAttribute('aria-label', 'Delete message');
+  btn.innerText = '✕';
+  btn.style.position = 'absolute';
+  btn.style.top = '6px';
+  btn.style.right = '6px';
+  btn.style.border = 'none';
+  btn.style.background = 'transparent';
+  btn.style.cursor = 'pointer';
+  btn.style.zIndex = '20';
+  btn.style.fontSize = '12px';
+  btn.style.lineHeight = '1';
+  btn.style.padding = '2px';
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    messageEl.remove();
+  });
+  messageEl.appendChild(btn);
+}
+
 // addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
 function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false) {
   const m = document.createElement('div');
   m.classList.add('message', sender);
+  m.style.position = 'relative';
   if (sender === 'user') {
     m.classList.add(isChat ? 'chat' : 'send');
   }
@@ -629,6 +657,8 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   if (showPrompt) {
     addPromptButtonIfNeeded(b);
   }
+
+  addBubbleDeleteButton(m);
   messagesEl.appendChild(m);
 
 }
@@ -729,6 +759,7 @@ form.addEventListener('submit', async e => {
       b.dataset.markdown = '';
       m.appendChild(b);
       messagesEl.appendChild(m);
+      addBubbleDeleteButton(m);
 
       const reader = res.body.getReader();
       const dec = new TextDecoder();
@@ -771,6 +802,7 @@ form.addEventListener('submit', async e => {
       if (!b.classList.contains('error')) {
         addCopyAndTopButtonsIfNeeded(b);
       }
+      addBubbleDeleteButton(m);
 
       success = true; // Mark as success to exit the loop
 
