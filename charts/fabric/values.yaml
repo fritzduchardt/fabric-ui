@@ -21,7 +21,7 @@ backend:
   journalFileRetroMonths: 3
   telegramBotToken: ""
   weaviateClass: "ObsidianFile"
-  weaviateCertainty: "0.7"
+  weaviateCertainty: "0.5"
   weaviateUrl: "http://weaviate.weaviate"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
