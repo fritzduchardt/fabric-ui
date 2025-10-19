@@ -52,7 +52,7 @@ spec:
           - name: WEAVIATE_URL
             value: {{ .Values.backend.weaviateUrl }}
           - name: WEAVIATE_CERTAINTY
-            value: {{ .Values.backend.weaviateCertainty }}
+            value: "{{ .Values.backend.weaviateCertainty }}"
           - name: WEAVIATE_CLASS
             value: {{ .Values.backend.weaviateClass }}
       volumes:
