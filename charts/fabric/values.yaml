@@ -20,6 +20,9 @@ backend:
   personalName: "Fritz"
   journalFileRetroMonths: 3
   telegramBotToken: ""
+  weaviateClass: "ObsidianFile"
+  weaviateCertainty: "0.7"
+  weaviateUrl: "http://weaviate.weaviate"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"

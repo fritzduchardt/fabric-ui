@@ -49,6 +49,12 @@ spec:
             value: {{ .Values.backend.telegramBotToken | quote }}
           - name: JOURNAL_FILE_RETRO_MONTHS
             value: {{ .Values.backend.journalFileRetroMonths | quote }}
+          - name: WEAVIATE_URL
+            value: {{ .Values.backend.weaviateUrl }}
+          - name: WEAVIATE_CERTAINTY
+            value: {{ .Values.backend.weaviateCertainty }}
+          - name: WEAVIATE_CLASS
+            value: {{ .Values.backend.weaviateClass }}
       volumes:
       - name: fabric-env
         secret:
@@ -56,4 +62,3 @@ spec:
       - name: sync
         persistentVolumeClaim:
           claimName: sync
-

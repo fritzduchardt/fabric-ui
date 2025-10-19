@@ -357,7 +357,7 @@ function createEnhancedSelect(id, placeholder) {
         dropdownItem.style.display = 'flex';              // use flex for alignment
         dropdownItem.style.alignItems = 'center';         // center items vertically
 
-        if (id === 'obsidian-select' && item !== '(no file)') {
+        if (id === 'obsidian-select' && item !== '(no file)' && item !== 'weaviate') {
           const showBtn = document.createElement('button');
           showBtn.className = 'show-file-button';
           showBtn.textContent = 'Sw';
@@ -529,7 +529,9 @@ async function loadObsidianFiles() {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-    const allOptions = ['(no file)', ...files];
+    const safeFiles = Array.isArray(files) ? files.filter(f => f != null) : [];
+    const dedupedFiles = safeFiles.filter(f => f !== 'weaviate');
+    const allOptions = ['(no file)', 'weaviate', ...dedupedFiles];
     const prevFile = obsidianSelect.getValue();
     const defaultFile = prevFile && allOptions.includes(prevFile) ? prevFile : '(no file)';
     obsidianSelect.setItems(allOptions, defaultFile);
