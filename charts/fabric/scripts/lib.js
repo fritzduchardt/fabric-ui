@@ -2,7 +2,7 @@
 function transformObsidianMarkdown(md, model) {
   let html = "";
   if (model) {
-    html = `<div style="position: absolute; top: 5px; right: 10px; font-size: 0.7em; color: #6c757d;">${model}</div>`;
+    html = `<div class="mode-info">${model}</div>`;
   }
   if (md.startsWith("<!-- HTML -->")) {
     console.debug("html only");
