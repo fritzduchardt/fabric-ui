@@ -41,6 +41,8 @@ spec:
           - name: OBSIDIAN_VAULT_PATH_{{ add $index 1 }}
             value: "{{ printf "%s/%s" $.Values.backend.syncFilesMountPath $path }}"
           {{- end }}
+          - name: OBSIDIAN_BASE_PATH
+            value: {{ .Values.backend.syncFilesMountPath }}
           - name: FABRIC_PATTERN_PATH
             value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
           - name: PERSONAL_NAME
