@@ -61,8 +61,8 @@ const modelVendorMap = {
 };
 
 async function loadModels() {
-  const defaults = ['gpt-5-mini','gemini-2.5-pro','claude-sonnet-4-20250514', 'grok-4-fast-reasoning'];
-  modelSelect.setItems(defaults, 'o3-mini');
+  const defaults = ['gpt-5-mini','gemini-2.5-pro','claude-sonnet-4-20250514', 'grok-4-fast-non-reasoning'];
+  modelSelect.setItems(defaults, 'grok-4-fast-non-reasoning');
 }
 
 

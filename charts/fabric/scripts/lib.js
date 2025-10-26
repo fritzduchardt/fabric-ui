@@ -1,8 +1,9 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
 function transformObsidianMarkdown(md, model) {
   let html = "";
+  console.debug("Model:" + model);
   if (model) {
-    html = `<div class="mode-info">${model}</div>`;
+    html = `<div class="model-info">${model}</div>`;
   }
   if (md.startsWith("<!-- HTML -->")) {
     console.debug("html only");
@@ -30,7 +31,7 @@ function transformObsidianMarkdown(md, model) {
       `;
     });
   } else {
-    html = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
+    html += window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
   }
 
   // Transform wikilinks [[Page|alias]] and [[Page]]
