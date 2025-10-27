@@ -44,7 +44,7 @@ spec:
           - name: OBSIDIAN_BASE_PATH
             value: {{ .Values.backend.syncFilesMountPath }}
           - name: FABRIC_PATTERN_PATH
-            value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
+            value: "{{ printf "%s" .Values.backend.patternFolder }}"
           - name: PERSONAL_NAME
             value: {{ .Values.backend.personalName | quote }}
           - name: TELEGRAM_BOT_TOKEN
