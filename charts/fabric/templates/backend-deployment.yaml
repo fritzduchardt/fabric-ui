@@ -39,16 +39,16 @@ spec:
             value: "{{ .Values.backend.fabricConfigHome }}"
           {{- range $index, $path := .Values.backend.obsidianFolders }}
           - name: OBSIDIAN_VAULT_PATH_{{ add $index 1 }}
-            value: "{{ printf "%s/%s" $.Values.backend.syncFilesMountPath $path }}"
+            value: "{{ printf "%s" $path }}"
           {{- end }}
           - name: OBSIDIAN_BASE_PATH
             value: {{ .Values.backend.syncFilesMountPath }}
           - name: FABRIC_PATTERN_PATH
-            value: "{{ printf "%s" .Values.backend.patternFolder }}"
+            value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
           - name: PERSONAL_NAME
             value: {{ .Values.backend.personalName | quote }}
           - name: TELEGRAM_BOT_TOKEN
-            value: {{ .Values.backend.telegramBotToken | quote }}
+            value: {{ .Values.backend.telegramBotToken | quote }}(no file)
           - name: JOURNAL_FILE_RETRO_MONTHS
             value: {{ .Values.backend.journalFileRetroMonths | quote }}
           - name: WEAVIATE_URL
