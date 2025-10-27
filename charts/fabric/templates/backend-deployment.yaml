@@ -48,7 +48,7 @@ spec:
           - name: PERSONAL_NAME
             value: {{ .Values.backend.personalName | quote }}
           - name: TELEGRAM_BOT_TOKEN
-            value: {{ .Values.backend.telegramBotToken | quote }}(no file)
+            value: {{ .Values.backend.telegramBotToken | quote }}
           - name: JOURNAL_FILE_RETRO_MONTHS
             value: {{ .Values.backend.journalFileRetroMonths | quote }}
           - name: WEAVIATE_URL
