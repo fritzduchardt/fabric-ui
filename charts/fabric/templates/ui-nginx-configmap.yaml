@@ -8,6 +8,7 @@ metadata:
     component: ui
 data:
   nginx.conf: |-
+    load_module modules/ngx_otel_module.so;
     events {
       worker_connections 1024;
     }
@@ -16,6 +17,9 @@ data:
       default_type application/octet-stream;
       sendfile on;
       keepalive_timeout 65;
+      otel_exporter {
+          endpoint alloy.alloy:4317;
+      }
       server {
         # Bind to the configured UI port
         listen {{ .Values.ui.containerPort }};
@@ -49,6 +53,10 @@ data:
         }
         # SPA fallback: serve index.html for non-file routes
         location / {
+          otel_trace         on;
+          otel_trace_context inject;
+          otel_span_attr namespace {{ .Release.Namespace }}
+
           try_files $uri $uri/ /index.html;
         }
         # Service worker script: exact path, disable caching
