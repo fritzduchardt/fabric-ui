@@ -20,6 +20,7 @@ data:
       otel_exporter {
           endpoint alloy.alloy:4317;
       }
+      otel_service_name  {{ .Release.Namespace }}:ui
       server {
         # Bind to the configured UI port
         listen {{ .Values.ui.containerPort }};
@@ -55,7 +56,6 @@ data:
         location / {
           otel_trace         on;
           otel_trace_context inject;
-          otel_service_name  {{ .Release.Namespace }}:ui
           otel_span_attr namespace {{ .Release.Namespace }};
 
           try_files $uri $uri/ /index.html;
