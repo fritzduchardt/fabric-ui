@@ -7,7 +7,7 @@ This ensures that any change in the scripts or their templated values will resul
 */}}
 {{- $appJsTpl := .Files.Get "scripts/app.js"
   | replace "const apiDomain = 'http://localhost:8080';" (printf "const apiDomain = '%s';" ( tpl .Values.ui.backendUrl . ))
-  | replace "const defaults = ['gpt-5-mini','gemini-2.5-pro','claude-sonnet-4-20250514', 'grok-4-fast-non-reasoning'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
+  | replace "const defaults = ['gpt-5-mini','gemini-2.5-flash','claude-sonnet-4-20250514', 'grok-4-fast-non-reasoning'];" (printf "const defaults = %s;" ( toJson .Values.ui.models ))
   | replace "modelSelect.setItems(defaults, 'o3-mini');" (printf "modelSelect.setItems(defaults, '%s');" .Values.ui.defaultModel)
   | replace "'general'" (printf "'%s'" .Values.ui.defaultPattern)
   | replace "patternSelect.setItems(patterns, defaultPattern);" "patternSelect.setItems(patterns, defaultPattern);"
