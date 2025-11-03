@@ -530,8 +530,7 @@ async function loadObsidianFiles() {
       }
     }
     const safeFiles = Array.isArray(files) ? files.filter(f => f != null) : [];
-    const dedupedFiles = safeFiles.filter(f => f !== 'weaviate');
-    const allOptions = ['(no file)', 'weaviate', ...dedupedFiles];
+    const allOptions = ['(no file)', ...safeFiles];
     const prevFile = obsidianSelect.getValue();
     const defaultFile = prevFile && allOptions.includes(prevFile) ? prevFile : '(no file)';
     obsidianSelect.setItems(allOptions, defaultFile);
