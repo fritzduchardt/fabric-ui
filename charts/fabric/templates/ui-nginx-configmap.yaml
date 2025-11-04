@@ -20,7 +20,7 @@ data:
       otel_exporter {
           endpoint alloy.alloy:4317;
       }
-      otel_service_name  {{ .Release.Namespace }}:ui;
+      otel_service_name  {{ .Release.Namespace }};
       server {
         # Bind to the configured UI port
         listen {{ .Values.ui.containerPort }};
