@@ -49,6 +49,15 @@ spec:
         - name: ui-nginx-config
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
+      - name: nginx-exporter
+        image: "{{ .Values.nginxExporter.image }}:{{ .Values.nginxExporter.tag }}"
+        imagePullPolicy: Always
+        env:
+        - name: SCRAPE_URI
+          value: "http://127.0.0.1:{{ .Values.ui.containerPort }}/status"
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.nginxExporter.port }}
       {{- if .Values.oauth2Proxy.enabled }}
       - name: oauth2-proxy
         image: "{{ .Values.oauth2Proxy.image }}:{{ .Values.oauth2Proxy.tag }}"

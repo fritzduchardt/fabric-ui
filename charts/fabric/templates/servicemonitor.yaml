@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-ui-nginx-exporter
+  namespace: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+    component: ui
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+      component: ui
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

@@ -68,3 +68,7 @@ oauth2Proxy:
   cookieSecret: ""
   emailDomains: "*"
   proxyPort: 8888
+nginxExporter:
+  image: nginx/nginx-prometheus-exporter
+  tag: latest
+  port: 9113
