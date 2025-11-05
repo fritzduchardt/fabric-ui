@@ -12,6 +12,9 @@ spec:
   - port: {{ .Values.ui.servicePort }}
     targetPort: {{ if .Values.oauth2Proxy.enabled }}{{ .Values.oauth2Proxy.proxyPort }}{{ else }}{{ .Values.ui.containerPort }}{{ end }}
     name: http
+  - port: {{ .Values.nginxExporter.port }}
+    targetPort: {{ .Values.nginxExporter.port }}
+    name: metrics
   selector:
     app: {{ .Release.Name }}
     component: ui
