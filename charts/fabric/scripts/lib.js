@@ -46,24 +46,16 @@ function transformObsidianMarkdown(md, model) {
 
 // Convert markdown to plain text for clipboard
 function markdownToPlainText(md) {
-  // Restore line breaks and remove markdown constructs
   let text = md;
-  // Remove lines starting with FILENAME:
   text = text.replace(/^FILENAME:.*$/gm, '');
-  // Convert markdown headers to uppercase
   text = text.replace(/^#+\s*(.*)$/gm, (_match, content) => content.toUpperCase());
-  // Convert markdown checkboxes to simple bullet points
   text = text.replace(/^[*-]\s*\[[ xX]\]\s*(.*)$/gm, '- $1');
-  // Transform wikilinks [[Page|alias]] and [[Page]]
   text = text.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_, p, a) => a || p);
-  // Remove markdown links [text](url) -> text
-  text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
-  // Remove bold and italic markers **, __, *, _
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, url) => `${t} ${url}`);
+  text = text.replace(/<((?:https?:\/\/|mailto:)[^>]+)>/g, '$1');
   text = text.replace(/(\*\*|__)(.*?)\1/g, '$2');
   text = text.replace(/(\*|_)(.*?)\1/g, '$2');
-  // Remove any remaining markdown link brackets
   text = text.replace(/\[\[|\]\]/g, '');
-  // Remove any empty lines at the start of the text
   text = text.replace(/^(?:\s*\r?\n)+/, '');
   return text;
 }
