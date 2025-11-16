@@ -54,6 +54,7 @@ const storeUrl = `${apiDomain}/store`;
 const modelVendorMap = {
   'gpt-5-mini': 'OpenAI',
   'gemini-2.5-flash': 'Gemini',
+  'mistral-large-latest': 'Mistral',
   'claude-sonnet-4-20250514': 'Anthropic',
   'claude-opus-4-1-20250805': 'Anthropic',
   'grok-4-fast-reasoning': 'GrokAI',
