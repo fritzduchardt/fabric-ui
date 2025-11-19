@@ -63,8 +63,19 @@ const modelVendorMap = {
 };
 
 async function loadModels() {
-  const defaults = ['gpt-5-mini','gemini-2.5-flash','claude-sonnet-4-20250514', 'grok-4-fast-non-reasoning'];
-  modelSelect.setItems(defaults, 'grok-4-fast-non-reasoning');
+  const models = Object.keys(modelVendorMap);
+  const saved = localStorage.getItem('lastModel');
+  let defaultModel = 'gpt-5-mini';
+  if (saved && models.includes(saved)) {
+    defaultModel = saved;
+  } else if (!models.includes(defaultModel)) {
+    defaultModel = models.length ? models[0] : '';
+  }
+  modelSelect.setItems(models, defaultModel);
+  modelSelect.searchInput.addEventListener('change', () => {
+    const val = modelSelect.getValue();
+    if (val) localStorage.setItem('lastModel', val);
+  });
 }
 
 
