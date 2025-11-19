@@ -31,15 +31,6 @@ ui:
   title: "FritzGPT"
   iconPath: "icons/turtle"
   backendUrl: "https://{{ .Values.ingress.host }}/api"
-  models:
-    - 'gpt-5-mini'
-    - 'gpt-5.1'
-    - 'gemini-3-pro-preview'
-    - 'mistral-large-latest'
-    - 'claude-sonnet-4-5-20250929'
-    - 'claude-opus-4-1-20250805'
-    - 'grok-4-fast-reasoning'
-    - 'grok-4-fast-non-reasoning'
   defaultModel: "o4-mini"
   defaultPattern: "journal"
 ingress:
