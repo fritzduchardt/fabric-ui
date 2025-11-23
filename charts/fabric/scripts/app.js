@@ -56,7 +56,7 @@ const modelVendorMap = {
   'gpt-5.1': 'OpenAI',
   'gemini-3-pro-preview': 'Gemini',
   'mistral-large-latest': 'Mistral',
-  'claude-sonnet-4-5': 'Anthropic',
+  'claude-sonnet-4-5-20250929': 'Anthropic',
   'claude-opus-4-1-20250805': 'Anthropic',
   'grok-4-fast-reasoning': 'GrokAI',
   'grok-4-fast-non-reasoning': 'GrokAI',
