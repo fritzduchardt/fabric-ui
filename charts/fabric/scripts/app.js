@@ -14,7 +14,7 @@ const funnyRetryMessages = [
     "Our carrier pigeon seems to have gotten lost. Resending...",
     "Don't worry, we've dispatched a team of highly trained monkeys.",
     "Trying to reconnect to the Matrix...",
-    "The server is playing hard to get. Let's be persistent.",
+    "The server is probably just shy. Let's try again.",
     "Poking the server with a stick...",
     "It's not you, it's me... I mean, the server. Retrying.",
     "Let's give it another go. Third time's the charm, right?",
@@ -23,18 +23,18 @@ const funnyRetryMessages = [
     "Waking up the server from its nap...",
     "Sending positive vibes to the server... and another request.",
     "Hold tight, we're trying a different magic spell.",
-    "The server is probably just shy. Let's try again.",
+    "The server seems to be running on dial-up. Patience, young padawan.",
     "I think the server is on a coffee break. Let's wait and retry.",
     "Re-calibrating the flux capacitor...",
     "The server is busy watching cat videos. Retrying.",
     "Maybe if we ask nicely this time? Retrying...",
     "Our intern tripped over the server cable. Fixing and retrying.",
     "Just a glitch in the simulation. We're on it.",
-    "The server is checking its horoscope. Let's try again in a sec.",
+    "The server seems to be checking its horoscope. Let's try again.",
     "I've got a good feeling about this next attempt.",
     "Is this thing on? *taps mic* Retrying...",
     "We're sending in the backup squirrels. Stand by.",
-    "The server seems to be running on dial-up. Patience, young padawan.",
+    "The server is probably running on dial-up. Patience, young padawan.",
     "Okay, deep breaths. We can do this. Retrying..."
 ];
 
@@ -175,7 +175,18 @@ function addShareWithTelegramButton(b) {
   shareBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    shareWithTelegram(telegramUrl, markdownToPlainText(b.dataset.markdown));
+    const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
+    if (filenameMatch) {
+      let filename = filenameMatch[1].trim();
+      const foodIndex = filename.indexOf('Food');
+      if (foodIndex !== -1) {
+        filename = filename.substring(foodIndex);
+      }
+      const link = filename.replace(/\.md$/, '/');
+      shareWithTelegram(telegramUrl, `https://yummy.duchardt.net/${link}`);
+    } else {
+      shareWithTelegram(telegramUrl, markdownToPlainText(b.dataset.markdown));
+    }
     shareBtn.disabled = true;
   });
   b.appendChild(shareBtn);
