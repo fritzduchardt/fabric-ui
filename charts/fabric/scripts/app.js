@@ -175,7 +175,7 @@ function addShareWithTelegramButton(b) {
   shareBtn.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const filenameMatch = b.dataset.markdown.match(/^FILENAME:\s*(.+)$/m);
+    const filenameMatch = b.dataset.markdown.match(/^\s*FILENAME:\s*(.+)$/m);
     if (filenameMatch) {
       let filename = filenameMatch[1].trim();
       const foodIndex = filename.indexOf('Food');
