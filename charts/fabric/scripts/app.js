@@ -182,7 +182,7 @@ function addShareWithTelegramButton(b) {
       if (foodIndex !== -1) {
         filename = filename.substring(foodIndex);
       }
-      const link = filename.replace(/\.md$/, '/');
+      const link = filename.replace(/\.md$/, '.html');
       shareWithTelegram(telegramUrl, `https://yummy.duchardt.net/${link}`);
     } else {
       shareWithTelegram(telegramUrl, markdownToPlainText(b.dataset.markdown));
