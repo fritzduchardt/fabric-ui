@@ -46,7 +46,11 @@ spec:
           - name: FABRIC_PATTERN_PATH
             value: "{{ printf "%s/%s" .Values.backend.syncFilesMountPath .Values.backend.patternFolder }}"
           - name: PERSONAL_NAME
-            value: {{ .Values.backend.personalName | quote }}
+            value: {{ .Values.backend.personal.name | quote }}
+          - name: GENDER
+            value: {{ .Values.backend.personal.gender | quote }}
+          - name: BIRTH_YEAR
+            value: {{ .Values.backend.personal.birthYear | quote }}
           - name: TELEGRAM_BOT_TOKEN
             value: {{ .Values.backend.telegramBotToken | quote }}
           - name: JOURNAL_FILE_RETRO_MONTHS
