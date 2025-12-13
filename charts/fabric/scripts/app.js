@@ -52,14 +52,14 @@ const storeUrl = `${apiDomain}/store`;
 
 // Model to vendor mapping
 const modelVendorMap = {
-  'gpt-5-mini': 'OpenAI',
-  'gpt-5.1': 'OpenAI',
-  'gemini-3-pro-preview': 'Gemini',
+  'gpt-5.2': 'OpenAI',
+  'gpt-5.2-pro': 'OpenAI',
+  'gemini-pro-latest': 'Gemini',
   'mistral-large-latest': 'Mistral',
-  'claude-sonnet-4-5-20250929': 'Anthropic',
-  'claude-opus-4-1-20250805': 'Anthropic',
-  'grok-4-fast-reasoning': 'GrokAI',
-  'grok-4-fast-non-reasoning': 'GrokAI',
+  'claude-sonnet-4-5': 'Anthropic',
+  'claude-opus-4-5': 'Anthropic',
+  'grok-4-1-fast-reasoning': 'GrokAI',
+  'grok-4-1-fast-non-reasoning': 'GrokAI',
 };
 
 async function loadModels() {
