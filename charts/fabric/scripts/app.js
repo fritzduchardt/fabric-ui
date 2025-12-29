@@ -14,7 +14,7 @@ const funnyRetryMessages = [
     "Our carrier pigeon seems to have gotten lost. Resending...",
     "Don't worry, we've dispatched a team of highly trained monkeys.",
     "Trying to reconnect to the Matrix...",
-    "The server is probably just shy. Let's try again.",
+    "The server seems to be running on dial-up. Patience, young padawan.",
     "Poking the server with a stick...",
     "It's not you, it's me... I mean, the server. Retrying.",
     "Let's give it another go. Third time's the charm, right?",
@@ -34,7 +34,7 @@ const funnyRetryMessages = [
     "I've got a good feeling about this next attempt.",
     "Is this thing on? *taps mic* Retrying...",
     "We're sending in the backup squirrels. Stand by.",
-    "The server is probably running on dial-up. Patience, young padawan.",
+    "The server seems to be running on dial-up. Patience, young padawan.",
     "Okay, deep breaths. We can do this. Retrying..."
 ];
 
@@ -649,7 +649,6 @@ function addBubbleDeleteButton(messageEl) {
   btn.style.border = 'none';
   btn.style.background = 'transparent';
   btn.style.cursor = 'pointer';
-  btn.style.zIndex = '20';
   btn.style.fontSize = '12px';
   btn.style.lineHeight = '1';
   btn.style.padding = '2px';

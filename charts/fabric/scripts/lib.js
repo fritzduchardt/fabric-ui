@@ -34,14 +34,36 @@ function transformObsidianMarkdown(md, model) {
     html += window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
   }
 
-  // Transform wikilinks [[Page|alias]] and [[Page]]
-  html = html.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
+  // Parse HTML to handle code blocks
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const codeBlocks = [];
+  let placeholderIndex = 0;
+
+  // Extract content from <code> and <pre> elements
+  doc.querySelectorAll('code, pre').forEach(el => {
+    const placeholder = `__CODE_BLOCK_PLACEHOLDER_${placeholderIndex}__`;
+    codeBlocks.push({ placeholder, content: el.innerHTML });
+    el.innerHTML = placeholder;
+    placeholderIndex++;
+  });
+
+  // Get the modified HTML string
+  let modifiedHtml = doc.body.innerHTML;
+
+  // Transform wikilinks outside of code blocks
+  modifiedHtml = modifiedHtml.replace(/\[\[([^\|\]]+)\|?([^\]]*)\]\]/g, (_m, p, a) => {
     const text = a || p;
     const escaped = text.replace(/'/g, "\\'");
     return `<a href="#" onclick="fillAndSend('${escaped}');return false;">${text}</a>`;
   });
 
-  return html;
+  // Restore code block contents
+  codeBlocks.forEach(({ placeholder, content }) => {
+    modifiedHtml = modifiedHtml.replace(placeholder, content);
+  });
+
+  return modifiedHtml;
 }
 
 // Convert markdown to plain text for clipboard
