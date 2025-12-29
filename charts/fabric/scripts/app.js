@@ -79,8 +79,6 @@ async function loadModels() {
   });
 }
 
-
-// Helper to throw error with status and body message
 async function checkResponse(res) {
   if (!res.ok) {
     const errText = await res.text();
@@ -89,7 +87,6 @@ async function checkResponse(res) {
   return res;
 }
 
-// Handles storing a message to a file
 async function storeMessageHandler(e, bubble) {
     const btn = e.currentTarget;
     e.preventDefault();
@@ -101,7 +98,6 @@ async function storeMessageHandler(e, bubble) {
     btn.appendChild(spinner);
     try {
         let data;
-        // retry until backend call succeeds
         while (true) {
             try {
                 const res = await fetch(storeUrl, {
@@ -114,7 +110,6 @@ async function storeMessageHandler(e, bubble) {
                 break;
             } catch (err) {
                 console.error('Error storing message, retrying...', err);
-                // wait before retrying
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
         }
@@ -136,7 +131,6 @@ async function storeMessageHandler(e, bubble) {
     }
 }
 
-// Adds a "Store" button to a message bubble if it contains a FILENAME
 function addStoreButtonIfNeeded(bubble) {
   if (bubble.querySelector('.store-message-button')) return;
 
@@ -193,7 +187,49 @@ function addShareWithTelegramButton(b) {
   b.appendChild(shareBtn);
 }
 
-// Adds "Copy" and "Top" buttons to a bot message bubble
+async function writeToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+function ensureCodeBlockCopyButtons(bubble) {
+  if (!bubble) return;
+  const pres = bubble.querySelectorAll('pre');
+  pres.forEach(pre => {
+    if (pre.querySelector(':scope > .code-copy-button')) return;
+    const codeEl = pre.querySelector('code');
+    if (!codeEl) return;
+
+    pre.style.position = pre.style.position || 'relative';
+    pre.style.paddingTop = pre.style.paddingTop || '2rem';
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy-button';
+    btn.textContent = 'Copy';
+    btn.addEventListener('mousedown', () => btn.classList.add('pressed'));
+    btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
+    btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const codeText = codeEl.innerText || codeEl.textContent || '';
+      const ok = await writeToClipboard(codeText);
+      if (ok) {
+        const prev = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => { btn.textContent = prev; }, 1200);
+      }
+    });
+    pre.appendChild(btn);
+  });
+}
+
 function addCopyAndTopButtonsIfNeeded(bubble) {
     const text = bubble.dataset.markdown;
     if (bubble.querySelector('.copy-button') || text.startsWith('Error') || text === 'Request cancelled' || text.startsWith('Deleted')) {
@@ -228,17 +264,16 @@ function addCopyAndTopButtonsIfNeeded(bubble) {
     });
     bubble.appendChild(copyBtn);
     updateTopButton(bubble);
+    ensureCodeBlockCopyButtons(bubble);
 }
 
 const form = document.getElementById('chat-form');
 const input = document.getElementById('user-input');
 const messagesEl = document.getElementById('messages');
 
-// Ensure user-input is a two-line text field
 input.setAttribute('rows', '2');
 input.style.resize = 'none';
 
-// Create enhanced select elements to replace standard pulldowns
 function createEnhancedSelect(id, placeholder) {
   const container = document.createElement('div');
   container.classList.add('enhanced-select');
@@ -287,7 +322,6 @@ function createEnhancedSelect(id, placeholder) {
   container.appendChild(searchInput);
   container.appendChild(dropdownMenu);
 
-  // Clear previous text when dropdown opens
   searchInput.addEventListener('focus', () => {
     searchInput.value = '';
     dropdownMenu.classList.add('show');
@@ -379,14 +413,14 @@ function createEnhancedSelect(id, placeholder) {
         dropdownItem.href = '#';
         dropdownItem.textContent = item;
         dropdownItem.dataset.value = item;
-        dropdownItem.style.display = 'flex';              // use flex for alignment
-        dropdownItem.style.alignItems = 'center';         // center items vertically
+        dropdownItem.style.display = 'flex';
+        dropdownItem.style.alignItems = 'center';
 
         if (id === 'obsidian-select' && item !== '(no file)' && item !== 'weaviate') {
           const showBtn = document.createElement('button');
           showBtn.className = 'show-file-button';
           showBtn.textContent = 'Sw';
-          showBtn.style.marginLeft = 'auto';              // push Sw button to the right
+          showBtn.style.marginLeft = 'auto';
           showBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -432,7 +466,7 @@ function createEnhancedSelect(id, placeholder) {
           const showPatternBtn = document.createElement('button');
           showPatternBtn.className = 'show-pattern-button';
           showPatternBtn.textContent = 'Sw';
-          showPatternBtn.style.marginLeft = 'auto';        // push Sw button to the right
+          showPatternBtn.style.marginLeft = 'auto';
           showPatternBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -508,7 +542,6 @@ async function loadPatterns() {
   try {
     const prevPattern = patternSelect.getValue();
     let patterns;
-    // retry until backend call succeeds
     while (true) {
       try {
         const res = await fetch(`${patternsUrl}/names`);
@@ -542,7 +575,6 @@ async function generatePatterns() {
 async function loadObsidianFiles() {
   try {
     let files;
-    // retry until backend call succeeds
     while (true) {
       try {
         const res = await fetch(obsidianUrl);
@@ -565,7 +597,6 @@ async function loadObsidianFiles() {
   }
 }
 
-// Manages the visibility of the 'Top' button on a message bubble
 function updateTopButton(bubble) {
   const topButton = bubble.querySelector('.top-button');
   const shouldHaveButton = bubble.offsetHeight > messagesEl.clientHeight;
@@ -591,12 +622,10 @@ function updateTopButton(bubble) {
   }
 }
 
-// Updates all 'Top' buttons in the chat, useful on container resize
 function updateAllTopButtons() {
   document.querySelectorAll('.message.bot .bubble:not(.error)').forEach(updateTopButton);
 }
 
-// Handles container resizing to dynamically show/hide 'Top' buttons
 if (messagesEl) {
   const resizeObserver = new ResizeObserver(updateAllTopButtons);
   resizeObserver.observe(messagesEl);
@@ -606,7 +635,6 @@ function autoScroll() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-// Adds a small delete 'x' button to every message container
 function addBubbleDeleteButton(messageEl) {
   if (!messageEl || messageEl.querySelector('.bubble-delete-button')) return;
   if (!messageEl.style.position) messageEl.style.position = 'relative';
@@ -633,7 +661,6 @@ function addBubbleDeleteButton(messageEl) {
   messageEl.appendChild(btn);
 }
 
-// addMessage now accepts hideStore flag to suppress store button on show messages and full-width for Sw
 function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false, patternUsed = '') {
   const m = document.createElement('div');
   m.classList.add('message', sender);
@@ -644,15 +671,14 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   const b = document.createElement('div');
   b.classList.add('bubble');
   if (view) {
-    b.classList.add('full-width'); // full-width for Sw button messages
+    b.classList.add('full-width');
   }
   if (text.startsWith('Error')) {
     b.classList.add('error');
   }
 
-  // Color retry messages with pastel orange
   if (funnyRetryMessages.some(msg => text.startsWith(msg))) {
-    b.style.backgroundColor = '#FFDAB9'; // PeachPuff
+    b.style.backgroundColor = '#FFDAB9';
   }
 
   b.dataset.markdown = text;
@@ -697,6 +723,8 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
 
   addBubbleDeleteButton(b);
   messagesEl.appendChild(m);
+
+  ensureCodeBlockCopyButtons(b);
   return m;
 }
 
@@ -772,7 +800,7 @@ form.addEventListener('submit', async e => {
     if (entry && entry.cancelled) {
         break;
     }
-    let messageBubbleElement = null; // To track the created bubble for cleanup
+    let messageBubbleElement = null;
 
     try {
       const payload = {
@@ -813,7 +841,7 @@ form.addEventListener('submit', async e => {
 
       hideLoading(loader);
       const m = document.createElement('div');
-      messageBubbleElement = m; // Assign for potential cleanup
+      messageBubbleElement = m;
       m.classList.add('message', 'bot');
       m.style.position = 'relative';
       const b = document.createElement('div');
@@ -844,7 +872,7 @@ form.addEventListener('submit', async e => {
               const c = obj.content || '';
               b.dataset.markdown += c;
               b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, model);
-              b.classList.add('full-width'); // full-width for Sw button messages
+              b.classList.add('full-width');
               b.querySelectorAll('a').forEach(a => {
                 if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
                 a.setAttribute('target', '_blank');
@@ -853,6 +881,7 @@ form.addEventListener('submit', async e => {
               addStoreButtonIfNeeded(b);
               addPromptButtonIfNeeded(b);
               addShareWithTelegramButton(b);
+              ensureCodeBlockCopyButtons(b);
             } catch {}
           }
         }
@@ -865,17 +894,17 @@ form.addEventListener('submit', async e => {
       if (!b.classList.contains('error')) {
         addCopyAndTopButtonsIfNeeded(b);
       }
-      success = true; // Mark as success to exit the loop
+      success = true;
 
     } catch (err) {
       lastError = err;
 
       if (messageBubbleElement) {
-        messageBubbleElement.remove(); // Clean up failed bubble
+        messageBubbleElement.remove();
       }
 
       if (err.name === 'AbortError') {
-        success = true; // Exit loop, will be handled by entry.cancelled
+        success = true;
       } else {
         console.error(`Attempt ${attempt} failed:`, err);
         if (attempt < 10) {
