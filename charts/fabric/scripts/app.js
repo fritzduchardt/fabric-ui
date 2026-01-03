@@ -144,24 +144,6 @@ function addStoreButtonIfNeeded(bubble) {
   }
 }
 
-function addPromptButtonIfNeeded(b) {
-  const mdTrim = b.dataset.markdown.trim();
-  if (mdTrim && mdTrim.toLowerCase() !== 'no further instructions') {
-    const promptBtn = document.createElement('button');
-    promptBtn.className = 'prompt-again-button';
-    promptBtn.textContent = 'Prompt';
-    promptBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      input.value = b.dataset.markdown;
-      input.focus();
-      const pos = input.value.length;
-      input.setSelectionRange(pos, pos);
-    });
-    b.appendChild(promptBtn);
-  }
-}
-
 function addShareWithTelegramButton(b) {
   const shareBtn = document.createElement('button');
   shareBtn.className = 'share-button';
@@ -716,9 +698,6 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   if (!hideShare) {
     addShareWithTelegramButton(b);
   }
-  if (showPrompt) {
-    addPromptButtonIfNeeded(b);
-  }
 
   addBubbleDeleteButton(b);
   messagesEl.appendChild(m);
@@ -766,7 +745,7 @@ form.addEventListener('submit', async e => {
   const obs = obsidianSelect.getValue() === '(no file)' ? '' : obsidianSelect.getValue();
   const requestId = `${Date.now()}-${Math.floor(Math.random()*100000)}`;
   abortControllers.set(requestId, { controller: null, cancelled: false });
-  const userMsgEl = addMessage(text, 'user', userIsChat,  false, true, true, false, true, pattern);
+  const userMsgEl = addMessage(text, 'user', userIsChat,  false, true, true, false, false, pattern);
   const userBubble = userMsgEl.querySelector('.bubble');
 
   const cancelBtn = document.createElement('button');
@@ -878,7 +857,6 @@ form.addEventListener('submit', async e => {
                 a.setAttribute('rel', 'noopener noreferrer');
               });
               addStoreButtonIfNeeded(b);
-              addPromptButtonIfNeeded(b);
               addShareWithTelegramButton(b);
               ensureCodeBlockCopyButtons(b);
             } catch {}
