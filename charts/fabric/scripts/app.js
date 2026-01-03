@@ -212,6 +212,31 @@ function ensureCodeBlockCopyButtons(bubble) {
   });
 }
 
+function addCopyRawButtonIfNeeded(bubble) {
+    const text = bubble.dataset.markdown;
+    if (bubble.querySelector('.copy-raw-button') || text.startsWith('Error') || text === 'Request cancelled' || text.startsWith('Deleted')) {
+        return;
+    }
+    const copyRawBtn = document.createElement('button');
+    copyRawBtn.className = 'copy-raw-button copy-button';
+    copyRawBtn.textContent = 'Copy (r)';
+    copyRawBtn.addEventListener('mousedown', () => copyRawBtn.classList.add('pressed'));
+    copyRawBtn.addEventListener('mouseup', () => copyRawBtn.classList.remove('pressed'));
+    copyRawBtn.addEventListener('mouseleave', () => copyRawBtn.classList.remove('pressed'));
+    copyRawBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        navigator.clipboard.writeText(bubble.dataset.markdown).catch(console.error);
+    });
+
+    const copyBtn = bubble.querySelector('.copy-button');
+    if (copyBtn) {
+        bubble.insertBefore(copyRawBtn, copyBtn.nextSibling);
+    } else {
+        bubble.appendChild(copyRawBtn);
+    }
+}
+
 function addCopyAndTopButtonsIfNeeded(bubble) {
     const text = bubble.dataset.markdown;
     if (bubble.querySelector('.copy-button') || text.startsWith('Error') || text === 'Request cancelled' || text.startsWith('Deleted')) {
@@ -694,6 +719,9 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   }
   if (!hideCopy) {
     addCopyAndTopButtonsIfNeeded(b);
+    if (sender === 'bot') {
+      addCopyRawButtonIfNeeded(b);
+    }
   }
   if (!hideShare) {
     addShareWithTelegramButton(b);
@@ -870,6 +898,7 @@ form.addEventListener('submit', async e => {
 
       if (!b.classList.contains('error')) {
         addCopyAndTopButtonsIfNeeded(b);
+        addCopyRawButtonIfNeeded(b);
       }
       success = true;
 
