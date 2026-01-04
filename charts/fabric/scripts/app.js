@@ -144,6 +144,24 @@ function addStoreButtonIfNeeded(bubble) {
   }
 }
 
+function addPromptButton(b) {
+    const mdTrim = b.dataset.markdown.trim();
+    if (mdTrim && mdTrim.toLowerCase() !== 'no further instructions') {
+        const promptBtn = document.createElement('button');
+        promptBtn.className = 'prompt-again-button';
+        promptBtn.textContent = 'Prompt';
+        promptBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = b.dataset.markdown;
+            input.focus();
+            const pos = input.value.length;
+            input.setSelectionRange(pos, pos);
+        });
+        b.appendChild(promptBtn);
+    }
+}
+
 function addShareWithTelegramButton(b) {
   const shareBtn = document.createElement('button');
   shareBtn.className = 'share-button';
@@ -792,6 +810,7 @@ form.addEventListener('submit', async e => {
     cancelBtn.disabled = true;
   });
   userBubble.appendChild(cancelBtn);
+  addPromptButton(userBubble);
 
   input.value = '';
   const loader = showLoading();
