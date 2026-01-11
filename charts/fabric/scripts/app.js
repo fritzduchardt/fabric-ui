@@ -230,6 +230,17 @@ function ensureCodeBlockCopyButtons(bubble) {
   });
 }
 
+function stripFilenameHeaderForCopy(text) {
+  if (typeof text !== 'string' || text.length === 0) return '';
+  const s = text.replace(/^\uFEFF/, '');
+  const m = s.match(/^\s*FILENAME:\s*[^\r\n]*\r?\n/);
+  if (!m) return text;
+  let idx = m[0].length;
+  if (s.startsWith('\r\n', idx)) idx += 2;
+  else if (s.startsWith('\n', idx)) idx += 1;
+  return s.slice(idx);
+}
+
 function addCopyRawButtonIfNeeded(bubble) {
     const text = bubble.dataset.markdown;
     if (bubble.querySelector('.copy-raw-button') || text.startsWith('Error') || text === 'Request cancelled' || text.startsWith('Deleted')) {
@@ -244,7 +255,7 @@ function addCopyRawButtonIfNeeded(bubble) {
     copyRawBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        navigator.clipboard.writeText(bubble.dataset.markdown).catch(console.error);
+        navigator.clipboard.writeText(stripFilenameHeaderForCopy(bubble.dataset.markdown)).catch(console.error);
     });
 
     const copyBtn = bubble.querySelector('.copy-button');
