@@ -230,6 +230,38 @@ function ensureCodeBlockCopyButtons(bubble) {
   });
 }
 
+function ensureTableCopyButtons(bubble) {
+  if (!bubble) return;
+  const tables = bubble.querySelectorAll('table');
+  tables.forEach(table => {
+    if (table.querySelector('.table-copy-button')) return;
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.display = 'inline-block';
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'table-copy-button';
+    btn.textContent = 'Copy Table';
+    btn.addEventListener('mousedown', () => btn.classList.add('pressed'));
+    btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
+    btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const markdown = htmlTableToMarkdown(table);
+      const ok = await writeToClipboard(markdown);
+      if (ok) {
+        const prev = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(() => { btn.textContent = prev; }, 1200);
+      }
+    });
+    wrapper.appendChild(btn);
+  });
+}
+
 function stripFilenameHeaderForCopy(text) {
   if (typeof text !== 'string' || text.length === 0) return '';
   const s = text.replace(/^\uFEFF/, '');
@@ -760,6 +792,7 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
   messagesEl.appendChild(m);
 
   ensureCodeBlockCopyButtons(b);
+  ensureTableCopyButtons(b);
   return m;
 }
 
@@ -917,6 +950,7 @@ form.addEventListener('submit', async e => {
               addStoreButtonIfNeeded(b);
               addShareWithTelegramButton(b);
               ensureCodeBlockCopyButtons(b);
+              ensureTableCopyButtons(b);
             } catch {}
           }
         }

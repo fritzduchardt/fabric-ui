@@ -66,6 +66,23 @@ function transformObsidianMarkdown(md, model) {
   return modifiedHtml;
 }
 
+// Convert HTML table to markdown table
+function htmlTableToMarkdown(tableEl) {
+  const rows = Array.from(tableEl.querySelectorAll('tr'));
+  if (rows.length === 0) return '';
+  const markdownRows = rows.map(row => {
+    const cells = Array.from(row.querySelectorAll('td, th')).map(cell => cell.textContent.trim());
+    return '| ' + cells.join(' | ') + ' |';
+  });
+  // Add header separator if first row has th
+  const firstRowCells = rows[0].querySelectorAll('td, th');
+  if (firstRowCells.length > 0 && rows[0].querySelector('th')) {
+    const headerCount = firstRowCells.length;
+    markdownRows.splice(1, 0, '|' + ' --- |'.repeat(headerCount));
+  }
+  return markdownRows.join('\n');
+}
+
 // Convert markdown to plain text for clipboard
 function markdownToPlainText(md) {
   let text = md;
