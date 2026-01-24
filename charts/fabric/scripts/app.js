@@ -1018,12 +1018,8 @@ function triggerFormSubmit() {
   }
 }
 
-function isSendShortcut(e) {
-  return (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 's' || e.key === 'S');
-}
-
 function isChatShortcut(e) {
-  return (e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey && (e.key === 's' || e.key === 'S');
+  return (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 's' || e.key === 'S');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1062,19 +1058,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('keydown', (e) => {
     if (e.defaultPrevented) return;
-    if (!isSendShortcut(e) && !isChatShortcut(e)) return;
+    if (!isChatShortcut(e)) return;
 
     const active = document.activeElement;
     if (active && active !== input && isEditableElement(active)) return;
 
     e.preventDefault();
-
-    if (isSendShortcut(e)) {
-      isChatButtonPressed = false;
-      input.focus();
-      triggerFormSubmit();
-      return;
-    }
 
     if (!lastPrompt) return;
     isChatButtonPressed = true;
