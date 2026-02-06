@@ -873,7 +873,7 @@ form.addEventListener('submit', async e => {
   }
   if (text && text !== promptHistory[promptHistory.length - 1]) {
     promptHistory.push(text);
-    if (promptHistory.length > 100) {
+    if (promptHistory.length > 200) {
       promptHistory.shift();
     }
     localStorage.setItem('promptHistory', JSON.stringify(promptHistory));
@@ -1084,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedLastPrompt = localStorage.getItem('lastPrompt');
   if (savedLastPrompt) {
     lastPrompt = savedLastPrompt;
-    input.value = lastPrompt;
+    input.value = savedLastPrompt;
   }
   const savedHistory = localStorage.getItem('promptHistory');
   if (savedHistory) {
