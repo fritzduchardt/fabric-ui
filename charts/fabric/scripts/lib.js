@@ -54,6 +54,7 @@ function transformObsidianMarkdown(md, model) {
     table.style.borderCollapse = 'collapse';
     table.querySelectorAll('th, td').forEach(cell => {
       cell.style.border = '1px solid #d3d3d3';
+      cell.style.padding = '2px';
     });
   });
 

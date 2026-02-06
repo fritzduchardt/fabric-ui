@@ -45,7 +45,7 @@ const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
-const patternDeleteUrl = `${apiDomain}/deletepattern`;
+const patternDeleteUrl = `${apiDomain}/patterns/delete`;
 const obsidianFileUrl = `${apiDomain}/obsidian/file`;
 const telegramUrl = `${apiDomain}/telegram/send`;
 const storeUrl = `${apiDomain}/store`;
@@ -857,6 +857,9 @@ function hideLoading(loader) {
   }
 }
 
+let promptHistory = [];
+let historyIndex = -1;
+
 form.addEventListener('submit', async e => {
   e.preventDefault();
   primeSuccessSoundFromUserGesture();
@@ -867,6 +870,13 @@ form.addEventListener('submit', async e => {
   let text = input.value.trim();
   if (text == "") {
     text = "No further instructions"
+  }
+  if (text && text !== promptHistory[promptHistory.length - 1]) {
+    promptHistory.push(text);
+    if (promptHistory.length > 100) {
+      promptHistory.shift();
+    }
+    localStorage.setItem('promptHistory', JSON.stringify(promptHistory));
   }
   const userIsChat = isChatButtonPressed;
   if (!isChatButtonPressed) {
@@ -1076,6 +1086,10 @@ document.addEventListener('DOMContentLoaded', () => {
     lastPrompt = savedLastPrompt;
     input.value = lastPrompt;
   }
+  const savedHistory = localStorage.getItem('promptHistory');
+  if (savedHistory) {
+    promptHistory = JSON.parse(savedHistory);
+  }
 
   const mdScript = document.createElement('script');
   mdScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
@@ -1097,10 +1111,35 @@ document.addEventListener('DOMContentLoaded', () => {
     input.select();
   });
 
+  input.addEventListener('input', () => {
+    historyIndex = -1;
+  });
+
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       triggerFormSubmit();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (promptHistory.length === 0) return;
+      if (historyIndex === -1) {
+        historyIndex = promptHistory.length - 1;
+      } else {
+        historyIndex = Math.max(0, historyIndex - 1);
+      }
+      input.value = promptHistory[historyIndex];
+      input.setSelectionRange(input.value.length, input.value.length);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex === -1) return;
+      historyIndex++;
+      if (historyIndex >= promptHistory.length) {
+        historyIndex = -1;
+        input.value = '';
+      } else {
+        input.value = promptHistory[historyIndex];
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
     }
   });
 
