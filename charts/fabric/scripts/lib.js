@@ -48,6 +48,15 @@ function transformObsidianMarkdown(md, model) {
     placeholderIndex++;
   });
 
+  // Ensure tables have a light gray border
+  doc.querySelectorAll('table').forEach(table => {
+    table.style.border = '1px solid #d3d3d3';
+    table.style.borderCollapse = 'collapse';
+    table.querySelectorAll('th, td').forEach(cell => {
+      cell.style.border = '1px solid #d3d3d3';
+    });
+  });
+
   // Get the modified HTML string
   let modifiedHtml = doc.body.innerHTML;
 
