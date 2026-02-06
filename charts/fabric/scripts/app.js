@@ -63,6 +63,51 @@ const modelVendorMap = {
   'grok-4-1-fast-non-reasoning': 'GrokAI',
 };
 
+let successAudioContext = null;
+
+function ensureSuccessAudioContext() {
+  if (successAudioContext && successAudioContext.state !== 'closed') return successAudioContext;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  successAudioContext = new Ctx();
+  return successAudioContext;
+}
+
+function primeSuccessSoundFromUserGesture() {
+  try {
+    const ctx = ensureSuccessAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+  } catch {}
+}
+
+function playSuccessSound() {
+  try {
+    const ctx = ensureSuccessAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.16);
+  } catch {}
+}
+
 async function loadModels() {
   const models = Object.keys(modelVendorMap);
   const saved = localStorage.getItem('lastModel');
@@ -813,6 +858,7 @@ function hideLoading(loader) {
 
 form.addEventListener('submit', async e => {
   e.preventDefault();
+  primeSuccessSoundFromUserGesture();
   const chatBtn = document.getElementById('chat-button');
   const sendBtn = document.querySelector('.btn-send');
   chatBtn.disabled = true;
@@ -907,6 +953,7 @@ form.addEventListener('submit', async e => {
       });
 
       await checkResponse(res);
+      playSuccessSound();
 
       hideLoading(loader);
       const m = document.createElement('div');
@@ -1074,6 +1121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   chatBtn.id = 'chat-button';
   chatBtn.textContent = 'Chat';
   chatBtn.addEventListener('click', () => {
+    primeSuccessSoundFromUserGesture();
     if (!lastPrompt) return;
     isChatButtonPressed = true;
     triggerFormSubmit();
