@@ -84,6 +84,7 @@ function primeSuccessSoundFromUserGesture() {
 }
 
 function playSuccessSound() {
+  if (!soundEnabled) return;
   try {
     const ctx = ensureSuccessAudioContext();
     if (!ctx) return;
@@ -1129,3 +1130,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';

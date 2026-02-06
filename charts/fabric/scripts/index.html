@@ -181,12 +181,13 @@
       font-size: 0.6rem !important;
       padding: 0.2rem 0.4rem !important;
     }
-    #toggle-input {
+    #toggle-buttons {
       position: fixed;
       bottom: 1.7rem;
       right: 1.7rem;
       z-index: 1000;
-      margin: 0;
+      display: flex;
+      gap: 0.5rem;
     }
     /* Styles for displaying code snippets inline and in blocks */
     code {
@@ -248,7 +249,10 @@
 <body>
   <div id="chat-container" class="container-fluid d-flex flex-column">
     <div id="messages">
-      <button id="toggle-input" class="btn btn-secondary btn-tiny">Hide Input</button>
+      <div id="toggle-buttons">
+        <button id="toggle-sound" class="btn btn-secondary btn-tiny">Mute Sound</button>
+        <button id="toggle-input" class="btn btn-secondary btn-tiny">Hide Input</button>
+      </div>
     </div>
     <div id="input-section" class="p-2">
       <form id="chat-form" autocomplete="off">
@@ -279,6 +283,13 @@
   <script src="app.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const toggleSoundBtn = document.getElementById('toggle-sound');
+      toggleSoundBtn.textContent = soundEnabled ? 'Mute Sound' : 'Unmute Sound';
+      toggleSoundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('soundEnabled', soundEnabled);
+        toggleSoundBtn.textContent = soundEnabled ? 'Mute Sound' : 'Unmute Sound';
+      });
       const toggleBtn = document.getElementById('toggle-input');
       const inputSection = document.getElementById('input-section');
       toggleBtn.addEventListener('click', () => {
