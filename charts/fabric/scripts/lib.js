@@ -6,17 +6,6 @@ function transformObsidianMarkdown(md) {
     return html + md;
   }
 
-  const extractedInfoTags = [];
-  const keyValueLineRegex = /^\s*\@([A-Za-z0-9_.-]{1,64})\s*:\s*(.+?)\s*$/gm;
-  md = md.replace(keyValueLineRegex, (_m, key, value) => {
-    const normalizedKey = String(key).trim();
-    const normalizedValue = String(value).trim();
-    if (!normalizedKey || !normalizedValue) return _m;
-    extractedInfoTags.push(`${normalizedValue}`);
-    return '';
-  });
-  md = md.replace(/^\s*\r?\n/gm, '');
-
   let sections = [];
   const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
 
@@ -25,15 +14,10 @@ function transformObsidianMarkdown(md) {
     sections.push({ filename, content });
   }
 
-  const infoTagsHtml = extractedInfoTags.length > 0
-    ? `<div class="bubble-info-tags">${extractedInfoTags.map(t => `<span class="bubble-info-tag">${t}</span>`).join('')}</div>`
-    : '';
-
   if (sections.length > 0) {
     sections.forEach((section, index) => {
       const htmlContent = window.marked ? marked.parse(section.content) : section.content.replace(/\n/g, '<br>');
       html += `
-        ${infoTagsHtml}
         <details class="file-section" ${index === 0 ? 'open' : ''}>
           <summary class="filename-info" onclick="document.querySelectorAll('.file-section').forEach(s=>{ if(s!==this.parentNode){ s.open = false; } });">
             FILENAME: ${section.filename}
@@ -46,7 +30,7 @@ function transformObsidianMarkdown(md) {
     });
   } else {
     const rendered = window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
-    html += `${infoTagsHtml}${rendered}`;
+    html += `${rendered}`;
   }
 
   // Parse HTML to handle code blocks

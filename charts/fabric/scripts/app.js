@@ -543,99 +543,6 @@ function createEnhancedSelect(id, placeholder) {
         dropdownItem.style.display = 'flex';
         dropdownItem.style.alignItems = 'center';
 
-        if (id === 'obsidian-select' && item !== '(no file)' && item !== 'weaviate') {
-          const showBtn = document.createElement('button');
-          showBtn.className = 'show-file-button';
-          showBtn.textContent = 'Sw';
-          showBtn.style.marginLeft = 'auto';
-          showBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            searchInput.value = item;
-            searchInput.dataset.value = item;
-            const changeEvent = new Event('change', { bubbles: true });
-            searchInput.dispatchEvent(changeEvent);
-            dropdownMenu.classList.remove('show');
-            try {
-              const res = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`);
-              await checkResponse(res);
-              const content = await res.text();
-              addMessage(content, 'bot', false,  true, true, false, true, false, '', false);
-              const lastMsg = messagesEl.querySelector('.message.bot:last-child');
-              const bubble = lastMsg.querySelector('.bubble');
-              const deleteBtn = document.createElement('button');
-              deleteBtn.className = 'delete-file-message-button';
-              deleteBtn.textContent = 'Delete';
-              deleteBtn.addEventListener('click', async (ev) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                try {
-                  const delRes = await fetch(`${obsidianFileUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
-                  await checkResponse(delRes);
-                  await loadObsidianFiles();
-                  lastMsg.remove();
-                  addMessage(`Deleted file ${item}`, 'bot', false,  false, true, true, true);
-                } catch (err) {
-                  console.error(err);
-                  addMessage(`Error deleting file (${err.message})`, 'bot', false,  false, true, true, true);
-                }
-              });
-              bubble.appendChild(deleteBtn);
-            } catch (err) {
-              console.error(err);
-              addMessage(`Error loading file (${err.message})`, 'bot', false,  false, true, true, true);
-            }
-          });
-          dropdownItem.appendChild(showBtn);
-        }
-
-        if (id === 'pattern-input') {
-          const showPatternBtn = document.createElement('button');
-          showPatternBtn.className = 'show-pattern-button';
-          showPatternBtn.textContent = 'Sw';
-          showPatternBtn.style.marginLeft = 'auto';
-          showPatternBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            searchInput.value = item;
-            searchInput.dataset.value = item;
-            const changeEvent = new Event('change', { bubbles: true });
-            searchInput.dispatchEvent(changeEvent);
-            dropdownMenu.classList.remove('show');
-            try {
-              const res = await fetch(`${patternsUrl}/${encodeURIComponent(item)}`);
-              await checkResponse(res);
-              const data = await res.json();
-              const md = data.Pattern;
-              addMessage(`${md}`, 'bot', false,  true, true, true, true, false, '', false);
-              const lastMsg = messagesEl.querySelector('.message.bot:last-child');
-              const bubble = lastMsg.querySelector('.bubble');
-              const deletePatBtn = document.createElement('button');
-              deletePatBtn.className = 'delete-pattern-message-button';
-              deletePatBtn.textContent = 'Delete';
-              deletePatBtn.addEventListener('click', async (ev) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                try {
-                  const delRes = await fetch(`${patternDeleteUrl}/${encodeURIComponent(item)}`, { method: 'DELETE' });
-                  await checkResponse(delRes);
-                  await generatePatterns();
-                  lastMsg.remove();
-                  addMessage(`Deleted pattern ${item}`, 'bot', false,  false, true, true, true);
-                } catch (err) {
-                  console.error(err);
-                  addMessage(`Error deleting pattern (${err.message})`, 'bot', false,  false, true, true, true);
-                }
-              });
-              bubble.appendChild(deletePatBtn);
-            } catch (err) {
-              console.error(err);
-              addMessage(`Error loading pattern (${err.message})`, 'bot', false,  false, true, true, true);
-            }
-          });
-          dropdownItem.appendChild(showPatternBtn);
-        }
-
         dropdownItem.addEventListener('click', (e) => {
           if (e.target.tagName === 'BUTTON') return;
           e.preventDefault();
@@ -978,7 +885,6 @@ form.addEventListener('submit', async e => {
 
       await checkResponse(res);
       playSuccessSound();
-
       hideLoading(loader);
       const m = document.createElement('div');
       messageBubbleElement = m;
