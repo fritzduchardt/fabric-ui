@@ -244,6 +244,30 @@
         font-style: italic;
         color: #6c757d;
     }
+    .bubble-info-tags {
+      position: absolute;
+      top: 6px;
+      left: 10px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      z-index: 26;
+      max-width: calc(100% - 20px);
+      pointer-events: none;
+    }
+    .bubble-info-tag {
+      font-size: 0.7em;
+      line-height: 1.2;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background-color: #496e3f;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   </style>
 </head>
 <body>

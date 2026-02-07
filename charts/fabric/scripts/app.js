@@ -310,6 +310,19 @@ function ensureTableCopyButtons(bubble) {
 
 function stripFilenameHeaderForCopy(text) {
   if (typeof text !== 'string' || text.length === 0) return '';
+    // remove tags
+    const keyValueLineRegex = /^\s*\@([A-Za-z0-9_.-]{1,64})\s*:\s*(.+?)\s*$/gm;
+    text = text.replace(keyValueLineRegex, (_m, key, value) => {
+        return '';
+    });
+
+    if (text[0] === '\n') {
+        text = text.slice(1);
+    } else if (text.startsWith('\r\n')) {
+        text = text.slice(2);
+    }
+
+    // remove filename
   const s = text.replace(/^\uFEFF/, '');
   const m = s.match(/^\s*FILENAME:\s*[^\r\n]*\r?\n/);
   if (!m) return text;
@@ -998,7 +1011,7 @@ form.addEventListener('submit', async e => {
               const obj = JSON.parse(d);
               const c = obj.content || '';
               b.dataset.markdown += c;
-              b.innerHTML = transformObsidianMarkdown(b.dataset.markdown, model);
+              b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
               b.classList.add('full-width');
               b.querySelectorAll('a').forEach(a => {
                 if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
