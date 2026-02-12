@@ -12,3 +12,18 @@ spec:
     type: ""
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Release.Namespace }}-rendered-patterns
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 2Gi
+  hostPath:
+    path: {{ .Values.backend.renderedPatterns }}
+    type: ""
+  persistentVolumeReclaimPolicy: Retain
+  volumeMode: Filesystem

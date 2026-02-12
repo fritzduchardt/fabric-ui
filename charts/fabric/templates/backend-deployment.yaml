@@ -32,6 +32,8 @@ spec:
         - name: fabric-env
           mountPath: "/home/fabric/.config/fabric/.env"
           subPath: .env
+        - name: rendered-patterns
+          mountPath: "/home/fabric/.config/fabric/patterns"
         - name: sync
           mountPath: "{{ .Values.backend.syncFilesMountPath }}"
         env:
@@ -68,3 +70,6 @@ spec:
       - name: sync
         persistentVolumeClaim:
           claimName: sync
+      - name: rendered-patterns
+        persistentVolumeClaim:
+          claimName: rendered-patterns

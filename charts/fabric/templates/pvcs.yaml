@@ -12,3 +12,18 @@ spec:
   storageClassName: ""
   volumeMode: Filesystem
   volumeName: {{ .Release.Namespace }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rendered-patterns
+  namespace: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: ""
+  volumeMode: Filesystem
+  volumeName: {{ .Release.Namespace }}
