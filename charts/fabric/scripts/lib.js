@@ -1,87 +1,14 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
-function transformObsidianMarkdown(md) {
+function transformObsidianMarkdown(md, model) {
   let html = "";
+  console.debug("Model:" + model);
+  if (model) {
+    html = `<div class="model-info">${model}</div>`;
+  }
   if (md.startsWith("<!-- HTML -->")) {
     console.debug("html only");
     return html + md;
   }
-
-  function escapeHtml(text) {
-    return String(text)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-  }
-
-  function extractFrontmatter(mdText) {
-    const normalized = String(mdText).replace(/\r\n/g, "\n");
-    if (!normalized.startsWith("---\n")) {
-      return { frontmatter: null, body: mdText };
-    }
-
-    const endIndex = normalized.indexOf("\n---", 4);
-    if (endIndex === -1) {
-      return { frontmatter: null, body: mdText };
-    }
-
-    const after = normalized.slice(endIndex + 1);
-    if (!after.startsWith("---")) {
-      return { frontmatter: null, body: mdText };
-    }
-
-    const afterRest = after.slice(3);
-    if (afterRest.length > 0 && afterRest[0] !== "\n") {
-      return { frontmatter: null, body: mdText };
-    }
-
-    const frontmatterRaw = normalized.slice(4, endIndex);
-    const body = afterRest.startsWith("\n") ? afterRest.slice(1) : afterRest;
-
-    return { frontmatter: frontmatterRaw, body };
-  }
-
-  function parseFrontmatterTags(frontmatterRaw) {
-    if (!frontmatterRaw) return [];
-    const tags = [];
-    const lines = String(frontmatterRaw).split("\n");
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-
-      const keyMatch = line.match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)\s*$/);
-      if (!keyMatch) continue;
-
-      const key = keyMatch[1];
-      let value = keyMatch[2] || "";
-
-      if (value === "" && i + 1 < lines.length && lines[i + 1].match(/^\s*-\s+/)) {
-        const items = [];
-        while (i + 1 < lines.length) {
-          const itemMatch = lines[i + 1].match(/^\s*-\s*(.+?)\s*$/);
-          if (!itemMatch) break;
-          items.push(itemMatch[1]);
-          i++;
-        }
-        value = items.join(", ");
-      }
-
-      const trimmed = value.trim();
-      if (!trimmed) continue;
-      tags.push(`${key}: ${trimmed}`);
-    }
-
-    return tags;
-  }
-
-  function buildFrontmatterTagsHtml(frontmatterRaw) {
-    const tags = parseFrontmatterTags(frontmatterRaw);
-    if (tags.length === 0) return "";
-    const inner = tags.map(t => `<span class="bubble-info-tag">${escapeHtml(t)}</span>`).join("");
-    return `<div class="bubble-info-tags">${inner}</div>`;
-  }
-
   let sections = [];
   const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
 
@@ -89,29 +16,22 @@ function transformObsidianMarkdown(md) {
   for (const [, filename, content] of md.matchAll(regex)) {
     sections.push({ filename, content });
   }
-
   if (sections.length > 0) {
     sections.forEach((section, index) => {
-      const extracted = extractFrontmatter(section.content);
-      const tagsHtml = buildFrontmatterTagsHtml(extracted.frontmatter);
-      const htmlContent = window.marked ? marked.parse(extracted.body) : extracted.body.replace(/\n/g, '<br>');
+      const htmlContent = window.marked ? marked.parse(section.content) : section.content.replace(/\n/g, '<br>');
       html += `
         <details class="file-section" ${index === 0 ? 'open' : ''}>
           <summary class="filename-info" onclick="document.querySelectorAll('.file-section').forEach(s=>{ if(s!==this.parentNode){ s.open = false; } });">
             FILENAME: ${section.filename}
           </summary>
           <div class="file-content">
-            ${tagsHtml}
             ${htmlContent}
           </div>
         </details>
       `;
     });
   } else {
-    const extracted = extractFrontmatter(md);
-    const tagsHtml = buildFrontmatterTagsHtml(extracted.frontmatter);
-    const rendered = window.marked ? marked.parse(extracted.body) : extracted.body.replace(/\n/g, '<br>');
-    html += `${tagsHtml}${rendered}`;
+    html += window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
   }
 
   // Parse HTML to handle code blocks
