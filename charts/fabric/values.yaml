@@ -24,9 +24,9 @@ backend:
     gender: "male"
   journalFileRetroMonths: 3
   telegramBotToken: ""
-  weaviateClass: "ObsidianFile"
-  weaviateCertainty: "0.5"
-  weaviateUrl: "http://weaviate.weaviate"
+  weaviateClass: "PatternFile"
+  weaviateCertainty: "0.8"
+  weaviateUrl: "weaviate.weaviate"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
