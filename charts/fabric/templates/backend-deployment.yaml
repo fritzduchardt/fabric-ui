@@ -59,6 +59,8 @@ spec:
             value: {{ .Values.backend.journalFileRetroMonths | quote }}
           - name: WEAVIATE_URL
             value: {{ .Values.backend.weaviateUrl }}
+          - name: MCP_SERVER
+            value: {{ .Values.backend.mcpServer }}
           - name: WEAVIATE_CERTAINTY
             value: "{{ .Values.backend.weaviateCertainty }}"
           - name: WEAVIATE_CLASS

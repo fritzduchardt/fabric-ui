@@ -27,6 +27,7 @@ backend:
   weaviateClass: "PatternFile"
   weaviateCertainty: "0.8"
   weaviateUrl: "weaviate.weaviate"
+  mcpServer: "http://finclaw.finclaw:8000/mcp"
 ui:
   image: "ghcr.io/fritzduchardt/fabric-ui"
   tag: "master"
