@@ -1,19 +1,45 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
-function transformObsidianMarkdown(md, model) {
+function transformObsidianMarkdown(md) {
   let html = "";
-  console.debug("Model:" + model);
-  if (model) {
-    html = `<div class="model-info">${model}</div>`;
+  let contentWithoutMetadata = md;
+  let metadataTags = [];
+
+  const metadataMatch = md.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
+  if (metadataMatch) {
+    const metadataBlock = metadataMatch[1];
+    contentWithoutMetadata = md.slice(metadataMatch[0].length);
+
+    const lines = metadataBlock.split('\n');
+    for (const line of lines) {
+      const colonIndex = line.indexOf(':');
+      if (colonIndex !== -1) {
+        const key = line.slice(0, colonIndex).trim();
+        const value = line.slice(colonIndex + 1).trim();
+        if (key && value) {
+          metadataTags.push({ key, value });
+        }
+      }
+    }
   }
-  if (md.startsWith("<!-- HTML -->")) {
+
+  if (metadataTags.length > 0) {
+    html = `<div class="bubble-info-tags">`;
+    for (const tag of metadataTags) {
+      html += `<span class="bubble-info-tag">${tag.key}: ${tag.value}</span>`;
+    }
+    html += `</div>`;
+  }
+
+  if (contentWithoutMetadata.startsWith("<!-- HTML -->")) {
     console.debug("html only");
-    return html + md;
+    return html + contentWithoutMetadata;
   }
+
   let sections = [];
   const regex = /FILENAME: (.+)\n([\s\S]*?)(?=FILENAME: |$)/g;
 
   // find sections
-  for (const [, filename, content] of md.matchAll(regex)) {
+  for (const [, filename, content] of contentWithoutMetadata.matchAll(regex)) {
     sections.push({ filename, content });
   }
   if (sections.length > 0) {
@@ -31,7 +57,7 @@ function transformObsidianMarkdown(md, model) {
       `;
     });
   } else {
-    html += window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>');
+    html += window.marked ? marked.parse(contentWithoutMetadata) : contentWithoutMetadata.replace(/\n/g, '<br>');
   }
 
   // Parse HTML to handle code blocks
@@ -96,6 +122,7 @@ function htmlTableToMarkdown(tableEl) {
 // Convert markdown to plain text for clipboard
 function markdownToPlainText(md) {
   let text = md;
+  text = text.replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, '');
   text = text.replace(/^FILENAME:.*$/gm, '');
   text = text.replace(/^#+\s*(.*)$/gm, (_match, content) => content.toUpperCase());
   text = text.replace(/^[*-]\s*\[[ xX]\]\s*(.*)$/gm, '- $1');
