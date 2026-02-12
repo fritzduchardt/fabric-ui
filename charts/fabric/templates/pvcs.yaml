@@ -26,4 +26,4 @@ spec:
       storage: 2Gi
   storageClassName: ""
   volumeMode: Filesystem
-  volumeName: {{ .Release.Namespace }}
+  volumeName: {{ .Release.Namespace }}-rendered-patterns
