@@ -25,7 +25,9 @@ function transformObsidianMarkdown(md) {
   if (metadataTags.length > 0) {
     html = `<div class="bubble-info-tags">`;
     for (const tag of metadataTags) {
-      html += `<span class="bubble-info-tag">${tag.key}: ${tag.value}</span>`;
+      const text = `${tag.key}: ${tag.value}`;
+      const escaped = text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      html += `<span class="bubble-info-tag" title="${escaped}" data-full-text="${escaped}">${escaped}</span>`;
     }
     html += `</div>`;
   }
@@ -72,6 +74,13 @@ function transformObsidianMarkdown(md) {
     codeBlocks.push({ placeholder, content: el.innerHTML });
     el.innerHTML = placeholder;
     placeholderIndex++;
+  });
+
+  doc.querySelectorAll('.bubble-info-tag').forEach(el => {
+    const fullText = el.textContent || '';
+    el.dataset.fullText = fullText;
+    el.dataset.collapsedText = fullText;
+    el.setAttribute('title', fullText);
   });
 
   // Ensure tables have a light gray border

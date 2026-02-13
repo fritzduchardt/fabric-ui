@@ -255,7 +255,7 @@
       align-items: center;
       z-index: 26;
       max-width: calc(100% - 20px);
-      pointer-events: none;
+      pointer-events: auto;
       margin-bottom: 0.5rem;
     }
     .bubble-info-tag {
@@ -269,6 +269,9 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      max-width: 100px;
+      display: inline-block;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -322,6 +325,21 @@
         inputSection.classList.toggle('d-none');
         toggleBtn.textContent = inputSection.classList.contains('d-none') ? 'Show Input' : 'Hide Input';
       });
+
+      document.addEventListener('click', (e) => {
+        const tag = e.target.closest('.bubble-info-tag');
+        if (!tag) return;
+
+        if (tag.dataset.expanded === 'true') {
+          tag.dataset.expanded = 'false';
+          if (tag.dataset.collapsedText !== undefined) {
+            tag.textContent = tag.dataset.collapsedText;
+          }
+        } else {
+          tag.dataset.expanded = 'true';
+          tag.textContent = tag.dataset.fullText || tag.textContent;
+        }
+      }, true);
     });
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
