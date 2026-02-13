@@ -10,22 +10,28 @@ function transformObsidianMarkdown(md) {
     contentWithoutMetadata = md.slice(metadataMatch[0].length);
 
     const lines = metadataBlock.split('\n');
+    let key, value
     for (const line of lines) {
       const colonIndex = line.indexOf(':');
       if (colonIndex !== -1) {
-        const key = line.slice(0, colonIndex).trim();
-        const value = line.slice(colonIndex + 1).trim();
-        if (key && value) {
-          metadataTags.push({ key, value });
-        }
+        key = line.slice(0, colonIndex).trim();
+        value = line.slice(colonIndex + 1).trim();
+      } else {
+          key = line
+          value = line
       }
+      metadataTags.push({ key, value });
     }
   }
 
+  let text;
   if (metadataTags.length > 0) {
     html = `<div class="bubble-info-tags">`;
     for (const tag of metadataTags) {
-      const text = `${tag.key}: ${tag.value}`;
+      text = `${tag.value}`
+      if (`${tag.key}` !== `${tag.value}`) {
+        text = `${tag.key}: ${tag.value}`;
+      }
       const escaped = text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       html += `<span class="bubble-info-tag" title="${escaped}" data-full-text="${escaped}">${escaped}</span>`;
     }
