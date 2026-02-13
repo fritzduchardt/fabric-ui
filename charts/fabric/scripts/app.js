@@ -3,40 +3,6 @@ let lastSession = '';  // store the previous session ID
 let lastPrompt = '';  // store last user prompt
 let isChatButtonPressed = false;  // track if chat button was pressed
 let abortControllers = new Map();  // map of requestId -> { controller, cancelled }
-let isRequestCancelled = false; // legacy flag kept for backward compatibility but not used for per-request cancellation
-
-const funnyRetryMessages = [
-    "Hang on, the hamsters are spinning up the wheel again...",
-    "Just a moment, we're negotiating with the server gnomes...",
-    "Reticulating splines...",
-    "The server is having a moment. Let's try that again.",
-    "Attempting to summon the digital spirits... Again.",
-    "Our carrier pigeon seems to have gotten lost. Resending...",
-    "Don't worry, we've dispatched a team of highly trained monkeys.",
-    "Trying to reconnect to the Matrix...",
-    "The server seems to be running on dial-up. Patience, young padawan.",
-    "Poking the server with a stick...",
-    "It's not you, it's me... I mean, the server. Retrying.",
-    "Let's give it another go. Third time's the charm, right?",
-    "The bits are flowing, just a little upstream. Trying again.",
-    "Our AI is contemplating the meaning of life. One more try.",
-    "Waking up the server from its nap...",
-    "Sending positive vibes to the server... and another request.",
-    "Hold tight, we're trying a different magic spell.",
-    "The server seems to be running on dial-up. Patience, young padawan.",
-    "I think the server is on a coffee break. Let's wait and retry.",
-    "Re-calibrating the flux capacitor...",
-    "The server is busy watching cat videos. Retrying.",
-    "Maybe if we ask nicely this time? Retrying...",
-    "Our intern tripped over the server cable. Fixing and retrying.",
-    "Just a glitch in the simulation. We're on it.",
-    "The server seems to be checking its horoscope. Let's try again.",
-    "I've got a good feeling about this next attempt.",
-    "Is this thing on? *taps mic* Retrying...",
-    "We're sending in the backup squirrels. Stand by.",
-    "The server seems to be running on dial-up. Patience, young padawan.",
-    "Okay, deep breaths. We can do this. Retrying..."
-];
 
 // API domain configuration
 const apiDomain = 'http://localhost:8080'; // Hardcoded default since process.env isn't available in browser
@@ -45,8 +11,6 @@ const apiUrl = `${apiDomain}/chat`;
 const patternsUrl = `${apiDomain}/patterns`;
 const patternsGenerateUrl = `${apiDomain}/patterns/generate`;
 const obsidianUrl = `${apiDomain}/obsidian/files`;
-const patternDeleteUrl = `${apiDomain}/patterns/delete`;
-const obsidianFileUrl = `${apiDomain}/obsidian/file`;
 const telegramUrl = `${apiDomain}/telegram/send`;
 const storeUrl = `${apiDomain}/store`;
 
@@ -710,10 +674,6 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
     b.classList.add('error');
   }
 
-  if (funnyRetryMessages.some(msg => text.startsWith(msg))) {
-    b.style.backgroundColor = '#FFDAB9';
-  }
-
   b.dataset.markdown = text;
   b.innerHTML = transformObsidianMarkdown(text);
   if (sender === 'user') {
@@ -839,15 +799,12 @@ form.addEventListener('submit', async e => {
 
   let lastError;
   let success = false;
-  const entryRef = abortControllers.get(requestId);
 
-  for (let attempt = 1; attempt <= 10 && !success; attempt++) {
-    const entry = abortControllers.get(requestId);
-    if (entry && entry.cancelled) {
-        break;
-    }
+  const entry = abortControllers.get(requestId);
+  if (entry && entry.cancelled) {
+    success = true;
+  } else {
     let messageBubbleElement = null;
-
     try {
       const payload = {
         prompts: [{
@@ -868,6 +825,7 @@ form.addEventListener('submit', async e => {
       };
 
       const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 60000);
       const currentEntry = abortControllers.get(requestId);
       if (currentEntry) {
         currentEntry.controller = abortController;
@@ -882,6 +840,7 @@ form.addEventListener('submit', async e => {
         body: JSON.stringify(payload),
         signal: abortController.signal
       });
+      clearTimeout(timeoutId);
 
       await checkResponse(res);
       playSuccessSound();
@@ -953,13 +912,7 @@ form.addEventListener('submit', async e => {
       if (err.name === 'AbortError') {
         success = true;
       } else {
-        console.error(`Attempt ${attempt} failed:`, err);
-        if (attempt < 10) {
-          const randomIndex = Math.floor(Math.random() * funnyRetryMessages.length);
-          const retryMessage = funnyRetryMessages[randomIndex];
-          addMessage(`${retryMessage} (${attempt})`, 'bot', false, false, true, true, true);
-          await new Promise(resolve => setTimeout(resolve, 5000));
-        }
+        console.error(err);
       }
     }
   }
