@@ -25,7 +25,9 @@ function transformObsidianMarkdown(md) {
   if (metadataTags.length > 0) {
     html = `<div class="bubble-info-tags">`;
     for (const tag of metadataTags) {
-      const text = `${tag.key}: ${tag.value}`;
+      const keyLower = tag.key.toLowerCase();
+      const shouldRemovePrefix = keyLower === 'pattern' || keyLower === 'model';
+      const text = shouldRemovePrefix ? `${tag.value}` : `${tag.key}: ${tag.value}`;
       const escaped = text.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       html += `<span class="bubble-info-tag" title="${escaped}" data-full-text="${escaped}">${escaped}</span>`;
     }
