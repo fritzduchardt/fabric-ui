@@ -4,12 +4,11 @@ function transformObsidianMarkdown(md) {
   let contentWithoutMetadata = md;
   let metadataTags = [];
 
-  const metadataMatch = md.match(/^---\s*\n([\s\S]*?)\n---\s*\n?/);
-  if (metadataMatch) {
-    const metadataBlock = metadataMatch[1];
-    contentWithoutMetadata = md.slice(metadataMatch[0].length);
+  const { contentWithoutMetadata: extractedContent, metadata } = extractMetadata(md);
+  contentWithoutMetadata = extractedContent;
 
-    const lines = metadataBlock.split('\n');
+  if (metadata) {
+    const lines = metadata.split('\n');
     for (const line of lines) {
       const colonIndex = line.indexOf(':');
       if (colonIndex !== -1) {
@@ -32,11 +31,6 @@ function transformObsidianMarkdown(md) {
       html += `<span class="bubble-info-tag" title="${escaped}" data-full-text="${escaped}">${escaped}</span>`;
     }
     html += `</div>`;
-  }
-
-  if (contentWithoutMetadata.startsWith("<!-- HTML -->")) {
-    console.debug("html only");
-    return html + contentWithoutMetadata;
   }
 
   let sections = [];
@@ -111,6 +105,35 @@ function transformObsidianMarkdown(md) {
   });
 
   return modifiedHtml;
+}
+
+function extractMetadata(md) {
+  const lines = md.split('\n');
+  let metadataLines = [];
+  let inMetadata = false;
+  let metadataStart = -1;
+  let metadataEnd = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.trim() === '---') {
+      if (!inMetadata) {
+        inMetadata = true;
+        metadataStart = i;
+      } else {
+        metadataEnd = i;
+        break;
+      }
+    } else if (inMetadata) {
+      metadataLines.push(line);
+    }
+  }
+  let metadata = '';
+  if (metadataStart !== -1 && metadataEnd !== -1) {
+    metadata = metadataLines.join('\n');
+  }
+  let contentLines = lines.slice(0, metadataStart).concat(lines.slice(metadataEnd + 1));
+  let contentWithoutMetadata = contentLines.join('\n');
+  return { contentWithoutMetadata, metadata };
 }
 
 // Convert HTML table to markdown table

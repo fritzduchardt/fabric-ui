@@ -877,6 +877,10 @@ form.addEventListener('submit', async e => {
               const c = obj.content || '';
               b.dataset.markdown += c;
               b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
+              if (!b._paddingIncreased && b.innerHTML.includes('bubble-info-tags')) {
+                b.style.paddingTop = (parseInt(b.style.paddingTop || '0') + 40) + 'px';
+                b._paddingIncreased = true;
+              }
               b.classList.add('full-width');
               b.querySelectorAll('a').forEach(a => {
                 if (a.querySelector('img') || /\.(png|jpe?g|gif|svg)(\?.*)?$/i.test(a.href)) return;
