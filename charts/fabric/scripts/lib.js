@@ -7,7 +7,6 @@ function transformObsidianMarkdown(md) {
   const { contentWithoutMetadata: extractedContent, metadata } = extractMetadata(md);
   contentWithoutMetadata = extractedContent;
 
-  console.debug(`metadata: ${JSON.stringify(metadata)}`)
   if (metadata) {
     const lines = metadata.split('\n');
     for (const line of lines) {

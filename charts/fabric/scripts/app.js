@@ -736,6 +736,14 @@ function addMessage(text, sender, isChat = false, view = false, hideStore = fals
 
   ensureCodeBlockCopyButtons(b);
   ensureTableCopyButtons(b);
+  const allButtons = b.querySelectorAll('button:not(.bubble-delete-button):not(.code-copy-button):not(.table-copy-button)');
+  allButtons.forEach(btn => {
+    btn.style.display = 'inline-block';
+    btn.style.marginRight = '4px';
+  });
+  if (allButtons.length > 0) {
+    allButtons[allButtons.length - 1].style.marginRight = '0';
+  }
   return m;
 }
 
