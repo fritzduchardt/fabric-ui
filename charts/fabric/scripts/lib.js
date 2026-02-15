@@ -1,12 +1,13 @@
 // Transform Obsidian Markdown to HTML snippet, keeping filenames inline
 function transformObsidianMarkdown(md) {
+
   let html = "";
   let contentWithoutMetadata = md;
   let metadataTags = [];
-
   const { contentWithoutMetadata: extractedContent, metadata } = extractMetadata(md);
   contentWithoutMetadata = extractedContent;
 
+  console.debug(`metadata: ${JSON.stringify(metadata)}`)
   if (metadata) {
     const lines = metadata.split('\n');
     for (const line of lines) {
@@ -31,6 +32,10 @@ function transformObsidianMarkdown(md) {
       html += `<span class="bubble-info-tag" title="${escaped}" data-full-text="${escaped}">${escaped}</span>`;
     }
     html += `</div>`;
+  }
+
+  if (md.startsWith("<!-- HTML -->")) {
+    return html + contentWithoutMetadata;
   }
 
   let sections = [];

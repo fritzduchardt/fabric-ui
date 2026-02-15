@@ -658,6 +658,23 @@ function addBubbleDeleteButton(messageEl) {
   messageEl.appendChild(btn);
 }
 
+function executeScripts(element) {
+  const scripts = element.querySelectorAll('script');
+  scripts.forEach(script => {
+    if (script.src) {
+      const newScript = document.createElement('script');
+      newScript.src = script.src;
+      document.head.appendChild(newScript);
+    } else if (script.textContent.trim()) {
+      try {
+        eval(script.textContent);
+      } catch (e) {
+        console.error('Error executing script:', e);
+      }
+    }
+  });
+}
+
 function addMessage(text, sender, isChat = false, view = false, hideStore = false,  hideShare = false, hideCopy = false, showPrompt = false, patternUsed = '') {
   const m = document.createElement('div');
   m.classList.add('message', sender);
@@ -825,7 +842,7 @@ form.addEventListener('submit', async e => {
       };
 
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 60000);
+      const timeoutId = setTimeout(() => abortController.abort(), 320000);
       const currentEntry = abortControllers.get(requestId);
       if (currentEntry) {
         currentEntry.controller = abortController;
@@ -854,7 +871,6 @@ form.addEventListener('submit', async e => {
       b.style.maxWidth = '100%';
       b.dataset.markdown = '';
       m.appendChild(b);
-      messagesEl.appendChild(m);
       addBubbleDeleteButton(m);
 
       const reader = res.body.getReader();
@@ -877,7 +893,9 @@ form.addEventListener('submit', async e => {
               const c = obj.content || '';
               b.dataset.markdown += c;
               b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
-              if (!b._paddingIncreased && b.innerHTML.includes('bubble-info-tags')) {
+                executeScripts(b);
+
+                if (!b._paddingIncreased && b.innerHTML.includes('bubble-info-tags')) {
                 b.style.paddingTop = (parseInt(b.style.paddingTop || '0') + 40) + 'px';
                 b._paddingIncreased = true;
               }
