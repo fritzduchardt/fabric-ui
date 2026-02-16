@@ -850,7 +850,7 @@ form.addEventListener('submit', async e => {
       };
 
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 60000);
+      const timeoutId = setTimeout(() => abortController.abort(), 600000);
       const currentEntry = abortControllers.get(requestId);
       if (currentEntry) {
         currentEntry.controller = abortController;
