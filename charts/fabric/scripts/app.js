@@ -850,7 +850,7 @@ form.addEventListener('submit', async e => {
       };
 
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 320000);
+      const timeoutId = setTimeout(() => abortController.abort(), 60000);
       const currentEntry = abortControllers.get(requestId);
       if (currentEntry) {
         currentEntry.controller = abortController;
@@ -879,6 +879,7 @@ form.addEventListener('submit', async e => {
       b.style.maxWidth = '100%';
       b.dataset.markdown = '';
       m.appendChild(b);
+      messagesEl.appendChild(m);
       addBubbleDeleteButton(m);
 
       const reader = res.body.getReader();
@@ -902,7 +903,6 @@ form.addEventListener('submit', async e => {
               b.dataset.markdown += c;
               b.innerHTML = transformObsidianMarkdown(b.dataset.markdown);
                 executeScripts(b);
-
                 if (!b._paddingIncreased && b.innerHTML.includes('bubble-info-tags')) {
                 b.style.paddingTop = (parseInt(b.style.paddingTop || '0') + 40) + 'px';
                 b._paddingIncreased = true;

@@ -8,6 +8,7 @@ function transformObsidianMarkdown(md) {
   contentWithoutMetadata = extractedContent;
 
   if (metadata) {
+    console.debug("Metadata: " + JSON.stringify(metadata));
     const lines = metadata.split('\n');
     for (const line of lines) {
       const colonIndex = line.indexOf(':');
